@@ -1,0 +1,161 @@
+
+<form [formGroup]="transactionForm" (ngSubmit)="submitForm()" class="m-4">
+  <div class="row">
+    <div class="col-sm-4"><label for="recibo-input" class="fw-bold">RECIBO: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" id="recibo-input" class="form-control" formControlName="recibo">
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label for="data-lan-input" class="fw-bold">DATA DE LANÇAMENTO: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="date" id="data-lan-input" class="form-control"
+          formControlName="data_lan"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">DATA DE VENCIMENTO: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="date" class="form-control" formControlName="data_ven"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">TIPO DOC:</label></div>
+    <div class="col">
+      <div class="input-group">
+        <select class="form-select" id="inputGroupSelect01" formControlName="tipo_doc">
+          <option *ngFor="let type of docTypeValues" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">Nº DOC.: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" class="form-control" formControlName="num_doc"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">ENTRADAS:</label></div>
+    <div class="col">
+      <div class="input-group">
+        <select class="form-select" id="inputGroupSelect02" formControlName="entrada">
+          <option *ngFor="let inflow of inflowValues" [value]="inflow">{{ inflow }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">SAÍDA:</label></div>
+    <div class="col">
+      <div class="input-group">
+        <select class="form-select" id="inputGroupSelect03" formControlName="saida">
+          <option *ngFor="let outflow of outflowValues" [value]="outflow">{{ outflow }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">CONGREGAÇÃO:</label></div>
+    <div class="col">
+      <div class="input-group">
+        <select class="form-select" id="inputGroupSelect04" formControlName="cong">
+          <option *ngFor="let congregation of congregations" [value]="congregation">{{ congregation }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">FORNECEDORES:</label></div>
+    <div class="col">
+      <div class="input-group">
+        <select class="form-select" id="inputGroupSelect05" formControlName="forn">
+          <option *ngFor="let suplier of supliers" [value]="suplier">{{ suplier }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">NOME DIZIMISTA: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" class="form-control" formControlName="dizimista"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">OBS.: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" class="form-control" formControlName="obs"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">VALOR: </label></div>
+
+    <div class="col">
+      <div class="input-group">
+        <span class="input-group-text">R$</span>
+        <input type="text" class="form-control" formControlName="valor" mask="separator.2" [decimalMarker]="','"
+          (ngModelChange)="onValueChanges($event)" />
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">CONTA:</label></div>
+    <div class="col">
+      <div class="input-group">
+        <select class="form-select" id="inputGroupSelect06" formControlName="conta">
+          <option *ngFor="let account of accounts" [value]="account">{{ account }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">PAGO?: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" class="form-control" formControlName="situacao"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">TIPO LANÇAMENTO: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" class="form-control" formControlName="tipo_lanc"></div>
+    </div>
+  </div>
+
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">HISTÓRICO: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" class="form-control" formControlName="historico"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-4"><label class="fw-bold">SITUAÇÃO: </label></div>
+    <div class="col">
+      <div class="input-group"><input type="text" class="form-control" formControlName="status_lanc"></div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col"></div>
+    <div class="col"></div>
+    <div class="col col-submit">
+      <button mat-button color="primary" type="submit" [disabled]="!transactionForm.valid">LANÇAR</button>
+    </div>
+  </div>
+</form>

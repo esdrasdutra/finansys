@@ -1,0 +1,10 @@
+<div class="menu">
+    <button *ngFor="let index of indices" type="button" class="menu-button" (click)="routerRedirect(routeArray[index])">
+        <div class="icon-img">
+            <img class="menu-icon" [src]="pathArray[index]" alt="">
+        </div>
+        <div class="icon-name">
+            {{nameArray[index]}}   
+        </div>
+    </button>
+</div>

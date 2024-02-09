@@ -1,0 +1,22 @@
+<table mat-table *ngIf="dataSource" [dataSource]="dataSource">
+    <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef> </th>
+        <td mat-cell *matCellDef="let row">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                [checked]="selection.isSelected(row)" [aria-label]="checkboxLabel(row)">
+            </mat-checkbox>
+        </td>
+    </ng-container>
+    <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
+        <th mat-header-cell class="f-sm" *matHeaderCellDef>
+            {{ columnMapping[item] }}
+        </th>
+        <td mat-cell class="f-sm" *matCellDef="let element">{{ element[item] }} </td>
+    </ng-container>
+    <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsLancamento, sticky: true"></tr>
+
+    <tr mat-row
+    [ngClass]="{ 'selected': selection.isSelected(row)}"
+    (click)="selection.select(row)" class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
+</tr>
+</table>

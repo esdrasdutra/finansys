@@ -1,0 +1,23 @@
+.f-sm
+    font-size: 0.5rem !important
+    white-space: nowrap
+    width: fit-content
+
+.highlight
+    background: linear-gradient(to bottom,#dee9ee, #7baac2)
+    //background: #42A948
+
+
+::ng-deep
+    .mat-mdc-table .mdc-data-table__header-row
+        min-height: 36px
+
+    .mat-mdc-row
+        &.selected
+            background: #dddddd
+
+    .mat-mdc-row:hover .mat-mdc-cell
+        cursor: pointer
+        background: linear-gradient(to bottom,#dee9ee, #7baac2)
+
+

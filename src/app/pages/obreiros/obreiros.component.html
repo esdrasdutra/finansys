@@ -1,0 +1,52 @@
+<div class="content" role="main">
+    <div class="container">
+      <form [formGroup]="transactionForm" (ngSubmit)="submitForm()">
+        <div class="row">
+          <div class="col-sm-4"><label for="nome-input" class="fw-bold">NOME: </label></div>
+          <div class="col">
+            <div class="input-group"><input type="text" id="recibo-input" class="form-control" formControlName="name"></div>
+          </div>
+        </div>
+  
+        <div class="row">
+          <div class="col-sm-4"><label for="cong-input" class="fw-bold">CONGREGAÇÃO: </label></div>
+          <div class="col">
+            <div class="input-group"><input type="text" id="data-lan-input"class="form-control" formControlName="cong"></div>
+          </div>
+        </div>
+  
+        <div class="row">
+          <div class="col-sm-4"><label for="func-input"class="fw-bold">FUNÇÃO: </label></div>
+          <div class="col">
+            <div class="input-group"><input type="text" class="form-control" formControlName="func"></div>
+          </div>
+        </div>
+  
+        <div class="row">
+          <div class="col"></div>
+          <div class="col"></div>
+          <div class="col col-submit">
+            <button mat-button color="primary" type="submit">LANÇAR</button>
+          </div>
+        </div>
+      </form>
+
+      <table class="table table-bordered d-block text-center">
+        <thead>
+            <tr *ngFor="let obreiro of data">
+                <th scope="row">NOME</th>
+                <td>CONGREGAÇÃO</td>
+                <td>FUNÇÃO</td>
+          
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let obreiro of data">
+                <td>{{ obreiro.name }}</td>
+                <td>{{ obreiro.cong }}</td>
+                <td>{{ obreiro.func }}</td>        
+            </tr>
+        </tbody>
+    </table>
+    </div>
+  </div>

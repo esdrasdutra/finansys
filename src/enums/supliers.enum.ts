@@ -1,0 +1,18 @@
+export enum Supliers {
+    SP_00 = "-",
+    SP_01 = "ANÔNIMO",
+    SP_02 = "ATAQUE TOTAL",
+    SP_03 = "ÔNIBUS ÁREA 3",
+    SP_04 = "ÔNIBUS ÁREA 6",
+    SP_05 = "ÔNIBUS ÁREA 7",
+    SP_06 = "PASTOR ÁREA 1",
+    SP_07 = "PASTOR ÁREA 2",
+    SP_08 = "PASTOR ÁREA 3",
+    SP_09 = "PASTOR ÁREA 4",
+    SP_10 = "PASTOR ÁREA 5",
+    SP_11 = "PASTOR ÁREA 6",
+    SP_12 = "PASTOR ÁREA 7",
+    SP_13 = "PASTOR ÁREA 8",
+    SP_14 = "TC. E CONGR.",
+    SP_15 = "TERRENO IGREJA",
+}
