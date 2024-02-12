@@ -36,8 +36,9 @@ export class LancamentoService {
     return this.requestService.put(url, lancamento);
   }
 
-  deleteLancamento(lancamento: any): Observable<RemoveLancamentoResponse>{
-    const url = `http://localhost:8001/${this.lancamentoUrl}/${lancamento.id}`
+  deleteLancamento(id: any): Observable<RemoveLancamentoResponse>{
+    console.log(id, 'ID LANCAMENTO IN THE SERVICE');
+    const url = `http://localhost:8001/${this.lancamentoUrl}/${id}`
     return this.requestService.delete(url);
   }
 }

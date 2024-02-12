@@ -1,17 +1,41 @@
 <mat-tab-group mat-tab-align="start" animationDuration="0ms">
-
-
     <mat-tab label="DESPESAS">
         <section class="crud-lanc">
-            <button id="add-button" mat-raised-button class="add-button"> <mat-icon color="black">add</mat-icon>
+            <button id="add-button" (click)="addLancamentoModal()" mat-raised-button class="add-button"> <mat-icon color="black">add</mat-icon>
                 Lançar Nova Despesa </button>
-            <button id="edit-button" mat-raised-button class="add-button"> <mat-icon color="black">edit</mat-icon>
+            <button id="edit-button" (click)="editLancamento()" mat-raised-button class="add-button"> <mat-icon color="black">edit</mat-icon>
                 Editar Despesa </button>
-            <button id="delete-button" mat-raised-button class="add-button"> <mat-icon color="black">delete</mat-icon>
+            <button id="delete-button" (click)="deleteLancamento()" mat-raised-button class="add-button"> <mat-icon color="black">delete</mat-icon>
                 Excluir Despesa </button>
         </section>
         <section class="example-container mat-elevation-z8" tabindex="0">
             <table mat-table *ngIf="dataSourceDespesas" [dataSource]="dataSourceDespesas">
+                <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
+                    <th mat-header-cell class="f-sm" *matHeaderCellDef>
+                        {{ columnMapping[item] }}
+                    </th>
+                    <td mat-cell class="f-sm" *matCellDef="let element">{{ element[item] }} </td>
+                </ng-container>
+                <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsLancamento, sticky: true"></tr>
+
+                <tr mat-row [class.highlight]="row.id === selectedRowIndex" (click)="onClickRow(row, $event)"
+                    class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
+                </tr>
+            </table>
+        </section>
+    </mat-tab>
+
+    <mat-tab label="RECEITAS">
+        <section class="crud-lanc">
+            <button id="add-button" (click)="addLancamentoModal()" mat-raised-button class="add-button"> <mat-icon color="black">add</mat-icon>
+                Lançar Nova Receita </button>
+            <button id="edit-button" (click)="editLancamento()" mat-raised-button class="add-button"> <mat-icon color="black">edit</mat-icon>
+                Editar Receita </button>
+            <button id="delete-button" (click)="deleteLancamento()" mat-raised-button class="add-button"> <mat-icon color="black">delete</mat-icon>
+                Excluir Receita </button>
+        </section>
+        <section class="example-container mat-elevation-z8" tabindex="0">
+            <table mat-table *ngIf="dataSourceReceitas" [dataSource]="dataSourceReceitas">
                 <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
                     <th mat-header-cell class="f-sm" *matHeaderCellDef>
                         {{ columnMapping[item] }}

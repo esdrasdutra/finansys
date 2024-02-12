@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { LancamentoAddComponent } from '../pages/lancamento-add/lancamento-add.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComunicationService } from './comunication.service';
+import { LancamentoDeleteComponent } from '../components/lancamento-delete/lancamento-delete.component';
 
 @Injectable({
   providedIn: 'root',
@@ -29,7 +30,7 @@ export class ModalService {
 
   editLancamentoModal(data:any): void {        
     const dialogRef = this.dialog.open(LancamentoAddComponent, {
-      data: data,
+      data: data,      
       width: '900px',
     });
 
@@ -41,6 +42,14 @@ export class ModalService {
   }
 
   deleteLancamentoModal(data: any): void {
-    console.log(data.lancamento.id);    
+    const dialogRef = this.dialog.open(LancamentoDeleteComponent, {
+      data: data,
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.snackBar.open('Lancamento Excluído com sucesso.', 'X', { duration: 1500})
+      }
+    })
   }
 }

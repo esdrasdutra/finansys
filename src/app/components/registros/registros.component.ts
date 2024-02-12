@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChange } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 
@@ -38,14 +38,19 @@ export class RegistrosComponent implements OnInit {
   dataSourceDespesas = new MatTableDataSource<Lancamento>();
   dataSourceReceitas = new MatTableDataSource<Lancamento>();
 
+  dataDespesas: Lancamento[] = [];
+  dataReceitas: Lancamento[] = []
+
   selectedRowIndex = -1;
   displayedColumnsLancamento!: string[];
 
   @Input() tipoLancFromParent!: any;
   @Output() idLanc = new EventEmitter<Lancamento>();
+  lanc: any;
   constructor(
     private elementRef: ElementRef,
     private commService: ComunicationService,
+    private modalService: ModalService,
   ) { }
 
   ngOnInit(): void {
@@ -53,39 +58,34 @@ export class RegistrosComponent implements OnInit {
 
     this.commService.dataChanged.subscribe({
       next: (data: any) => {
-        console.log(data);
-      },
-    })
-
-/*     this.dataFromParent.subscribe({
-      next: (data: any) => {
-        this.dataSource = new MatTableDataSource<Lancamento>(data);
         data.forEach((el: any) => {
           if (el.tipo_lanc === "RECEITA") {
+            this.dataReceitas.push(el);
             this.displayedColumnsLancamento = [
               'recibo', 'data_lan', 'data_ven', 'tipo_doc', 'num_doc', 'entrada', 'cong',
               'forn', 'dizimista', 'obs', 'valor', 'conta', 'situacao', 'historico', 'status_lanc'
             ]
           } else if (el.tipo_lanc === "DESPESA") {
+            this.dataDespesas.push(el);
             this.displayedColumnsLancamento = [
               'recibo', 'data_lan', 'data_ven', 'tipo_doc', 'num_doc', 'saida', 'cong',
               'forn', 'dizimista', 'obs', 'valor', 'conta', 'situacao', 'historico', 'status_lanc'
             ]
           }
         })
-        this.dataSource.data = data;
-      }
-    }) */
+        
+      },
+    });
+
+    this.dataSourceDespesas.data = this.dataDespesas;
+    this.dataSourceReceitas.data = this.dataReceitas;
   }
 
-  getSelectedRowIndex(row: any) {
-    this.selectedRowIndex = row.id; // Define o índice da linha selecionada
-    return this.selectedRowIndex;
-  }
 
   onClickRow(row: any, event: any) {
-    this.getSelectedRowIndex(row);
-    this.idLanc.emit(row);
+    this.selectedRowIndex = row.id
+    this.lanc = row;
+    console.log(row.id);
     event.stopPropagation();
   }
 
@@ -95,5 +95,31 @@ export class RegistrosComponent implements OnInit {
     if (!clickedInside) {
       this.selectedRowIndex = -1; // Reseta o índice da linha selecionada
     }
+  }
+
+  addLancamentoModal() {
+    this.modalService.openLancamentoModal({
+      message: 'LANÇANDO NOVA MOVIMENTAÇÃO',
+      buttonText: {
+        ok: 'LANÇAR',
+        cancel: 'CANCELAR'
+      }
+    });
+  }
+
+  editLancamento(): void {
+    this.modalService.editLancamentoModal({
+      message: 'EDITANDO LANÇAMENTO',
+      buttonText: {
+        ok: 'EDITAR',
+        cancel: 'CANCELAR'
+      },
+      lancamento: this.lanc
+    });
+  }
+
+  deleteLancamento(): void {
+    this.modalService.deleteLancamentoModal(this.selectedRowIndex);
+
   }
 }
