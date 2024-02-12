@@ -1,5 +1,5 @@
 export enum FormCadastro {
-    select = 'SELECT',
+    id = 'ID',
     recibo = "RECIBO",
     data_lan = "LANÇAMENTO",
     data_ven = "VENCIMENTO",

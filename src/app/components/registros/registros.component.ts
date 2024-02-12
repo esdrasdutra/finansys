@@ -1,9 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import {SelectionModel} from '@angular/cdk/collections';
+import { SelectionModel } from '@angular/cdk/collections';
 
 import { Lancamento } from 'src/app/models/Lancamento';
 import { FormCadastro } from 'src/enums/forms.enum';
+import { ModalService } from 'src/app/services/modal.service';
+import { ComunicationService } from 'src/app/services/comunication.service';
 
 @Component({
   selector: 'app-registros',
@@ -11,35 +13,6 @@ import { FormCadastro } from 'src/enums/forms.enum';
   styleUrls: ['./registros.component.sass']
 })
 export class RegistrosComponent implements OnInit {
-  selection = new SelectionModel<Lancamento>(true, []);
-  dataSource: any;
-  selectedRowIndex = -1;
-  highlightedRows = [];
-
-  /** Whether the number of selected elements matches the total number of rows. */
-  isAllSelected() {
-    const numSelected = this.selection.selected.length;
-    const numRows = this.dataSource.data.length;
-    return numSelected === numRows;
-  }
-
-  /** Selects all rows if they are not all selected; otherwise clear selection. */
-  toggleAllRows() {
-    if (this.isAllSelected()) {
-      this.selection.clear();
-      return;
-    }
-
-    this.selection.select(...this.dataSource.data);
-  }
-
-  /** The label for the checkbox on the passed row */
-  checkboxLabel(row?: Lancamento): string {
-    if (!row) {
-      return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
-    }
-    return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.recibo + 1}`;
-  }
 
   columnMapping: { [key: string]: string } = {
     'recibo': 'RECIBO',
@@ -60,28 +33,31 @@ export class RegistrosComponent implements OnInit {
     'status_lanc': 'SITUAÇÃO'
   };
 
-  @Input() dataFromParent: any;
-  @Input() tipoLancFromParent!: any;
-
-  clickedRows = new Set<Lancamento>
-
-  private sub: any;
-  form = FormCadastro;
-  form_values: any = Object.values(FormCadastro);
   title = null;
-  data: Lancamento[] = [];
-  tipoLan: string = 'entrada';
-  dataSourceLan!: Lancamento[];
 
+  dataSourceDespesas = new MatTableDataSource<Lancamento>();
+  dataSourceReceitas = new MatTableDataSource<Lancamento>();
+
+  selectedRowIndex = -1;
   displayedColumnsLancamento!: string[];
 
+  @Input() tipoLancFromParent!: any;
+  @Output() idLanc = new EventEmitter<Lancamento>();
   constructor(
+    private elementRef: ElementRef,
+    private commService: ComunicationService,
   ) { }
 
-
-
   ngOnInit(): void {
-    this.dataFromParent.subscribe({
+    this.commService.refreshData();
+
+    this.commService.dataChanged.subscribe({
+      next: (data: any) => {
+        console.log(data);
+      },
+    })
+
+/*     this.dataFromParent.subscribe({
       next: (data: any) => {
         this.dataSource = new MatTableDataSource<Lancamento>(data);
         data.forEach((el: any) => {
@@ -99,19 +75,25 @@ export class RegistrosComponent implements OnInit {
         })
         this.dataSource.data = data;
       }
-    })
+    }) */
   }
 
-  clickedRow(row: any) {
-    this.selection.changed.subscribe((a) =>
-    {
-        if (a.added[0])   // will be undefined if no selection
-        {
-            alert('You selected ' + a.added[0].tipo_lanc);
-        }
-    });
-    this.selectedRowIndex = row.id;
-    console.log(this.selectedRowIndex);
-    console.log(row);
+  getSelectedRowIndex(row: any) {
+    this.selectedRowIndex = row.id; // Define o índice da linha selecionada
+    return this.selectedRowIndex;
+  }
+
+  onClickRow(row: any, event: any) {
+    this.getSelectedRowIndex(row);
+    this.idLanc.emit(row);
+    event.stopPropagation();
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent) {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+    if (!clickedInside) {
+      this.selectedRowIndex = -1; // Reseta o índice da linha selecionada
+    }
   }
 }

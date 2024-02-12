@@ -1,31 +1,5 @@
 <div class="content" role="main">
-    <mat-tab-group mat-tab-align="start" animationDuration="0ms">
-        <mat-tab label="DESPESAS">
-            <section class="crud-lanc">
-                <button mat-raised-button (click)="showLancamentoModal()" class="add-button"> <mat-icon color="accent">add</mat-icon>
-                    Lançar Nova Despesa </button>
-                <button mat-raised-button (click)="show()" class="add-button"> <mat-icon color="accent">edit</mat-icon>
-                    Editar Despesa </button>
-                <button mat-raised-button (click)="show()" class="add-button"> <mat-icon color="accent">delete</mat-icon>
-                    Excluir Despesa </button>
-            </section>
-            <section class="example-container mat-elevation-z8" tabindex="0">
-                <app-registros [dataFromParent]="outputDespesas"></app-registros>
-            </section>
-        </mat-tab>
-
-        <mat-tab label="RECEITAS">
-            <section class="crud-lanc">
-                <button mat-raised-button (click)="show()" class="add-button"> <mat-icon color="accent">add</mat-icon>
-                    Lançar Nova Receita </button>
-                <button mat-raised-button (click)="show()" class="add-button"> <mat-icon color="accent">edit</mat-icon>
-                    Editar Receita </button>
-                <button mat-raised-button (click)="show()" class="add-button"> <mat-icon color="accent">delete</mat-icon>
-                    Excluir Receita </button>
-            </section>
-            <section class="example-container mat-elevation-z8" tabindex="0">
-                <app-registros [dataFromParent]="outputReceitas"></app-registros>
-            </section>
-        </mat-tab>
-    </mat-tab-group>
+<app-registros>
+    
+</app-registros>
 </div>

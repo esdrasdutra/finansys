@@ -35,13 +35,17 @@ export class RequestService {
   }
 
   put<Request, Response>(url: any, item: Request): Observable<Response>{
-    const post_item = {
-      ...item,
-    }
-    return this.http.put<Response>(url, post_item, this.httpOptionJson)
+
+    return this.http.put<Response>(url, item, this.httpOptionJson)
+    .pipe(
+      tap((response: any) => {
+        console.log(response);
+      })
+    )
   }
 
   delete<Response>(url: any): Observable<Response>{
+    console.log(url);
     return this.http.delete<Response>(url);
   }
 }
