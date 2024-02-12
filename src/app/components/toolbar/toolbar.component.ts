@@ -15,11 +15,11 @@ export class ToolbarComponent {
   ]
 
   pathArray =[
-    '../../../assets/home_icon.svg',
-    '../../../assets/balancesheet_icon.svg',
-    '../../../assets/add_obreiro_icon.svg',
-    '../../../assets/add_cong_icon.svg',    
-    '../../../assets/fornecedores_icons.svg',
+    'assets/add_cong_icon.svg',
+    'assets/balancesheet_icon.svg',
+    'assets/add_obreiro_icon.svg',
+    'assets/add_cong_icon.svg',    
+    'assets/fornecedores_icons.svg',
   ]
 
   appRoutes = [
