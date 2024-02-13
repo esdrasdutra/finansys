@@ -3,7 +3,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 
 import { Lancamento } from 'src/app/models/Lancamento';
-import { FormCadastro } from 'src/enums/forms.enum';
+import { FormCadastro } from 'src/app/enums/forms.enum';
 import { ModalService } from 'src/app/services/modal.service';
 import { ComunicationService } from 'src/app/services/comunication.service';
 

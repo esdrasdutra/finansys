@@ -14,7 +14,8 @@
     <div class="row">
       <div class="col-sm-4"><label for="data-lan-input" class="fw-bold">DATA DE LANÇAMENTO: </label></div>
       <div class="col">
-        <div class="input-group"><input type="date" id="data-lan-input" class="form-control" formControlName="data_lan">
+        <div class="input-group">
+          <datepicker-selection id="data-lan-input" formControlName="data_lan"></datepicker-selection>
         </div>
       </div>
     </div>
@@ -22,7 +23,7 @@
     <div class="row">
       <div class="col-sm-4"><label class="fw-bold">DATA DE VENCIMENTO: </label></div>
       <div class="col">
-        <div class="input-group"><input type="date" class="form-control" formControlName="data_ven"></div>
+        <datepicker-selection (formControlName)="formControlNameDele"></datepicker-selection>
       </div>
     </div>
 

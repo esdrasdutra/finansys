@@ -1,7 +1,7 @@
 import { Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { Lancamento } from 'src/app/models/Lancamento';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
-import { FormCadastro } from 'src/enums/forms.enum';
+import { FormCadastro } from 'src/app/enums/forms.enum';
 import { MatSort } from '@angular/material/sort';
 import { ModalService } from 'src/app/services/modal.service';
 import { ComunicationService } from 'src/app/services/comunication.service';

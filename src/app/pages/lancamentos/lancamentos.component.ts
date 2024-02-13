@@ -2,13 +2,13 @@ import { Component, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
-import { Account } from 'src/enums/account.enum';
-import { Congregation } from 'src/enums/congregation.enum';
-import { DocType } from 'src/enums/doc-type.enum';
-import { FormCadastro } from 'src/enums/forms.enum';
-import { Inflows } from 'src/enums/inflows.enum';
-import { Outflows } from 'src/enums/outflows.enum';
-import { Supliers } from 'src/enums/supliers.enum';
+import { Account } from 'src/app/enums/account.enum';
+import { Congregation } from 'src/app/enums/congregation.enum';
+import { DocType } from 'src/app/enums/doc-type.enum';
+import { FormCadastro } from 'src/app/enums/forms.enum';
+import { Inflows } from 'src/app/enums/inflows.enum';
+import { Outflows } from 'src/app/enums/outflows.enum';
+import { Supliers } from 'src/app/enums/supliers.enum';
 
 @Component({
   selector: 'app-lancamentos',

@@ -1,14 +1,14 @@
-import { Component, EventEmitter, Inject, Output } from '@angular/core';
+import { Component, EventEmitter, Inject, Output, SimpleChange } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Account } from 'src/enums/account.enum';
-import { Congregation } from 'src/enums/congregation.enum';
-import { DocType } from 'src/enums/doc-type.enum';
-import { FormCadastro } from 'src/enums/forms.enum';
-import { Inflows } from 'src/enums/inflows.enum';
-import { Outflows } from 'src/enums/outflows.enum';
-import { Supliers } from 'src/enums/supliers.enum';
+import { Account } from 'src/app/enums/account.enum';
+import { Congregation } from 'src/app/enums/congregation.enum';
+import { DocType } from 'src/app/enums/doc-type.enum';
+import { FormCadastro } from 'src/app/enums/forms.enum';
+import { Inflows } from 'src/app/enums/inflows.enum';
+import { Outflows } from 'src/app/enums/outflows.enum';
+import { Supliers } from 'src/app/enums/supliers.enum';
 import { LancamentoDeleteComponent } from 'src/app/components/lancamento-delete/lancamento-delete.component';
 import { first } from 'rxjs';
 
@@ -36,6 +36,7 @@ export class LancamentoAddComponent {
   confirmButtonText = ""
   cancelButtonText = ""
   submitted!: boolean;
+formControlNameDele: any;
 
   constructor(
     private fb: FormBuilder,
@@ -121,6 +122,14 @@ export class LancamentoAddComponent {
       .subscribe(() => {
         this.updateHistory();
       })
+
+    this.transactionForm.get('status_lanc')?.valueChanges
+      .subscribe(() => {
+        this.dayToDue();
+      })
+  }
+  dayToDue() {
+    console.log(this.formControls)
   }
 
   public get formControls() {

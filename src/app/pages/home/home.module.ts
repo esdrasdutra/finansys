@@ -19,41 +19,43 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { ObreirosComponent } from '../obreiros/obreiros.component';
 import { LancamentoEditComponent } from '../lancamento-edit/lancamento-edit.component';
+import { DatepickerViewsSelectionExampleComponent } from "../../components/dateícker/datepicker-views-selection-example.component";
 
 @NgModule({
-  declarations: [
-    HomeComponent, 
-    RegistrosComponent, 
-    SnackBarComponent, 
-    LancamentoDeleteComponent, 
-    LancamentoAddComponent,
-    LancamentoEditComponent,
-    ObreirosComponent,
-  ],
-  imports: [
-    CommonModule,
-    MatTabsModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatSnackBarModule,
-    MatCheckboxModule,
-    MatFormFieldModule,
-    MatDialogModule,
-    FormsModule,
-    ReactiveFormsModule,    
-    NgxMaskDirective,
-    NgxMaskPipe,
-
-  ],
-  exports: [
-    HomeComponent,
-    RegistrosComponent,
-    SnackBarComponent,
-    LancamentoDeleteComponent,
-    LancamentoEditComponent
-  ],
-  providers: [provideNgxMask(),]
+    declarations: [
+        HomeComponent,
+        RegistrosComponent,
+        SnackBarComponent,
+        LancamentoDeleteComponent,
+        LancamentoAddComponent,
+        LancamentoEditComponent,
+        ObreirosComponent,
+    ],
+    exports: [
+        HomeComponent,
+        RegistrosComponent,
+        SnackBarComponent,
+        LancamentoDeleteComponent,
+        LancamentoEditComponent,
+        ObreirosComponent,
+    ],
+    providers: [provideNgxMask(),],
+    imports: [
+        CommonModule,
+        MatTabsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTableModule,
+        MatSnackBarModule,
+        MatCheckboxModule,
+        MatFormFieldModule,
+        MatDialogModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgxMaskDirective,
+        NgxMaskPipe,
+        DatepickerViewsSelectionExampleComponent
+    ]
 })
 export class HomeModule { }
