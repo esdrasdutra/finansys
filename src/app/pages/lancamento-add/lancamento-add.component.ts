@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Inject, Output, SimpleChange } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Account } from 'src/app/enums/account.enum';
@@ -36,7 +36,6 @@ export class LancamentoAddComponent {
   confirmButtonText = ""
   cancelButtonText = ""
   submitted!: boolean;
-formControlNameDele: any;
 
   constructor(
     private fb: FormBuilder,
@@ -60,7 +59,7 @@ formControlNameDele: any;
     this.transactionForm = this.fb.group({
       id: [''],
       recibo: [''],
-      data_lan: [''],
+      data_lan: new FormControl(),
       data_ven: [''],
       tipo_doc: [''],
       num_doc: [''],
@@ -83,7 +82,7 @@ formControlNameDele: any;
         .pipe(first())
         .subscribe((x) => {
           this.transactionForm.patchValue(x)
-      });
+        });
     }
 
     this.transactionForm.get('valor')?.valueChanges
@@ -201,7 +200,12 @@ formControlNameDele: any;
   }
 
   onConfirmClick(): void {
-    this.submitForm();    
+    this.submitForm();
     this.dialogRef.close(true);
+  }
+
+  // Método para lidar com a mudança de data emitida pelo componente filho
+  handleDateChange(date: Date) {
+    console.log(date);
   }
 }
