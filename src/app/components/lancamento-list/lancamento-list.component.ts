@@ -1,19 +1,16 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChange } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
 
 import { Lancamento } from 'src/app/models/Lancamento';
-import { FormCadastro } from 'src/app/enums/forms.enum';
-import { ModalService } from 'src/app/services/modal.service';
 import { ComunicationService } from 'src/app/services/comunication.service';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import moment from 'moment';
 
 @Component({
-  selector: 'app-registros',
-  templateUrl: './registros.component.html',
-  styleUrls: ['./registros.component.sass']
+  selector: 'app-lancamento-list',
+  templateUrl: './lancamento-list.component.html',
+  styleUrls: ['./lancamento-list.component.sass']
 })
-export class RegistrosComponent implements OnInit {
+export class LancamentoListComponent implements OnInit {
 
   columnMapping: { [key: string]: string } = {
     'recibo': 'RECIBO',
@@ -43,10 +40,10 @@ export class RegistrosComponent implements OnInit {
   dataReceitas: Lancamento[] = []
 
   selectedRowIndex = -1;
-  
+
   displayedColumnsLancamento = [
-    'recibo', 'data_lan', 'data_ven', 'valor', 'num_doc','entrada', 'saida', 'cong',
-    'forn', 'dizimista', 'obs','tipo_doc','conta', 'situacao', 'historico', 'status_lanc'
+    'recibo', 'data_lan', 'data_ven', 'valor', 'num_doc', 'entrada', 'saida', 'cong',
+    'forn', 'dizimista', 'obs', 'tipo_doc', 'conta', 'situacao', 'historico', 'status_lanc'
   ]
 
   @Input() tipoLancFromParent!: any;
@@ -54,27 +51,37 @@ export class RegistrosComponent implements OnInit {
   constructor(
     private elementRef: ElementRef,
     private commService: ComunicationService,
-    private lancamentoService: LancamentoService,
   ) { }
 
-  ngOnInit(): void {    
-    this.commService.fetchData();
+  ngOnInit(): void {
+    this.commService.fetchData('REGISTRO ON INIT');
   }
 
   ngAfterViewInit(): void {
+    this.commService.fetchData('REGISTRO AfterViewInit');
 
     this.commService.lancamentoList$.subscribe(
       (data: any) => {
+        this.dataDespesas = [];
+        this.dataReceitas = [];
         data.forEach((el: any) => {
+          if (el.data_lan) {           
+            el.data_lan = moment(new Date(el.data_lan)).format("DD/MM/YYYY");
+          }
+          if (el.data_ven) {           
+            el.data_ven = moment(new Date(el.data_ven)).format("DD/MM/YYYY");
+          }
+
           if (el.tipo_lanc === "RECEITA") {
             this.dataReceitas.push(el);
           } else if (el.tipo_lanc === "DESPESA") {
             this.dataDespesas.push(el);
           }
         });
-        this.dataSourceDespesas.data = this.dataDespesas;
-        this.dataSourceReceitas.data = this.dataReceitas;
-    });
+
+        this.dataSourceDespesas.data = this.dataDespesas.slice();
+        this.dataSourceReceitas.data = this.dataReceitas.slice();
+      });
   }
 
   onClickRow(row: any, event: any) {

@@ -193,12 +193,10 @@ export class LancamentoAddComponent {
   }
 
   private addLancamento() {
-    console.log('ADD MODE');
     this.lancamentoService.addLancamento(this.transactionForm.value)
       .pipe(first())
       .subscribe({
         next: () => {
-          this.commService.fetchData();
           console.log('COMPLETE')
         },
         error: (err) => console.log(err),
@@ -206,15 +204,12 @@ export class LancamentoAddComponent {
   }
 
   private updateLancamento(updatedForm: any) {
-    console.log('EDIT MODE');
     updatedForm.data_lan = new Date(updatedForm.data_lan).toISOString().slice(0, 10);
     updatedForm.data_ven = new Date(updatedForm.data_ven).toISOString().slice(0, 10);
     this.lancamentoService.updateLancamento(updatedForm)
       .pipe(first())
       .subscribe({
         next: () => {
-          this.commService.fetchData();
-          console.log('DATA REFETCHED')
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),

@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ComunicationService } from './services/comunication.service';
 
 @Component({
   selector: 'app-root',
@@ -33,9 +32,7 @@ export class AppComponent implements OnInit {
     "fornecedores"
   ]
 
-  constructor(
-    private commService: ComunicationService,
-  ){}
+  constructor(){}
 
   ngOnInit(): void {
     

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { LancamenoListComponent } from './lancameno-list.component';
+import { LancamentoListComponent } from './lancamento-list.component';
 
-describe('LancamenoListComponent', () => {
-  let component: LancamenoListComponent;
-  let fixture: ComponentFixture<LancamenoListComponent>;
+describe('LancamentoListComponent', () => {
+  let component: LancamentoListComponent;
+  let fixture: ComponentFixture<LancamentoListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LancamenoListComponent ]
+      declarations: [ LancamentoListComponent ]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(LancamenoListComponent);
+    fixture = TestBed.createComponent(LancamentoListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

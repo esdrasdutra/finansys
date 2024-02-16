@@ -12,6 +12,11 @@ export class DashboardComponent implements OnInit {
   valorDespesas = 0;
   valorReceitas = 0;
 
+  months = [
+    'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
+    'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
+  ];
+
   saldoMensal: any;
 
   constructor(
@@ -19,9 +24,8 @@ export class DashboardComponent implements OnInit {
   ){}
 
   ngOnInit(){
-  }
+    this.commService.fetchData('Dashboard OnInit');
 
-  ngAfterViewInit(){
     this.commService.despesas$.subscribe(
       (data: any) => {
         this.valorDespesas = data

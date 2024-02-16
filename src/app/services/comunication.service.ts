@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { LancamentoService } from './lancamentos/lancamento.service';
 import { BehaviorSubject } from 'rxjs';
+import { Lancamento } from '../models/Lancamento';
 
 @Injectable({
   providedIn: 'root'
@@ -46,25 +47,29 @@ export class ComunicationService {
     this.totalReceitas$.next(lancamentos);
   }
 
-  fetchData() {
+  fetchData(component: string): void {
+    console.log(component)
+    console.time('getLancamentos');
+
     this.lancamentoService.getLancamentos().subscribe({
       next: (lancamentos) => {
-        let totalDespesas = 0;
-        let totalReceitas = 0;
+        let totalDespesas: Lancamento[] = [];
+        let totalReceitas: Lancamento[] = [];
         lancamentos.data.forEach((lanc: any) => {
           if( lanc.tipo_lanc === "DESPESA") {
-            totalDespesas += parseFloat(lanc.valor);
+            totalDespesas.push(lanc);
 
           } else if (lanc.tipo_lanc === "RECEITA") {
-            totalReceitas += parseFloat(lanc.valor);
+            totalReceitas.push(lanc);
           }
         });
          
         this.setDespesas(totalDespesas);
         this.setReceitas(totalReceitas);
-
         this.setLancamentoList(lancamentos.data);
       },
     });
+
+    console.timeEnd('getLancamentos');
   }
 }

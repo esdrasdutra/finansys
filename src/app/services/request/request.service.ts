@@ -26,22 +26,11 @@ export class RequestService {
   }
 
   post<Request, Response>(url: any, item: Request): Observable<Response>{
-    
-    return this.http.post<Response>(url, item, this.httpOptionJson).pipe(
-      tap((response: any) => {
-        console.log(response);
-      })
-    )
+    return this.http.post<Response>(url, item, this.httpOptionJson);
   }
 
   put<Request, Response>(url: any, item: Request): Observable<Response>{
-
-    return this.http.put<Response>(url, item, this.httpOptionJson)
-    .pipe(
-      tap((response: any) => {
-        console.log(response);
-      })
-    )
+    return this.http.put<Response>(url, item, this.httpOptionJson);
   }
 
   delete<Response>(url: any): Observable<Response>{

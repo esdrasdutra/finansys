@@ -3,7 +3,7 @@ import { LancamentoService } from 'src/app/services/lancamentos/lancamento.servi
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { LancamentoAddComponent } from 'src/app/pages/lancamento-add/lancamento-add.component';
+import { LancamentoAddComponent } from 'src/app/components/lancamento-add/lancamento-add.component';
 
 
 

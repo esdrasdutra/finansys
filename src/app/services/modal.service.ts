@@ -1,6 +1,6 @@
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { LancamentoAddComponent } from '../pages/lancamento-add/lancamento-add.component';
+import { LancamentoAddComponent } from '../components/lancamento-add/lancamento-add.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComunicationService } from './comunication.service';
 import { LancamentoDeleteComponent } from '../components/lancamento-delete/lancamento-delete.component';

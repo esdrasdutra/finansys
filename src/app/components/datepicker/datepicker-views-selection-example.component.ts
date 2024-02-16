@@ -51,7 +51,6 @@ export const MY_FORMATS = {
 
 export class DatepickerViewsSelectionExampleComponent {
   data_lan = new FormControl();
-  value!: Date;
 
   @Output() dateChanged = new EventEmitter<any>();
   constructor(
