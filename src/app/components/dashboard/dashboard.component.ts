@@ -19,8 +19,6 @@ export class DashboardComponent implements OnInit {
   ){}
 
   ngOnInit(){
-    console.log('BALANCETE LOADED')
-    this.commService.fetchData();
   }
 
   ngAfterViewInit(){

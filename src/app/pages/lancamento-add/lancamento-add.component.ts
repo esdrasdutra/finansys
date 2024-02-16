@@ -214,6 +214,7 @@ export class LancamentoAddComponent {
       .subscribe({
         next: () => {
           this.commService.fetchData();
+          console.log('DATA REFETCHED')
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),

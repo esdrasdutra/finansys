@@ -57,11 +57,11 @@ export class RegistrosComponent implements OnInit {
     private lancamentoService: LancamentoService,
   ) { }
 
-  ngOnInit(): void {
+  ngOnInit(): void {    
+    this.commService.fetchData();
   }
 
-  ngAfterViewInit(): void {    
-    this.commService.fetchData();
+  ngAfterViewInit(): void {
 
     this.commService.lancamentoList$.subscribe(
       (data: any) => {

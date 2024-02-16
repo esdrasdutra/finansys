@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule, DEFAULT_CURRENCY_CODE } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeComponent } from './home.component';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -24,6 +24,10 @@ import { NewHomeComponent } from '../new-home/new-home.component';
 import { CrudButtonsComponent } from 'src/app/components/crud-buttons/crud-buttons.component';
 import { DashboardComponent } from 'src/app/components/dashboard/dashboard.component';
 
+import { registerLocaleData } from '@angular/common';
+import ptBr from '@angular/common/locales/pt';
+
+registerLocaleData(ptBr);
 
 @NgModule({
     declarations: [
@@ -49,7 +53,10 @@ import { DashboardComponent } from 'src/app/components/dashboard/dashboard.compo
         CrudButtonsComponent,
         DashboardComponent,
     ],
-    providers: [provideNgxMask(),],
+    providers: [
+        provideNgxMask(),
+        { provide: LOCALE_ID, useValue: 'pt'}
+    ],
     imports: [
         CommonModule,
         MatTabsModule,

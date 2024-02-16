@@ -3,10 +3,18 @@
         <section class="mat-elevation-z8" tabindex="0">
             <table mat-table *ngIf="dataSourceDespesas" [dataSource]="dataSourceDespesas">
                 <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
+
                     <th mat-header-cell class="f-sm" *matHeaderCellDef>
-                        {{ columnMapping[item] }}
+                        <div *ngIf="item === 'valor';then isValue else notValue"></div>
+                        <ng-template #isValue > (R$) {{ columnMapping[item] }} </ng-template>
+                        <ng-template #notValue> {{ columnMapping[item] }} </ng-template>
+                                              
                     </th>
-                    <td mat-cell class="f-sm" *matCellDef="let element">{{ element[item] }} </td>
+                    <td mat-cell class="f-sm" *matCellDef="let element">                        
+                        <div *ngIf="item === 'valor';then isValue else notValue"></div>
+                        <ng-template #isValue > {{ element[item] | currency: 'BRL' }} </ng-template>
+                        <ng-template #notValue> {{ element[item] }} </ng-template>
+                    </td>
                 </ng-container>
                 <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsLancamento, sticky: true"></tr>
 

@@ -1,11 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ComunicationService } from './services/comunication.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.sass']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'finan_Sys';
 
   nameArray = [
@@ -31,4 +32,12 @@ export class AppComponent {
     "congregacoes",
     "fornecedores"
   ]
+
+  constructor(
+    private commService: ComunicationService,
+  ){}
+
+  ngOnInit(): void {
+    
+  }
 }
