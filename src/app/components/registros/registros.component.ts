@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChange } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output, SimpleChange } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
 
@@ -6,6 +6,7 @@ import { Lancamento } from 'src/app/models/Lancamento';
 import { FormCadastro } from 'src/app/enums/forms.enum';
 import { ModalService } from 'src/app/services/modal.service';
 import { ComunicationService } from 'src/app/services/comunication.service';
+import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 
 @Component({
   selector: 'app-registros',
@@ -42,50 +43,43 @@ export class RegistrosComponent implements OnInit {
   dataReceitas: Lancamento[] = []
 
   selectedRowIndex = -1;
-  displayedColumnsLancamento!: string[];
+  
+  displayedColumnsLancamento = [
+    'recibo', 'data_lan', 'data_ven', 'valor', 'num_doc','entrada', 'saida', 'cong',
+    'forn', 'dizimista', 'obs','tipo_doc','conta', 'situacao', 'historico', 'status_lanc'
+  ]
 
   @Input() tipoLancFromParent!: any;
   @Output() idLanc = new EventEmitter<Lancamento>();
-  lanc: any;
   constructor(
     private elementRef: ElementRef,
     private commService: ComunicationService,
-    private modalService: ModalService,
+    private lancamentoService: LancamentoService,
   ) { }
 
   ngOnInit(): void {
-    this.commService.refreshData();
+  }
 
-    this.commService.dataChanged.subscribe({
-      next: (data: any) => {
+  ngAfterViewInit(): void {    
+    this.commService.fetchData();
+
+    this.commService.lancamentoList$.subscribe(
+      (data: any) => {
         data.forEach((el: any) => {
           if (el.tipo_lanc === "RECEITA") {
             this.dataReceitas.push(el);
-            this.displayedColumnsLancamento = [
-              'recibo', 'data_lan', 'data_ven', 'tipo_doc', 'num_doc', 'entrada', 'cong',
-              'forn', 'dizimista', 'obs', 'valor', 'conta', 'situacao', 'historico', 'status_lanc'
-            ]
           } else if (el.tipo_lanc === "DESPESA") {
             this.dataDespesas.push(el);
-            this.displayedColumnsLancamento = [
-              'recibo', 'data_lan', 'data_ven', 'tipo_doc', 'num_doc', 'saida', 'cong',
-              'forn', 'dizimista', 'obs', 'valor', 'conta', 'situacao', 'historico', 'status_lanc'
-            ]
           }
-        })
-        
-      },
+        });
+        this.dataSourceDespesas.data = this.dataDespesas;
+        this.dataSourceReceitas.data = this.dataReceitas;
     });
-
-    this.dataSourceDespesas.data = this.dataDespesas;
-    this.dataSourceReceitas.data = this.dataReceitas;
   }
-
 
   onClickRow(row: any, event: any) {
     this.selectedRowIndex = row.id
-    this.lanc = row;
-    console.log(row.id);
+    this.commService.setLancamento(row);
     event.stopPropagation();
   }
 
@@ -95,31 +89,5 @@ export class RegistrosComponent implements OnInit {
     if (!clickedInside) {
       this.selectedRowIndex = -1; // Reseta o índice da linha selecionada
     }
-  }
-
-  addLancamentoModal() {
-    this.modalService.openLancamentoModal({
-      message: 'LANÇANDO NOVA MOVIMENTAÇÃO',
-      buttonText: {
-        ok: 'LANÇAR',
-        cancel: 'CANCELAR'
-      }
-    });
-  }
-
-  editLancamento(): void {
-    this.modalService.editLancamentoModal({
-      message: 'EDITANDO LANÇAMENTO',
-      buttonText: {
-        ok: 'EDITAR',
-        cancel: 'CANCELAR'
-      },
-      lancamento: this.lanc
-    });
-  }
-
-  deleteLancamento(): void {
-    this.modalService.deleteLancamentoModal(this.selectedRowIndex);
-
   }
 }

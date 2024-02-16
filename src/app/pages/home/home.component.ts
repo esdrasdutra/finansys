@@ -14,10 +14,6 @@ import { ComunicationService } from 'src/app/services/comunication.service';
   providers: [LancamentoService]
 })
 export class HomeComponent implements OnInit {
-  @Output() outputLancDes = new EventEmitter<string>;
-  @Output() outputLancRec = new EventEmitter<string>;
-  @Input() lanc!: any;
-
   form = FormCadastro;
   form_values: any = Object.values(FormCadastro);
   title = null;
@@ -32,42 +28,5 @@ export class HomeComponent implements OnInit {
   @ViewChild(MatSort, { static: true }) sort!: MatSort;
 
   ngOnInit(): void {
-  }
-
-  addLancamentoModal() {
-    this.modalService.openLancamentoModal({
-      message: 'LANÇANDO NOVA MOVIMENTAÇÃO',
-      buttonText: {
-        ok: 'LANÇAR',
-        cancel: 'CANCELAR'
-      }
-    });
-  }
-
-  editLancamento(): void {
-    if (!this.lanc) {
-      return
-    }
-    this.modalService.editLancamentoModal({
-      message: 'EDITANDO LANÇAMENTO',
-      buttonText: {
-        ok: 'EDITAR',
-        cancel: 'CANCELAR'
-      },
-      lancamento: this.lanc,
-    });
-  }
-
-  deleteLancamento(): void {
-    if (!this.lanc) {
-      return
-    }
-    this.modalService.deleteLancamentoModal(this.lanc);
-
-  }
-
-  getIdLanc(event: any) {
-    console.log(event);
-    this.lanc = event;
   }
 }

@@ -5,29 +5,23 @@
 .highlight
     background: linear-gradient(to bottom,#dee9ee, #7baac2)
     //background: #42A948
-    
-.crud-lanc
-    display: flex
 
-.add-button
-    white-space: nowrap
-    width: fit-content
-    position: relative
+.example-container
+  width: 99vw
+  // height: 100vh
+  //overflow: auto
+
+.despesas-tab .mat-tab-header, .receitas-tab .mat-tab-header
+    position: sticky
     top: 0
-    left: 0
-    right: 0
-    z-index: 1000
-    display: flex
-    margin: 4px
-    background: linear-gradient(to bottom, #eef9ff, #aae1ff)
-    cursor: pointer
-    border: none
-    outline: none
-    border-radius: 3px /* Optional: Add border-radius for rounded corners */
-    &:hover
-        background: linear-gradient(to bottom,#dee9ee, #7baac2)        
-    &:active
-        background: linear-gradient(to bottom,#dee9ee, #7baac2)
+    z-index: 1
+    background-color: white 
+
+.despesas-tab .mat-table-sticky, .receitas-tab .mat-table-sticky
+    position: sticky
+    top: 48px 
+    z-index: 1
+    background-color: white
 
 ::ng-deep
     .mat-mdc-table .mdc-data-table__header-row

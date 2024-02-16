@@ -7,6 +7,7 @@ import { default as _rollupMoment, Moment } from 'moment';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { ComunicationService } from 'src/app/services/comunication.service';
 
 const moment = _rollupMoment || _moment;
 
@@ -16,9 +17,9 @@ export const MY_FORMATS = {
   },
   display: {
     dateInput: 'DD/MM',
-    monthYearLabel: 'DD MM',
+    monthYearLabel: 'DD/MM',
     dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'DD MM',
+    monthYearA11yLabel: 'DD/MM',
   },
 };
 
@@ -55,9 +56,8 @@ export class DatepickerViewsSelectionExampleComponent {
   @Output() dateChanged = new EventEmitter<any>();
   constructor(
     private fb: FormBuilder,
+    private commService: ComunicationService,
   ) { }
-
-  date = new FormControl(moment());
 
   setMonthAndYear(normalizedDayAndMonth: Moment, datepicker: MatDatepicker<Moment>) {
     const ctrlValue = this.data_lan.value ?? moment();
@@ -66,13 +66,10 @@ export class DatepickerViewsSelectionExampleComponent {
     datepicker.close();
   }
 
-  // Método para lidar com a mudança de data e emitir o evento para o componente pai
-  handleDateChange(date: any) {
-    console.log(date);
-    this.dateChanged.emit(date);
-  }
-
   onDateChange(event: MatDatepickerInputEvent<Date>) {
-    console.log(event.value?.getDay());
+    const date = event.value?.toISOString().slice(0,10)
+    const target = event.targetElement.id;
+
+    this.commService.setDate({date: date, target: target});
   }
 }

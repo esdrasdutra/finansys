@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ModalService } from 'src/app/services/modal.service';
 
 @Component({
   selector: 'app-new-home',
@@ -6,5 +7,13 @@ import { Component } from '@angular/core';
   styleUrls: ['./new-home.component.sass']
 })
 export class NewHomeComponent {
+  lanc: any;
+
+
+  constructor(
+    private modalService: ModalService,
+  ){}
+
+
 
 }

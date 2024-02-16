@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, Output, SimpleChange } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -11,6 +11,7 @@ import { Outflows } from 'src/app/enums/outflows.enum';
 import { Supliers } from 'src/app/enums/supliers.enum';
 import { LancamentoDeleteComponent } from 'src/app/components/lancamento-delete/lancamento-delete.component';
 import { first } from 'rxjs';
+import { ComunicationService } from 'src/app/services/comunication.service';
 
 @Component({
   selector: 'app-lancamento-add',
@@ -40,6 +41,8 @@ export class LancamentoAddComponent {
   constructor(
     private fb: FormBuilder,
     private lancamentoService: LancamentoService,
+    private commService: ComunicationService,
+
     @Inject(MAT_DIALOG_DATA) private data: any,
     private dialogRef: MatDialogRef<LancamentoDeleteComponent>) {
     if (data) {
@@ -78,6 +81,7 @@ export class LancamentoAddComponent {
     });
 
     if (!this.isAddMode) {
+      console.log(data.lancamento);
       this.lancamentoService.getLancamentoById(data.lancamento)
         .pipe(first())
         .subscribe((x) => {
@@ -124,11 +128,7 @@ export class LancamentoAddComponent {
 
     this.transactionForm.get('status_lanc')?.valueChanges
       .subscribe(() => {
-        this.dayToDue();
       })
-  }
-  dayToDue() {
-    console.log(this.formControls)
   }
 
   public get formControls() {
@@ -138,7 +138,15 @@ export class LancamentoAddComponent {
   ngOnInit(): void {
   }
 
-  updateHistory() {
+  ngAfterViewInit(): void {    
+    this.commService.selectedDate$.subscribe(
+      (data: any) => {
+        this.updateDate(data);
+      }
+    )
+  }
+
+  updateHistory(): void {
     const receipt = this.transactionForm.get('recibo')?.value;
     const obs = this.transactionForm.get('obs')?.value;
     const inf = this.transactionForm.get('entrada')?.value;
@@ -149,6 +157,16 @@ export class LancamentoAddComponent {
     const historico = `${obs} / ${inf} - ${thn} - ${cong} /  RECIBO: ${receipt}`;
 
     this.transactionForm.patchValue({ historico });
+  }
+
+  updateDate(data: any): void {
+    if (data.target === 'mat-input-0') {
+      const data_lan = data.date;
+      this.transactionForm.patchValue({ data_lan });
+    } else if (data.target === 'mat-input-1') {
+      const data_ven =  data.date;
+      this.transactionForm.patchValue({ data_ven });
+    }
   }
 
   checkTypeDoc() {
@@ -171,7 +189,7 @@ export class LancamentoAddComponent {
       this.addLancamento();
     } else {
       this.updateLancamento(this.transactionForm.value);
-    }
+    }    
   }
 
   private addLancamento() {
@@ -180,6 +198,7 @@ export class LancamentoAddComponent {
       .pipe(first())
       .subscribe({
         next: () => {
+          this.commService.fetchData();
           console.log('COMPLETE')
         },
         error: (err) => console.log(err),
@@ -187,12 +206,14 @@ export class LancamentoAddComponent {
   }
 
   private updateLancamento(updatedForm: any) {
+    console.log('EDIT MODE');
     updatedForm.data_lan = new Date(updatedForm.data_lan).toISOString().slice(0, 10);
     updatedForm.data_ven = new Date(updatedForm.data_ven).toISOString().slice(0, 10);
     this.lancamentoService.updateLancamento(updatedForm)
       .pipe(first())
       .subscribe({
         next: () => {
+          this.commService.fetchData();
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),
@@ -202,10 +223,5 @@ export class LancamentoAddComponent {
   onConfirmClick(): void {
     this.submitForm();
     this.dialogRef.close(true);
-  }
-
-  // Método para lidar com a mudança de data emitida pelo componente filho
-  handleDateChange(date: Date) {
-    console.log(date);
   }
 }

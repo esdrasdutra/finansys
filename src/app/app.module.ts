@@ -13,7 +13,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { CurrencyPipe } from '@angular/common';
 import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 import { HomeModule } from './pages/home/home.module';
-import { NewHomeComponent } from './pages/new-home/new-home.component';
 
 @NgModule({
   imports: [
@@ -32,8 +31,7 @@ import { NewHomeComponent } from './pages/new-home/new-home.component';
     CongregacoesComponent,
     FornecedoresComponent,
     IconsComponent,
-    ToolbarComponent,
-    NewHomeComponent,
+    ToolbarComponent
 ],
   providers: [CurrencyPipe, HttpClientModule],
   bootstrap: [AppComponent]

@@ -19,7 +19,11 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { ObreirosComponent } from '../obreiros/obreiros.component';
 import { LancamentoEditComponent } from '../lancamento-edit/lancamento-edit.component';
-import { DatepickerViewsSelectionExampleComponent } from "../../components/date√≠cker/datepicker-views-selection-example.component";
+import { DatepickerViewsSelectionExampleComponent } from "../../components/datepicker/datepicker-views-selection-example.component";
+import { NewHomeComponent } from '../new-home/new-home.component';
+import { CrudButtonsComponent } from 'src/app/components/crud-buttons/crud-buttons.component';
+import { DashboardComponent } from 'src/app/components/dashboard/dashboard.component';
+
 
 @NgModule({
     declarations: [
@@ -30,6 +34,9 @@ import { DatepickerViewsSelectionExampleComponent } from "../../components/date√
         LancamentoAddComponent,
         LancamentoEditComponent,
         ObreirosComponent,
+        NewHomeComponent,
+        CrudButtonsComponent,
+        DashboardComponent,
     ],
     exports: [
         HomeComponent,
@@ -38,6 +45,9 @@ import { DatepickerViewsSelectionExampleComponent } from "../../components/date√
         LancamentoDeleteComponent,
         LancamentoEditComponent,
         ObreirosComponent,
+        NewHomeComponent,
+        CrudButtonsComponent,
+        DashboardComponent,
     ],
     providers: [provideNgxMask(),],
     imports: [

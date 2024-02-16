@@ -1,0 +1,37 @@
+<div class="dashboard-style">
+    <h1>DASHBOARD COMES HERE</h1>
+    <div class="row">
+        <div class="col">
+            <section id="main">
+                <span class="dashboard-header">Receita do mês</span>
+                <div>
+                    Fevereiro
+                </div>
+                <span> Total de Entradas do mês</span>
+                <div>
+                    <button type="button" class="btn btn-lg btn-light"> {{ valorReceitas | currency }} </button>
+                </div>
+                <span> Total de Saídas do mês </span>
+                <div>
+                    <button type="button" class="btn btn-lg btn-danger"> {{ valorDespesas | currency }}</button>
+                </div>
+                <span> Saldo do Mês </span>
+                <div>
+                    <button type="button" class="btn btn-lg btn-success">{{ valorDespesas + valorReceitas | currency }}</button>
+                </div>
+            </section>
+        </div>
+        <div class="col">
+            <section id="resumo">
+                <h2>MAIN</h2>
+            </section>
+        </div>
+        <div class="col">
+            <section id="saldo">
+                <h2>MAIN</h2>
+            </section>
+        </div>
+    </div>
+
+    {{ data }}
+</div>

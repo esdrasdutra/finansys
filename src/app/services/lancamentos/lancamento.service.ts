@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { RequestService } from '../request/request.service';
 import { ListLancamentoResponse } from '../response/ListLancamentoResponse';
 import { Lancamento } from 'src/app/models/Lancamento';
 import { AddLancamentoResponse } from '../response/AddLancamentoResponse';
 import { RemoveLancamentoResponse } from '../response/RemoveLancamentoResponse';
+import { ComunicationService } from '../comunication.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class LancamentoService {
   private lancamentoUrl = 'api/v1/lancamentos';
 
   constructor(
-    private requestService: RequestService
+    private requestService: RequestService,
   ) { }
 
   getLancamentos(): Observable<ListLancamentoResponse>{
@@ -22,7 +23,7 @@ export class LancamentoService {
   }
 
   getLancamentoById(lancamento: any): Observable<RemoveLancamentoResponse>{
-    const url = `http://localhost:8001/${this.lancamentoUrl}/${lancamento.id}`
+    const url = `http://localhost:8001/${this.lancamentoUrl}/${lancamento.id}`;
     return this.requestService.get(url);
   }
 
@@ -36,9 +37,8 @@ export class LancamentoService {
     return this.requestService.put(url, lancamento);
   }
 
-  deleteLancamento(id: any): Observable<RemoveLancamentoResponse>{
-    console.log(id, 'ID LANCAMENTO IN THE SERVICE');
-    const url = `http://localhost:8001/${this.lancamentoUrl}/${id}`
+  deleteLancamento(lancamento: any): Observable<RemoveLancamentoResponse>{
+    const url = `http://localhost:8001/${this.lancamentoUrl}/${lancamento.id}`
     return this.requestService.delete(url);
   }
 }
