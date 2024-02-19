@@ -2,6 +2,9 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { LancamentoService } from './lancamentos/lancamento.service';
 import { BehaviorSubject } from 'rxjs';
 import { Lancamento } from '../models/Lancamento';
+import moment from 'moment';
+moment.locale('pt-br');
+
 
 @Injectable({
   providedIn: 'root'
@@ -16,11 +19,11 @@ export class ComunicationService {
   private lancamentoBus$ = new BehaviorSubject<any>([]);
   lancamentoList$ = this.lancamentoBus$.asObservable();
 
-  private totalDespesas$ = new BehaviorSubject<any>(Number);
-  despesas$ = this.totalDespesas$.asObservable();
+  private despesasBus$ = new BehaviorSubject<Lancamento[]>([]);
+  despesasList$ = this.despesasBus$.asObservable();
 
-  private totalReceitas$ = new BehaviorSubject<any>(Number);
-  receitas$ = this.totalReceitas$.asObservable();
+  private receitasBus$ = new BehaviorSubject<Lancamento[]>([]);
+  receitasList$ = this.receitasBus$.asObservable();
   
 
   constructor(
@@ -39,12 +42,12 @@ export class ComunicationService {
     this.lancamentoBus$.next(lancamentos);
   }
 
-  setDespesas(lancamentos: any) {
-    this.totalDespesas$.next(lancamentos);
+  setDespesas(lancamentos: Lancamento[]) {
+    this.despesasBus$.next(lancamentos)
   }
 
   setReceitas(lancamentos: any) {
-    this.totalReceitas$.next(lancamentos);
+    this.receitasBus$.next(lancamentos);
   }
 
   fetchData(component: string): void {

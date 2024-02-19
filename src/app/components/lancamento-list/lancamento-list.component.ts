@@ -4,6 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Lancamento } from 'src/app/models/Lancamento';
 import { ComunicationService } from 'src/app/services/comunication.service';
 import moment from 'moment';
+moment.locale('pt-br');
 
 @Component({
   selector: 'app-lancamento-list',
@@ -66,10 +67,10 @@ export class LancamentoListComponent implements OnInit {
         this.dataReceitas = [];
         data.forEach((el: any) => {
           if (el.data_lan) {           
-            el.data_lan = moment(new Date(el.data_lan)).format("DD/MM/YYYY");
+            el.data_lan = moment(el.data_lan).format("DD/MM/YYYY");
           }
           if (el.data_ven) {           
-            el.data_ven = moment(new Date(el.data_ven)).format("DD/MM/YYYY");
+            el.data_ven = moment(el.data_ven).format("DD/MM/YYYY");
           }
 
           if (el.tipo_lanc === "RECEITA") {

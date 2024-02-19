@@ -1,4 +1,4 @@
-import { LOCALE_ID, NgModule, DEFAULT_CURRENCY_CODE } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HomeComponent } from './home.component';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -22,10 +22,11 @@ import { DatepickerViewsSelectionExampleComponent } from "../../components/datep
 import { CrudButtonsComponent } from 'src/app/components/crud-buttons/crud-buttons.component';
 import { DashboardComponent } from 'src/app/components/dashboard/dashboard.component';
 
+import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
-import ptBr from '@angular/common/locales/pt';
+import localePtBr from '@angular/common/locales/pt';
 
-registerLocaleData(ptBr);
+registerLocaleData(localePtBr);
 
 @NgModule({
     declarations: [
@@ -49,7 +50,7 @@ registerLocaleData(ptBr);
     ],
     providers: [
         provideNgxMask(),
-        { provide: LOCALE_ID, useValue: 'pt'}
+        { provide: LOCALE_ID, useValue: 'pt-BR'}
     ],
     imports: [
         CommonModule,
