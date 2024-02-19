@@ -10,17 +10,17 @@
 
             <div class="dashboard-spacer">
                 <span class="title">ENTRADAS DO MÊS</span>
-                <div class="dash-box"> R$ 100.000,00  </div>
+                <div class="dash-box"> {{ valorTotalReceita | currency: 'BRL' }} </div>
             </div>
 
             <div class="dashboard-spacer">
                 <span class="title">SAÍDAS DO MÊS</span>
-                <div class="dash-box"> R$ 100.000,00 </div>
+                <div class="dash-box"> {{ valorTotalReceita | currency: 'BRL' }} </div>
             </div>
 
             <div class="dashboard-spacer">
                 <span class="title">SALDO DO MÊS</span>
-                <div class="dash-box"> R$ 100.000,00 </div>
+                <div class="dash-box"> {{ valorTotalReceita + valorTotalDespesa | currency: 'BRL' }} </div>
             </div>
         </div>
         <div id="resumo" class="col">

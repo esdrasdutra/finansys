@@ -17,6 +17,9 @@ export class DashboardComponent implements OnInit {
   despesasList: Lancamento[] = [];
   receitasList: Lancamento[] = [];
 
+  valorTotalDespesa = 0;
+  valorTotalReceita = 0;
+
   inflowByMonth: Lancamento[] = [];
   outflowByMonth: Lancamento[] = [];
 
@@ -31,7 +34,7 @@ export class DashboardComponent implements OnInit {
     private commService: ComunicationService,
   ) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.commService.fetchData('Dashboard OnInit');
 
     this.commService.despesasList$.subscribe(
@@ -45,12 +48,15 @@ export class DashboardComponent implements OnInit {
       });
   }
 
-  onChange(event: any) {
+  onChange(event: any): void {
+    this.valorTotalDespesa = 0;
+    this.valorTotalReceita = 0;
     this.selectedMonth = event.value;
     this.selectDataByMonth(event.value);
+    this.setTotalValores();
   }
 
-  selectDataByMonth(month: string) {
+  selectDataByMonth(month: string): void {
     this.despesasList.forEach((el) => {
       let monthInt = moment(el.data_lan).month();
       let monthStr = this.meses[monthInt];
@@ -68,8 +74,21 @@ export class DashboardComponent implements OnInit {
         }
       })
     })
+  }
 
-    console.log('SELECT DESPESAS WHERE MONTH: ', this.outflowByMonth);
-    console.log('SELECT * FROM RECEITAS WHERE MONTH: ', this.inflowByMonth);
+  setTotalValores(): void{
+    let valorTotalDespesa = 0;
+    let valorTotalReceita = 0;
+
+    this.inflowByMonth.forEach((lanc: any) => {
+      if( lanc.tipo_lanc === "DESPESA") {
+        valorTotalDespesa += parseFloat(lanc.valor);
+        this.valorTotalDespesa = valorTotalDespesa;
+
+      } else if (lanc.tipo_lanc === "RECEITA") {
+        valorTotalReceita += parseFloat(lanc.valor);
+        this.valorTotalReceita = valorTotalReceita;
+      }
+    });
   }
 }
