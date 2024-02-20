@@ -17,11 +17,11 @@ export class DashboardComponent implements OnInit {
   despesasList: Lancamento[] = [];
   receitasList: Lancamento[] = [];
 
-  valorTotalDespesa = 0;
-  valorTotalReceita = 0;
-
   inflowByMonth: Lancamento[] = [];
   outflowByMonth: Lancamento[] = [];
+
+  valorTotalReceita = 0;
+  valorTotalDepesas = 0;
 
   meses = [
     'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
@@ -46,49 +46,47 @@ export class DashboardComponent implements OnInit {
       (data: any) => {
         this.receitasList = data
       });
+    this.selectDataByMonth('JANEIRO');      
   }
 
   onChange(event: any): void {
-    this.valorTotalDespesa = 0;
-    this.valorTotalReceita = 0;
-    this.selectedMonth = event.value;
+    console.log(event.value);
     this.selectDataByMonth(event.value);
-    this.setTotalValores();
   }
 
   selectDataByMonth(month: string): void {
+    console.log(month);
+    console.log(this.valorTotalDepesas, this.valorTotalReceita);
+
     this.despesasList.forEach((el) => {
-      let monthInt = moment(el.data_lan).month();
-      let monthStr = this.meses[monthInt];
+      let monthInt = 0;
+      let monthStr = '';
+      monthInt = moment(el.data_lan).month();
+      monthStr = this.meses[monthInt];
 
       if (monthStr === month) {
         this.outflowByMonth.push(el);
       }
+    });
 
-      this.receitasList.forEach((el) => {
-        let monthInt = moment(el.data_lan).month();
-        let monthStr = this.meses[monthInt];
+    this.receitasList.forEach((el) => {
+      let monthInt = 0;
+      let monthStr = '';
+      monthInt = moment(el.data_lan).month();
+      monthStr = this.meses[monthInt];
 
-        if (monthStr === month) {
-          this.inflowByMonth.push(el);
-        }
-      })
-    })
-  }
-
-  setTotalValores(): void{
-    let valorTotalDespesa = 0;
-    let valorTotalReceita = 0;
-
-    this.inflowByMonth.forEach((lanc: any) => {
-      if( lanc.tipo_lanc === "DESPESA") {
-        valorTotalDespesa += parseFloat(lanc.valor);
-        this.valorTotalDespesa = valorTotalDespesa;
-
-      } else if (lanc.tipo_lanc === "RECEITA") {
-        valorTotalReceita += parseFloat(lanc.valor);
-        this.valorTotalReceita = valorTotalReceita;
+      if (monthStr === month) {
+        this.inflowByMonth.push(el);
       }
     });
+    
+    this.inflowByMonth.forEach((lanc: any) => {
+      this.valorTotalReceita += parseFloat(lanc.valor);
+    });
+
+    this.outflowByMonth.forEach((lanc: any) => {
+      this.valorTotalDepesas += parseFloat(lanc.valor);
+    });
   }
+
 }

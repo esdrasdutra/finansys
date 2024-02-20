@@ -15,12 +15,12 @@
 
             <div class="dashboard-spacer">
                 <span class="title">SAÍDAS DO MÊS</span>
-                <div class="dash-box"> {{ valorTotalReceita | currency: 'BRL' }} </div>
+                <div class="dash-box"> {{ valorTotalDepesas | currency: 'BRL' }} </div>
             </div>
 
             <div class="dashboard-spacer">
                 <span class="title">SALDO DO MÊS</span>
-                <div class="dash-box"> {{ valorTotalReceita + valorTotalDespesa | currency: 'BRL' }} </div>
+                <div class="dash-box"> {{ valorTotalReceita - valorTotalDepesas | currency: 'BRL' }} </div>
             </div>
         </div>
         <div id="resumo" class="col">
