@@ -50,14 +50,17 @@ export class DashboardComponent implements OnInit {
   }
 
   onChange(event: any): void {
-    console.log(event.value);
-    this.selectDataByMonth(event.value);
+    this.valorTotalDepesas = 0;
+    this.valorTotalDepesas = 0;
+    this.inflowByMonth = [];
+    this.outflowByMonth = [];
+
+    console.log('BEFORE FUNCTION ', this.valorTotalDepesas, this.valorTotalReceita);
+    this.selectDataByMonth(event.value);    
+    console.log('AFTER FUNCTION ', this.valorTotalDepesas, this.valorTotalReceita);
   }
 
   selectDataByMonth(month: string): void {
-    console.log(month);
-    console.log(this.valorTotalDepesas, this.valorTotalReceita);
-
     this.despesasList.forEach((el) => {
       let monthInt = 0;
       let monthStr = '';
