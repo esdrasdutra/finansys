@@ -22,6 +22,7 @@ import { ComunicationService } from 'src/app/services/comunication.service';
 export class LancamentoAddComponent {
   isAddMode!: boolean;
   id!: number;
+  dateSub!: any;
 
   transactionForm!: FormGroup;
   formCadastro: any = Object.values(FormCadastro);
@@ -75,8 +76,8 @@ export class LancamentoAddComponent {
       dizimista: [''],
       obs: [''],
       valor: ['', Validators.required],
-      conta: [''],
-      situacao: [''],
+      conta: ['CONTA IGREJA'],
+      situacao: ['SIM'],
       tipo_lanc: [''],
       historico: [''],
       status_lanc: [''],
@@ -141,11 +142,10 @@ export class LancamentoAddComponent {
   }
 
   ngAfterViewInit(): void {
-    this.commService.selectedDate$.subscribe(
-      (data: any) => {
-        this.updateDate(data);
-      }
-    )
+    this.dateSub = this.commService.selectedDate$.subscribe(
+      (res) => {
+        this.updateDate(res);
+      });
   }
 
   updateHistory(): void {
@@ -162,16 +162,15 @@ export class LancamentoAddComponent {
   }
 
   updateDate(data: any): void {
-    const dataInt = parseInt(data.target.slice(10));
-    const id = data.target;
+    console.log('Inside Function: ',data);
+    const dataInt = parseInt(data.target.slice(10)) + 1;
     const dataIn = data.date;
-
-    if (id === 'mat-input-0') {
-      const data_lan = dataIn;
-      this.transactionForm.patchValue({ data_lan });
-    } else if (id === 'mat-input-1') {
+    if (dataInt % 2 === 0) {
       const data_ven = dataIn;
       this.transactionForm.patchValue({ data_ven });
+    } else {
+      const data_lan = dataIn;
+      this.transactionForm.patchValue({ data_lan });
     }
   }
 
@@ -224,6 +223,7 @@ export class LancamentoAddComponent {
   }
 
   onConfirmClick(): void {
+    this.dateSub.unsubscribe();
     this.submitForm();
     this.dialogRef.close(true);
   }
