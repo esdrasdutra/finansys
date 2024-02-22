@@ -1,6 +1,6 @@
 <mat-form-field >
   <mat-label>Dia e Mês</mat-label>
-  <input matInput [matDatepicker]="dp" [formControl]="data_lan" (dateChange)="onDateChange($event)">
+  <input matInput [matDatepicker]="dp" [formControl]="new_date" (dateChange)="onDateChange($event)">
   <mat-datepicker-toggle matSuffix [for]="dp"></mat-datepicker-toggle>
   <mat-datepicker #dp
                   startView="month"

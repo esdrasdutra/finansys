@@ -50,16 +50,14 @@ export const MY_FORMATS = {
 
 
 export class DatepickerViewsSelectionExampleComponent {
-  data_lan = new FormControl();
+  new_date = new FormControl();
 
-  @Output() dateChanged = new EventEmitter<any>();
   constructor(
-    private fb: FormBuilder,
     private commService: ComunicationService,
   ) { }
 
   setMonthAndYear(normalizedDayAndMonth: Moment, datepicker: MatDatepicker<Moment>) {
-    const ctrlValue = this.data_lan.value ?? moment();
+    const ctrlValue = this.new_date.value ?? moment();
     ctrlValue.day(normalizedDayAndMonth.day());
     ctrlValue.month(normalizedDayAndMonth.month());
     datepicker.close();

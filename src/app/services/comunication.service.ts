@@ -51,7 +51,6 @@ export class ComunicationService {
   }
 
   fetchData(component: string): void {
-    console.log(component)
     console.time('getLancamentos');
 
     this.lancamentoService.getLancamentos().subscribe({

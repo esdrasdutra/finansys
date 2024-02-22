@@ -37,6 +37,8 @@ export class LancamentoAddComponent {
   confirmButtonText = ""
   cancelButtonText = ""
   submitted!: boolean;
+  datalanInt = 0;
+  datavenInt = 1;
 
   constructor(
     private fb: FormBuilder,
@@ -62,7 +64,7 @@ export class LancamentoAddComponent {
     this.transactionForm = this.fb.group({
       id: [''],
       recibo: [''],
-      data_lan: new FormControl(),
+      data_lan: [''],
       data_ven: [''],
       tipo_doc: [''],
       num_doc: [''],
@@ -138,7 +140,7 @@ export class LancamentoAddComponent {
   ngOnInit(): void {
   }
 
-  ngAfterViewInit(): void {    
+  ngAfterViewInit(): void {
     this.commService.selectedDate$.subscribe(
       (data: any) => {
         this.updateDate(data);
@@ -160,11 +162,15 @@ export class LancamentoAddComponent {
   }
 
   updateDate(data: any): void {
-    if (data.target === 'mat-input-0') {
-      const data_lan = data.date;
+    const dataInt = parseInt(data.target.slice(10));
+    const id = data.target;
+    const dataIn = data.date;
+
+    if (id === 'mat-input-0') {
+      const data_lan = dataIn;
       this.transactionForm.patchValue({ data_lan });
-    } else if (data.target === 'mat-input-1') {
-      const data_ven =  data.date;
+    } else if (id === 'mat-input-1') {
+      const data_ven = dataIn;
       this.transactionForm.patchValue({ data_ven });
     }
   }
@@ -189,10 +195,11 @@ export class LancamentoAddComponent {
       this.addLancamento();
     } else {
       this.updateLancamento(this.transactionForm.value);
-    }    
+    }
   }
 
   private addLancamento() {
+    console.log(this.transactionForm.value);
     this.lancamentoService.addLancamento(this.transactionForm.value)
       .pipe(first())
       .subscribe({
