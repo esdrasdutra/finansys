@@ -35,8 +35,6 @@ export class DashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.commService.fetchData('Dashboard OnInit');
-
     this.commService.despesasList$.subscribe(
       (data: any) => {
         this.despesasList = data

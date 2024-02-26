@@ -55,11 +55,9 @@ export class LancamentoListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.commService.fetchData('REGISTRO ON INIT');
   }
 
   ngAfterViewInit(): void {
-    this.commService.fetchData('REGISTRO AfterViewInit');
 
     this.commService.lancamentoList$.subscribe(
       (data: any) => {

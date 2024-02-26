@@ -51,24 +51,11 @@ export class ComunicationService {
   }
 
   fetchData(component: string): void {
+    console.log(component);
     console.time('getLancamentos');
 
     this.lancamentoService.getLancamentos().subscribe({
       next: (lancamentos) => {
-        let totalDespesas: Lancamento[] = [];
-        let totalReceitas: Lancamento[] = [];
-        lancamentos.data.forEach((lanc: any) => {
-          if( lanc.tipo_lanc === "DESPESA") {
-            totalDespesas.push(lanc);
-
-          } else if (lanc.tipo_lanc === "RECEITA") {
-            totalReceitas.push(lanc);
-          }
-        });
-         
-        this.setDespesas(totalDespesas);
-        this.setReceitas(totalReceitas);
-        this.setLancamentoList(lancamentos.data);
       },
     });
 
