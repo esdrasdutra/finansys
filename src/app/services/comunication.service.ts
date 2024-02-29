@@ -1,6 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { LancamentoService } from './lancamentos/lancamento.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, tap } from 'rxjs';
 import { Lancamento } from '../models/Lancamento';
 import moment from 'moment';
 moment.locale('pt-br');
@@ -10,14 +10,9 @@ moment.locale('pt-br');
   providedIn: 'root'
 })
 export class ComunicationService {
-  private lancamento$ = new BehaviorSubject<any>({});
-  selectedLancamento$ = this.lancamento$.asObservable();
 
   private date$ = new BehaviorSubject<any>({});
   selectedDate$ = this.date$.asObservable();
-
-  private lancamentoBus$ = new BehaviorSubject<any>([]);
-  lancamentoList$ = this.lancamentoBus$.asObservable();
 
   private despesasBus$ = new BehaviorSubject<Lancamento[]>([]);
   despesasList$ = this.despesasBus$.asObservable();
@@ -30,16 +25,10 @@ export class ComunicationService {
     private lancamentoService: LancamentoService,
   ) { }
 
-  setLancamento(lancamento: any) {
-    this.lancamento$.next(lancamento);
-  }
+
 
   setDate(date: any){
     this.date$.next(date);
-  }
-
-  setLancamentoList(lancamentos: any) {
-    this.lancamentoBus$.next(lancamentos);
   }
 
   setDespesas(lancamentos: Lancamento[]) {
@@ -54,10 +43,7 @@ export class ComunicationService {
     console.log(component);
     console.time('getLancamentos');
 
-    this.lancamentoService.getLancamentos().subscribe({
-      next: (lancamentos) => {
-      },
-    });
+    this.lancamentoService.getLancamentos()
 
     console.timeEnd('getLancamentos');
   }

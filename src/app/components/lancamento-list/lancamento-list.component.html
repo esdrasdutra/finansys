@@ -65,3 +65,12 @@
         </section>
     </mat-tab>
 </mat-tab-group>
+<mat-paginator 
+    [length]="500"
+    [pageSize]="15"
+    [showFirstLastButtons]="true"
+    [pageIndex]="currentPage"
+    (page)="handlePageEvent($event)"
+>
+
+</mat-paginator>

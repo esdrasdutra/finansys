@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ComunicationService } from './services/comunication.service';
+import { LancamentoService } from './services/lancamentos/lancamento.service';
 
 @Component({
   selector: 'app-root',
@@ -34,11 +34,11 @@ export class AppComponent implements OnInit {
   ]
 
   constructor(
-    private commService: ComunicationService,
+    private lancamentoService: LancamentoService,
   ){}
 
   ngOnInit(): void {
-    this.commService.fetchData('APP COMPONENT');
+    this.lancamentoService.getLancamentos()
     
   }
 }
