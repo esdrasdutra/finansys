@@ -14,7 +14,7 @@ export class AppComponent implements OnInit {
     "BALANCETES",
     "OBREIROS",
     "CONGREGAÇÕES",
-    "FORNECEDORES"
+    "RELATORIOS"
   ]
 
   pathArray =[
@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
     "balancete",
     "obreiros",
     "congregacoes",
-    "fornecedores"
+    "relatorios"
   ]
 
   constructor(

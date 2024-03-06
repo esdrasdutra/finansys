@@ -63,6 +63,7 @@ export class LancamentoListComponent implements OnInit {
       (data: any) => {
         this.dataDespesas = [];
         this.dataReceitas = [];
+        
         data.forEach((el: any) => {
           if (el.data_lan || el.data_ven) {           
             el.data_lan = moment(el.data_lan).format("DD/MM/YYYY");

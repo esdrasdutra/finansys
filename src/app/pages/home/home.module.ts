@@ -26,6 +26,7 @@ import { DashboardComponent } from 'src/app/components/dashboard/dashboard.compo
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localePtBr from '@angular/common/locales/pt';
+import { FiltrosRelatoriosComponent } from 'src/app/components/filtros-relatorios/filtros-relatorios.component';
 
 registerLocaleData(localePtBr);
 
@@ -39,6 +40,7 @@ registerLocaleData(localePtBr);
         ObreirosComponent,
         CrudButtonsComponent,
         DashboardComponent,
+        FiltrosRelatoriosComponent,
     ],
     exports: [
         HomeComponent,
@@ -48,6 +50,7 @@ registerLocaleData(localePtBr);
         ObreirosComponent,
         CrudButtonsComponent,
         DashboardComponent,
+        FiltrosRelatoriosComponent,
     ],
     providers: [
         provideNgxMask(),

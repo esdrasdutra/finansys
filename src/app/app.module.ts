@@ -31,7 +31,7 @@ import { HomeModule } from './pages/home/home.module';
     CongregacoesComponent,
     FornecedoresComponent,
     IconsComponent,
-    ToolbarComponent
+    ToolbarComponent,
 ],
   providers: [CurrencyPipe, HttpClientModule],
   bootstrap: [AppComponent]
