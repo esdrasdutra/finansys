@@ -1,22 +1,22 @@
 <mat-tab-group mat-tab-align="start" animationDuration="0ms" class="example-container">
     <mat-tab label="DESPESAS" class="despesas-tab">
         <section class="mat-elevation-z8" tabindex="0">
-            <table mat-table *ngIf="dataSourceDespesas" [dataSource]="dataSourceDespesas">
+            <table mat-table [dataSource]="dataSourceDespesa">
                 <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
                     <th mat-header-cell class="f-sm" *matHeaderCellDef>
                         <div *ngIf="item === 'valor';then isValue else notValue"></div>
-                        <ng-template #isValue > (R$) {{ columnMapping[item] }} </ng-template>
-                        <ng-template #notValue> {{ columnMapping[item] }} </ng-template>                                              
+                        <ng-template #isValue> (R$) {{ columnMapping[item] }} </ng-template>
+                        <ng-template #notValue> {{ columnMapping[item] }} </ng-template>
                     </th>
-                    <td mat-cell class="f-sm" *matCellDef="let element">                        
+                    <td mat-cell class="f-sm" *matCellDef="let element">
                         <ng-container *ngIf="item === 'valor'">
                             {{ element[item] | currency: 'BRL' }}
                         </ng-container>
-                    
+
                         <ng-container *ngIf="item === 'data_lan' || item === 'data_ven'">
                             {{ element[item] | slice:0:5 }}
                         </ng-container>
-                        
+
                         <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven'">
                             {{ element[item] }}
                         </ng-container>
@@ -25,8 +25,7 @@
                 </ng-container>
                 <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsLancamento, sticky: true"></tr>
 
-                <tr mat-row [class.highlight]="row.id === selectedRowIndex" (click)="onClickRow(row, $event)"
-                    class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
+                <tr mat-row class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
                 </tr>
             </table>
         </section>
@@ -34,22 +33,23 @@
 
     <mat-tab label="RECEITAS" class="receitas-tab">
         <section class="mat-elevation-z8" tabindex="0">
-            <table mat-table *ngIf="dataSourceReceitas" [dataSource]="dataSourceReceitas">
+
+            <table mat-table [dataSource]="dataSourceReceita">
                 <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
                     <th mat-header-cell class="f-sm" *matHeaderCellDef>
                         <div *ngIf="item === 'valor';then isValue else notValue"></div>
-                        <ng-template #isValue > (R$) {{ columnMapping[item] }} </ng-template>
-                        <ng-template #notValue> {{ columnMapping[item] }} </ng-template>                                              
+                        <ng-template #isValue> (R$) {{ columnMapping[item] }} </ng-template>
+                        <ng-template #notValue> {{ columnMapping[item] }} </ng-template>
                     </th>
-                    <td mat-cell class="f-sm" *matCellDef="let element">                        
+                    <td mat-cell class="f-sm" *matCellDef="let element">
                         <ng-container *ngIf="item === 'valor'">
                             {{ element[item] | currency: 'BRL' }}
                         </ng-container>
-                    
+
                         <ng-container *ngIf="item === 'data_lan' || item === 'data_ven'">
                             {{ element[item] | slice:0:5 }}
                         </ng-container>
-                        
+
                         <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven'">
                             {{ element[item] }}
                         </ng-container>
@@ -58,19 +58,9 @@
                 </ng-container>
                 <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsLancamento, sticky: true"></tr>
 
-                <tr mat-row [class.highlight]="row.id === selectedRowIndex" (click)="onClickRow(row, $event)"
-                    class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
+                <tr mat-row class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
                 </tr>
             </table>
         </section>
     </mat-tab>
 </mat-tab-group>
-<mat-paginator
-    [length]="500"
-    [pageSize]="15"
-    [showFirstLastButtons]="true"
-    [pageIndex]="currentPage"
-    (page)="handlePageEvent($event)"
->
-
-</mat-paginator>

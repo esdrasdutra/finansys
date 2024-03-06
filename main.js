@@ -29,6 +29,13 @@ const templateMenu = [{
 	submenu: [
 		{label: 'Consultar Tipo Documento'}
 	]
+},
+{
+	label: "Relatórios",
+	submenu: [
+		{ label: 'Relatório Analítico' },
+		{ label: 'Relatório de Receitas por Centro de Custo'}
+	]
 }
 ];
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, map, shareReplay, tap } from 'rxjs';
 import { RequestService } from '../request/request.service';
 import { ListLancamentoResponse } from '../response/ListLancamentoResponse';
 import { Lancamento } from 'src/app/models/Lancamento';
@@ -11,15 +11,34 @@ import { ComunicationService } from '../comunication.service';
   providedIn: 'root'
 })
 export class LancamentoService {
-  private lancamentoUrl = 'api/v1/lancamentos';
-
+  readonly lancamentoUrl = 'api/v1/lancamentos';
+  
+  private lancamento$ = new BehaviorSubject<any>({});
+  selectedLancamento$ = this.lancamento$.asObservable();
+  
   constructor(
     private requestService: RequestService,
   ) { }
 
+  setLancamento(lancamento: any) {
+    this.lancamento$.next(lancamento);
+  }
+
   getLancamentos(): Observable<ListLancamentoResponse>{
     const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
-    return this.requestService.get<ListLancamentoResponse>(url);
+    
+    let lancamentos$ = this.lancamentosCacheService.getValue();
+
+    if(!lancamentos$){
+      lancamentos$ = this.requestService.get<ListLancamentoResponse>(url)
+      .pipe(
+        // tap(console.log),
+        map((response: any) => response.data),
+        shareReplay(1)
+      );
+    }
+
+    return lancamentos$;
   }
 
   getLancamentoById(lancamento: any): Observable<RemoveLancamentoResponse>{

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ComunicationService } from 'src/app/services/comunication.service';
+import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 import { ModalService } from 'src/app/services/modal.service';
 
 @Component({
@@ -12,13 +13,13 @@ export class CrudButtonsComponent {
 
   constructor(
     private modalService: ModalService,
-    private communicationService: ComunicationService,
+    private lancamentoService: LancamentoService,
   ){
 
   }
 
   ngAfterViewInit(){    
-    this.communicationService.selectedLancamento$.subscribe(
+    this.lancamentoService.selectedLancamento$.subscribe(
       (data: any) => {
         this.lanc = data
       }

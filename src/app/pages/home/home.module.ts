@@ -4,6 +4,7 @@ import { HomeComponent } from './home.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
 import { LancamentoListComponent } from '../../components/lancamento-list/lancamento-list.component';
@@ -25,6 +26,7 @@ import { DashboardComponent } from 'src/app/components/dashboard/dashboard.compo
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localePtBr from '@angular/common/locales/pt';
+import { FiltrosRelatoriosComponent } from 'src/app/components/filtros-relatorios/filtros-relatorios.component';
 
 registerLocaleData(localePtBr);
 
@@ -38,6 +40,7 @@ registerLocaleData(localePtBr);
         ObreirosComponent,
         CrudButtonsComponent,
         DashboardComponent,
+        FiltrosRelatoriosComponent,
     ],
     exports: [
         HomeComponent,
@@ -47,6 +50,7 @@ registerLocaleData(localePtBr);
         ObreirosComponent,
         CrudButtonsComponent,
         DashboardComponent,
+        FiltrosRelatoriosComponent,
     ],
     providers: [
         provideNgxMask(),
@@ -67,7 +71,8 @@ registerLocaleData(localePtBr);
         ReactiveFormsModule,
         NgxMaskDirective,
         NgxMaskPipe,
-        DatepickerViewsSelectionExampleComponent
+        DatepickerViewsSelectionExampleComponent,
+        MatPaginatorModule,
     ]
 })
 export class HomeModule { }

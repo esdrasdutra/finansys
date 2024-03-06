@@ -4,6 +4,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Lancamento } from 'src/app/models/Lancamento';
 import { ComunicationService } from 'src/app/services/comunication.service';
 import moment from 'moment';
+import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { PageEvent } from '@angular/material/paginator';
 moment.locale('pt-br');
 
 @Component({
@@ -34,11 +36,13 @@ export class LancamentoListComponent implements OnInit {
 
   title = null;
 
+  currentPage = 0;
+
   dataSourceDespesas = new MatTableDataSource<Lancamento>();
   dataSourceReceitas = new MatTableDataSource<Lancamento>();
 
   dataDespesas: Lancamento[] = [];
-  dataReceitas: Lancamento[] = []
+  dataReceitas: Lancamento[] = [];
 
   selectedRowIndex = -1;
 
@@ -51,24 +55,19 @@ export class LancamentoListComponent implements OnInit {
   @Output() idLanc = new EventEmitter<Lancamento>();
   constructor(
     private elementRef: ElementRef,
-    private commService: ComunicationService,
+    private lancamentoService: LancamentoService,
   ) { }
 
   ngOnInit(): void {
-  }
-
-  ngAfterViewInit(): void {
-
-    this.commService.lancamentoList$.subscribe(
+    this.lancamentoService.getLancamentos().subscribe(
       (data: any) => {
         this.dataDespesas = [];
         this.dataReceitas = [];
+        
         data.forEach((el: any) => {
-          if (el.data_lan) {           
+          if (el.data_lan || el.data_ven) {           
             el.data_lan = moment(el.data_lan).format("DD/MM/YYYY");
-          }
-          if (el.data_ven) {           
-            el.data_ven = moment(el.data_ven).format("DD/MM/YYYY");
+            el.data_ven = moment(el.data_ven).format("DD/MM/YYYY")
           }
 
           if (el.tipo_lanc === "RECEITA") {
@@ -78,14 +77,14 @@ export class LancamentoListComponent implements OnInit {
           }
         });
 
-        this.dataSourceDespesas.data = this.dataDespesas.slice();
-        this.dataSourceReceitas.data = this.dataReceitas.slice();
+        this.dataDespesas.length !== 0 ? this.dataSourceDespesas.data = this.dataDespesas : []
+        this.dataReceitas.length !== 0 ? this.dataSourceReceitas.data = this.dataReceitas : []
       });
   }
 
   onClickRow(row: any, event: any) {
     this.selectedRowIndex = row.id
-    this.commService.setLancamento(row);
+    this.lancamentoService.setLancamento(row);
     event.stopPropagation();
   }
 
@@ -95,5 +94,9 @@ export class LancamentoListComponent implements OnInit {
     if (!clickedInside) {
       this.selectedRowIndex = -1; // Reseta o índice da linha selecionada
     }
+  }
+
+  handlePageEvent(pageEvent: PageEvent){
+    console.log('handgleEvent', pageEvent);
   }
 }
