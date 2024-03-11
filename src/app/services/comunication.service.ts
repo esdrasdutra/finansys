@@ -38,12 +38,4 @@ export class ComunicationService {
   setReceitas(lancamentos: any) {
     this.receitasBus$.next(lancamentos);
   }
-
-  fetchData(component: string): void {
-    console.time('getLancamentos');
-
-    this.lancamentoService.getLancamentos()
-
-    console.timeEnd('getLancamentos');
-  }
 }

@@ -33,12 +33,12 @@ export class AppComponent implements OnInit {
     "relatorios"
   ]
 
-  constructor(
-    private lancamentoService: LancamentoService,
-  ){}
+  constructor(){}
 
-  ngOnInit(): void {
-    this.lancamentoService.getLancamentos()
-    
+  ngOnInit(): void {    
+  }
+
+  handleChange(event: Event) {
+    console.log(event);
   }
 }

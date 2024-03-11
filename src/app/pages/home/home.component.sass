@@ -5,11 +5,6 @@ table
     thead
         font-weight: bold
 
-.example-container
-  width: 95vw
-  height: 400px
-  overflow: auto
-
 table
   width: 100%
 /* ::ng-deep
@@ -39,6 +34,15 @@ table
     align-items: center
     justify-content: center
 
+#filter-container
+    display: grid
+    width: 100vw
+    height: 32px
+    position: fixed
+    align-content: center
+    top: 90px
+    z-index: 1000
+
 .crud-buttons
     display: flex
     position: fixed
@@ -57,17 +61,5 @@ table
     align-content: center
     top:150px
 
-.example-container
-  width: 99vw
-  // height: 400px
-  // overflow: auto
-
-#filter-container
-    display: grid
+.custom-container
     width: 100vw
-    height: 32px
-    position: fixed
-    align-content: center
-    top: 90px
-    z-index: 1000
-

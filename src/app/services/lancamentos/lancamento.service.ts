@@ -15,7 +15,16 @@ export class LancamentoService {
   
   private lancamento$ = new BehaviorSubject<any>({});
   selectedLancamento$ = this.lancamento$.asObservable();
-  
+
+  private lancamentosBs$ = new BehaviorSubject<Lancamento[]>([]);
+  lancamentosList$ = this.lancamentosBs$.asObservable();
+
+  private despesasBs$ = new BehaviorSubject<Lancamento[]>([]);
+  despesasList$ = this.despesasBs$.asObservable();
+
+  private receitasBs$ = new BehaviorSubject<Lancamento[]>([]);
+  receitasList$ = this.receitasBs$.asObservable();
+
   constructor(
     private requestService: RequestService,
     private lancamentosCacheService: LancamentosCacheService,
@@ -25,8 +34,16 @@ export class LancamentoService {
     this.lancamento$.next(lancamento);
   }
 
-  getLancamentos(): Observable<ListLancamentoResponse>{
-    const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
+  setDespesas(lancamentos: any) {
+    this.despesasBs$.next(lancamentos);
+  }
+
+  setReceitas(lancamentos: any) {
+    this.receitasBs$.next(lancamentos);
+  }
+
+  getLancamentos(currentPage: number, pageSize: number): Observable<ListLancamentoResponse>{
+    const url = `http://localhost:8001/${this.lancamentoUrl}/all?page=${currentPage}&size=${pageSize}&sort_order=desc`;
     
     let lancamentos$ = this.lancamentosCacheService.getValue();
 

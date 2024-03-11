@@ -2,16 +2,17 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Outpu
 import { MatTableDataSource } from '@angular/material/table';
 
 import { Lancamento } from 'src/app/models/Lancamento';
-import { ComunicationService } from 'src/app/services/comunication.service';
 import moment from 'moment';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
-import { PageEvent } from '@angular/material/paginator';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { PaginatorIntl } from 'src/app/services/paginator-intl.service';
 moment.locale('pt-br');
 
 @Component({
   selector: 'app-lancamento-list',
   templateUrl: './lancamento-list.component.html',
-  styleUrls: ['./lancamento-list.component.sass']
+  styleUrls: ['./lancamento-list.component.sass'],
+  providers: [{provide: MatPaginatorIntl, useClass: PaginatorIntl}]
 })
 export class LancamentoListComponent implements OnInit {
 
@@ -36,8 +37,6 @@ export class LancamentoListComponent implements OnInit {
 
   title = null;
 
-  currentPage = 0;
-
   dataSourceDespesas = new MatTableDataSource<Lancamento>();
   dataSourceReceitas = new MatTableDataSource<Lancamento>();
 
@@ -52,34 +51,20 @@ export class LancamentoListComponent implements OnInit {
   ]
 
   @Input() tipoLancFromParent!: any;
-  @Output() idLanc = new EventEmitter<Lancamento>();
+  @Output() idLanc = new EventEmitter<Lancamento>();  
   constructor(
     private elementRef: ElementRef,
     private lancamentoService: LancamentoService,
   ) { }
 
   ngOnInit(): void {
-    this.lancamentoService.getLancamentos().subscribe(
-      (data: any) => {
-        this.dataDespesas = [];
-        this.dataReceitas = [];
-        
-        data.forEach((el: any) => {
-          if (el.data_lan || el.data_ven) {           
-            el.data_lan = moment(el.data_lan).format("DD/MM/YYYY");
-            el.data_ven = moment(el.data_ven).format("DD/MM/YYYY")
-          }
+    this.lancamentoService.despesasList$.subscribe(
+      data => this.dataSourceDespesas.data = data
+    );
 
-          if (el.tipo_lanc === "RECEITA") {
-            this.dataReceitas.push(el);
-          } else if (el.tipo_lanc === "DESPESA") {
-            this.dataDespesas.push(el);
-          }
-        });
-
-        this.dataDespesas.length !== 0 ? this.dataSourceDespesas.data = this.dataDespesas : []
-        this.dataReceitas.length !== 0 ? this.dataSourceReceitas.data = this.dataReceitas : []
-      });
+    this.lancamentoService.receitasList$.subscribe(
+      data => this.dataSourceReceitas.data = data
+    );
   }
 
   onClickRow(row: any, event: any) {
@@ -94,9 +79,5 @@ export class LancamentoListComponent implements OnInit {
     if (!clickedInside) {
       this.selectedRowIndex = -1; // Reseta o índice da linha selecionada
     }
-  }
-
-  handlePageEvent(pageEvent: PageEvent){
-    console.log('handgleEvent', pageEvent);
   }
 }

@@ -7,7 +7,7 @@ import { CongregacoesComponent } from './pages/congregacoes/congregacoes.compone
 import { FornecedoresComponent } from './pages/fornecedores/fornecedores.component';
 import { ObreirosComponent } from './pages/obreiros/obreiros.component';
 import { LancamentoAddComponent } from './components/lancamento-add/lancamento-add.component';
-import { FiltrosRelatoriosComponent } from './components/filtros-relatorios/filtros-relatorios.component';
+import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, 
@@ -18,8 +18,7 @@ const routes: Routes = [
   { path: 'obreiros', component: ObreirosComponent},
   { path: 'congregacoes', component: CongregacoesComponent},
   { path: 'fornecedores', component: FornecedoresComponent},
-  { path: 'relatorios', component: FiltrosRelatoriosComponent},
-  
+  { path: 'relatorios', component: RelatoriosComponent},  
 ];
 
 @NgModule({

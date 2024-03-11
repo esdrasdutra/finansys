@@ -1,4 +1,4 @@
-<mat-tab-group mat-tab-align="start" animationDuration="0ms" class="example-container">
+<mat-tab-group mat-tab-align="start" animationDuration="0ms">
     <mat-tab label="DESPESAS" class="despesas-tab">
         <section class="mat-elevation-z8" tabindex="0">
             <table mat-table *ngIf="dataSourceDespesas" [dataSource]="dataSourceDespesas">
@@ -65,12 +65,4 @@
         </section>
     </mat-tab>
 </mat-tab-group>
-<mat-paginator
-    [length]="500"
-    [pageSize]="15"
-    [showFirstLastButtons]="true"
-    [pageIndex]="currentPage"
-    (page)="handlePageEvent($event)"
->
 
-</mat-paginator>

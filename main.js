@@ -3,7 +3,7 @@ const url = require('url');
 const path = require('path');
 
 function onReady() {
-	win = new BrowserWindow({ width: 900, height: 6700 })
+	win = new BrowserWindow({ width: 900, height: 6700, webPreferences: {nodeIntegration: true} })
 	win.loadURL(url.format({
 		pathname: path.join(
 			__dirname,
@@ -11,6 +11,11 @@ function onReady() {
 		protocol: 'file:',
 		slashes: true
 	}))
+	  // Open the DevTools.
+      win.webContents.openDevTools()
+	  win.on('closed', function () {
+        win = null
+      })
 }
 
 // TEMPLATE MENU
@@ -45,3 +50,11 @@ const menu = Menu.buildFromTemplate(templateMenu);
 Menu.setApplicationMenu(menu);
 
 app.on('ready', onReady);
+
+app.on('window-all-closed', function () {
+	if (process.platform !== 'darwin') app.quit()
+  })
+
+  app.on('activate', function () {
+	if (win === null) createWindow()
+  })

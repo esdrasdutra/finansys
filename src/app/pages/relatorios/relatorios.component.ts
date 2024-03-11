@@ -2,16 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Congregation } from 'src/app/enums/congregation.enum';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
-import 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 @Component({
-  selector: 'app-filtros-relatorios',
-  templateUrl: './filtros-relatorios.component.html',
-  styleUrls: ['./filtros-relatorios.component.sass']
+  selector: 'app-relatorios',
+  templateUrl: './relatorios.component.html',
+  styleUrls: ['./relatorios.component.sass']
 })
-export class FiltrosRelatoriosComponent implements OnInit {
+export class RelatoriosComponent implements OnInit {
 
   columnMapping: { [key: string]: string } = {
     'recibo': 'RECIBO',
@@ -33,7 +32,11 @@ export class FiltrosRelatoriosComponent implements OnInit {
     'mes': 'MÊS'
   };
 
-  doc = new jsPDF();
+  doc = new jsPDF({
+    orientation: "landscape",
+    unit: "cm",
+    format: [29.7, 21]
+  });
 
   dataSourceDespesa = new MatTableDataSource();
   dataSourceReceita = new MatTableDataSource();
@@ -41,7 +44,7 @@ export class FiltrosRelatoriosComponent implements OnInit {
   displayedColumnsLancamento = [
     'congregation', 'mes', 'valor',
   ]
-  
+
   congregations = Object.values(Congregation);
 
   areaMapping: { [key: number]: Congregation[] } = {
@@ -59,7 +62,8 @@ export class FiltrosRelatoriosComponent implements OnInit {
   dataReceitas: any = [];
   dataDespesas: any = [];
 
-  
+  option: number = 0;
+
   despesasPerCong: any = [];
   receitasPerCong: any = [];
 
@@ -72,68 +76,41 @@ export class FiltrosRelatoriosComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.filterAndSumByCongregation(0);
-  }
-
-  // Função para filtrar automaticamente os dados pela congregação e realizar a soma total dos valores
-  filterAndSumByCongregation(area: number): void {
-    console.log(this.areaMapping[area]);
-    this.lancamentoService.getLancamentos().subscribe((data: any) => {
-      data.forEach((el: any) => {
-        if (el.tipo_lanc === "RECEITA" && el.entrada !== "ENTRADA OFERTA AVULSA") {
-          this.dataReceitas.push(el);
-        } else if (el.tipo_lanc === "DESPESA") {
-          this.dataDespesas.push(el);
-        }
-      });
-
-      this.congregations.forEach((cong: any) => {
-        this.receitasPerCong.push(
-          this.dataReceitas.filter((el: any) => el.cong === cong)
-        )
-
-        this.despesasPerCong.push(
-          this.dataDespesas.filter((el: any) => el.cong === cong)
-        );
-      });
-
-      this.despesasPerCong.forEach((cong: any, index: number) => {
-        let valueTemp = 0;
-        cong.forEach((res: any) => {
-          valueTemp += parseFloat(res.valor)
-        });
-
-        this.dataDespesasFiltered.push({ congregation: this.congregations[index], mes: '02', valor: valueTemp, })
-      });
-
-      this.receitasPerCong.forEach((cong: any, index: number) => {
-        let valueTemp = 0;
-        cong.forEach((res: any) => {
-          valueTemp += parseFloat(res.valor)
-        })
-        this.dataReceitasFiltered.push({ congregation: this.congregations[index], mes: '02', valor: valueTemp })
-      });
-
-      this.dataSourceDespesa.data = this.dataDespesasFiltered;
-      this.dataSourceReceita.data = this.dataReceitasFiltered;
-    });
+    this.dataDespesas = this.lancamentoService.despesasList$;
+    this.dataReceitas = this.lancamentoService.receitasList$;
   }
 
   downloadPdf() {
-    console.log('IMPRIMINDO ISSO');
     let prepare: any = [];
-    this.dataReceitasFiltered.forEach((e:any)=>{
-      var tempObj =[];
+    
+    let dataReceitasTC = this.dataReceitas.filter((e: any) => e.cong === "TEMPLO CENTRAL");
+
+    dataReceitasTC.forEach((e: any) => {
+      var tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+      tempObj.push(e.cong);
+      tempObj.push(new Date(e.data_lan).toISOString().slice(0,10));
+      tempObj.push(formattedValue);
+      prepare.push(tempObj);
+    })
+
+/*     this.dataReceitasFiltered.forEach((e: any) => {
+      var tempObj = [];
+      // Parse value to ensure it's treated as a number
+      const parsedValue = parseFloat(e.valor);
+      // Format the value as currency with thousand separators and cents
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
       tempObj.push(e.congregation);
       tempObj.push(e.mes);
-      tempObj.push(e.valor);
+      tempObj.push(formattedValue);
       prepare.push(tempObj);
-    });
+    }); */
     autoTable(this.doc, {
       head: [['CONGREGAÇÃO', 'MÊS', 'VALOR']],
-      body: prepare      
+      body: prepare,
     });
-    this.doc.save('Relatório_Cong.pdf');
-  }
 
+    this.doc.save('RelatórioAnalitico_TC.pdf');
+  }
 }
