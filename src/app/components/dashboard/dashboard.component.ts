@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import moment from 'moment';
+import { tap } from 'rxjs';
 moment.locale('pt-br');
 import { Lancamento } from 'src/app/models/Lancamento';
 import { ComunicationService } from 'src/app/services/comunication.service';
+import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,19 +33,17 @@ export class DashboardComponent implements OnInit {
   saldoMensal: any;
 
   constructor(
-    private commService: ComunicationService,
+    private lancamentoService: LancamentoService,
   ) { }
 
   ngOnInit(): void {
-    this.commService.despesasList$.subscribe(
-      (data: any) => {
-        this.despesasList = data
-      });
+    this.lancamentoService.despesasList$.subscribe(
+      data => console.log('DESPESAS', data),
+    )
 
-    this.commService.receitasList$.subscribe(
-      (data: any) => {
-        this.receitasList = data
-      });
+    this.lancamentoService.receitasList$.subscribe(
+      data => console.log('RECEITAS', data),
+    );
     this.selectDataByMonth('JANEIRO');      
   }
 

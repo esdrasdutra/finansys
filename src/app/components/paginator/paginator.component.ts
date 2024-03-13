@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import moment from 'moment';
@@ -19,6 +19,8 @@ export class PaginatorComponent implements OnInit {
   dataDespesas!: Lancamento[];
   dataReceitas!: Lancamento[];
 
+  @Output() _currentPage = new EventEmitter<number>();
+  @Output() _pageSize = new EventEmitter<number>();
   constructor(
     private lancamentoService: LancamentoService,
   ) { }
