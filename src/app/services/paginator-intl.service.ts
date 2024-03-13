@@ -7,6 +7,6 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 export class PaginatorIntl extends MatPaginatorIntl {
   override itemsPerPageLabel ='Items por Página';
   override getRangeLabel = (page: number, pageSize: number, length: number) => {
-    return `Página ${page + 1} de ${Math.ceil(length/pageSize)}`
+    return `Página ${page} de ${Math.ceil(length/pageSize)}`
   }
 }

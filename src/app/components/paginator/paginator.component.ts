@@ -25,7 +25,8 @@ export class PaginatorComponent implements OnInit {
     private lancamentoService: LancamentoService,
   ) { }
 
-  ngOnInit(): void {    
+  ngOnInit(): void {
+    console.log(this.currentPage);
     this.lancamentoService.getLancamentos(this.currentPage, this.pageSize).subscribe(
       (data: any) => {
         this.dataDespesas = [];
@@ -53,7 +54,7 @@ export class PaginatorComponent implements OnInit {
     this.currentPage = pageEvent.pageIndex;
     this.pageSize = pageEvent.pageSize;
 
-    this.lancamentoService.getLancamentos(this.currentPage + 1, this.pageSize).subscribe(
+    this.lancamentoService.getLancamentos(this.currentPage, this.pageSize).subscribe(
       (data: any) => {
         this.dataDespesas = [];
         this.dataReceitas = [];

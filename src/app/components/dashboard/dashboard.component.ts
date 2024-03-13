@@ -37,14 +37,11 @@ export class DashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.lancamentoService.despesasList$.subscribe(
-      data => console.log('DESPESAS', data),
-    )
-
-    this.lancamentoService.receitasList$.subscribe(
-      data => console.log('RECEITAS', data),
-    );
-    this.selectDataByMonth('JANEIRO');      
+    console.log('INCINANDO DASHBOARD');
+    
+    const mesAtual = new Date();
+    const mesAtualstr = (this.meses[mesAtual.getMonth()]);
+    this.selectDataByMonth(mesAtualstr);
   }
 
   onChange(event: any): void {

@@ -16,6 +16,9 @@ export class LancamentoService {
   private lancamento$ = new BehaviorSubject<any>({});
   selectedLancamento$ = this.lancamento$.asObservable();
 
+  private currentPage$ = new BehaviorSubject<number>(0);  
+  currentPage = this.currentPage$.asObservable();
+
   private lancamentosBs$ = new BehaviorSubject<Lancamento[]>([]);
   lancamentosList$ = this.lancamentosBs$.asObservable();
 
@@ -34,6 +37,10 @@ export class LancamentoService {
     this.lancamento$.next(lancamento);
   }
 
+  setCurrentPage(pageIndex: number) {
+    this.currentPage$.next(pageIndex);
+  }
+
   setDespesas(lancamentos: any) {
     this.despesasBs$.next(lancamentos);
   }
@@ -43,15 +50,17 @@ export class LancamentoService {
   }
 
   getLancamentos(currentPage: number, pageSize: number): Observable<ListLancamentoResponse>{
-    const url = `http://localhost:8001/${this.lancamentoUrl}/all?page=${currentPage}&size=${pageSize}&sort_order=desc`;
-    
+
+    const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
+
     let lancamentos$ = this.lancamentosCacheService.getValue();
 
     if(!lancamentos$){
       lancamentos$ = this.requestService.get<ListLancamentoResponse>(url)
       .pipe(
-        // tap(console.log),
         map((response: any) => response.data),
+        tap(data => {
+          this.lancamentosCacheService.setValue(data, 'lancamentos')}), // Cache the fetched data
         shareReplay(1)
       );
     }
