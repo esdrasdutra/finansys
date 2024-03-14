@@ -53,7 +53,8 @@ registerLocaleData(localePtBr);
         CrudButtonsComponent,
         DashboardComponent,
         RelatoriosComponent,
-        PaginatorComponent
+        PaginatorComponent,
+        MatCheckboxModule,
     ],
     providers: [
         provideNgxMask(),

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Congregation } from '../..//enums/congregation.enum';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import jsPDF from 'jspdf';
@@ -48,7 +49,7 @@ export class RelatoriosComponent implements OnInit {
   congregations = Object.values(Congregation);
 
   areaMapping: { [key: number]: Congregation[] } = {
-    0: [],
+    0: [this.congregations[36]],
     1: [this.congregations[5], this.congregations[13], this.congregations[25], this.congregations[12], this.congregations[8]],
     2: [this.congregations[19], this.congregations[23], this.congregations[18]],
     3: [this.congregations[30], this.congregations[4], this.congregations[24], this.congregations[21]],
@@ -71,31 +72,112 @@ export class RelatoriosComponent implements OnInit {
   dataDespesasFiltered: any = [];
   dataReceitasFiltered: any = [];
 
+  selected3: string[] = [];
+
   constructor(
     private lancamentoService: LancamentoService,
   ) { }
 
   ngOnInit(): void {
-    this.dataDespesas = this.lancamentoService.despesasList$;
-    this.dataReceitas = this.lancamentoService.receitasList$;
+    this.dataDespesas = localStorage.getItem('DESPESAS');
+    this.dataReceitas = localStorage.getItem('RECEITAS');
+
+    this.dataDespesas = JSON.parse(this.dataDespesas);
+    this.dataReceitas = JSON.parse(this.dataReceitas);
   }
+
+  filterAndSumByCongregation(arrayCong: any): void {
+    console.log('Function Call with the array:', arrayCong);
+    this.receitasPerCong = [];
+
+    arrayCong.forEach((cong: any) => {
+      this.receitasPerCong.push(
+        this.dataReceitas.filter((el : any) => el.cong === cong),
+      );
+      this.despesasPerCong.push(
+        this.dataDespesas.filter((el: any) => el.cong === cong)
+      );
+    });
+    console.log('RECEITAS PER CONG',this.receitasPerCong);
+    console.log('DESPESAS PER CONG', this.despesasPerCong);
+
+    this.despesasPerCong.forEach((cong: any, index: number) => {
+      let valueTemp = 0;
+      cong.forEach((res: any) => {
+        valueTemp += parseFloat(res.valor)
+      });
+      this.dataDespesasFiltered.push({ congregation: this.congregations[index], mes: '02', valor: valueTemp, })
+    });
+
+    this.receitasPerCong.forEach((cong: any, index: number) => {
+      let valueTemp = 0;
+      cong.forEach((res: any) => {
+        valueTemp += parseFloat(res.valor)
+      })
+      this.dataReceitasFiltered.push({ congregation: this.congregations[index], mes: '02', valor: valueTemp })
+    });
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered;
+    this.dataSourceReceita.data = this.dataReceitasFiltered;
+  }
+
+  filterAndSumByArea(area: number): void {
+
+  }
+
+  handleToogle(item: string, event: MatCheckboxChange): void {
+    if (event.checked) {
+      this.selected3.push(item);
+    } else {
+      const index = this.selected3.indexOf(item);
+      if (index >= 0) {
+        this.selected3.splice(index, 1);
+      }
+    }
+    console.log('Chamando FUNÇÃO DE FILTRAR POR CONGREGACAO');
+
+    this.filterAndSumByCongregation(this.selected3);
+  }
+
+  exists(item: string) {
+    return this.selected3.indexOf(item) > -1;
+  };
+
+  isIndeterminate() {
+    return (this.selected3.length > 0 && !this.isChecked());
+  };
+
+  isChecked() {
+    return this.selected3.length === this.congregations.length;
+  };
+
+  toggleAll(event: MatCheckboxChange) {
+    if (event.checked) {
+      this.congregations.forEach(row => {
+        this.selected3.push(row)
+      });
+    } else {
+      this.selected3.length = 0;
+    }
+  }
+
 
   downloadPdf() {
     let prepare: any = [];
+
+    /*     let dataReceitasTC = this.dataReceitas.filter((e: any) => e.cong === "TEMPLO CENTRAL");
     
-    let dataReceitasTC = this.dataReceitas.filter((e: any) => e.cong === "TEMPLO CENTRAL");
+        dataReceitasTC.forEach((e: any) => {
+          var tempObj = [];
+          const parsedValue = parseFloat(e.valor);
+          const formattedValue = parsedValue.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+          tempObj.push(e.cong);
+          tempObj.push(new Date(e.data_lan).toISOString().slice(0,10));
+          tempObj.push(formattedValue);
+          prepare.push(tempObj);
+        }) */
 
-    dataReceitasTC.forEach((e: any) => {
-      var tempObj = [];
-      const parsedValue = parseFloat(e.valor);
-      const formattedValue = parsedValue.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-      tempObj.push(e.cong);
-      tempObj.push(new Date(e.data_lan).toISOString().slice(0,10));
-      tempObj.push(formattedValue);
-      prepare.push(tempObj);
-    })
-
-/*     this.dataReceitasFiltered.forEach((e: any) => {
+    this.dataReceitasFiltered.forEach((e: any) => {
       var tempObj = [];
       // Parse value to ensure it's treated as a number
       const parsedValue = parseFloat(e.valor);
@@ -105,7 +187,7 @@ export class RelatoriosComponent implements OnInit {
       tempObj.push(e.mes);
       tempObj.push(formattedValue);
       prepare.push(tempObj);
-    }); */
+    });
     autoTable(this.doc, {
       head: [['CONGREGAÇÃO', 'MÊS', 'VALOR']],
       body: prepare,

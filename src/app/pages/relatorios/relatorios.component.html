@@ -1,5 +1,19 @@
 <div class="custom-container">
-    <h1>FILTROS AQUI</h1>
+    <fieldset class="demo-fieldset">
+        <div>
+            <mat-checkbox aria-label="SELECIONAR todas" [checked]="isChecked()" [indeterminate]="isIndeterminate()"
+                (change)="$event ? toggleAll($event) : null">
+                Selecionar Tudo
+            </mat-checkbox>
+        </div>
+        <div class="demo-select-all-checkboxes" *ngFor="let cong of congregations">
+            <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? handleToogle(cong, $event) : null"
+                [checked]="exists(cong)">
+                {{ cong }}
+            </mat-checkbox>
+        </div>
+    </fieldset>
+    
     <button type="button" (click)="downloadPdf()">IMPRIMIR RELATORIO</button>
     <header>RELATÓRIO ANALÍTICO</header>
     <mat-tab-group mat-tab-align="start" animationDuration="0ms">
