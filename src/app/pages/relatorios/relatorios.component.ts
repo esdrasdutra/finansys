@@ -203,7 +203,7 @@ export class RelatoriosComponent implements OnInit {
           tempObj.push(formattedValue);
           prepare.push(tempObj);
         }) */
-    this.dataReceitasByArray.forEach((e: any) => {
+    this.dataReceitasFiltered.forEach((e: any) => {
       var tempObj = [];
       // Parse value to ensure it's treated as a number
       const parsedValue = parseFloat(e.valor);
@@ -220,6 +220,6 @@ export class RelatoriosComponent implements OnInit {
       body: prepare,
     });
 
-    this.doc.save('RelatórioAnalitico_TC.pdf');
+    this.doc.save('RelatórioAnalitico-TC.pdf');
   }
 }
