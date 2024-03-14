@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import moment from 'moment';
-import { tap } from 'rxjs';
 moment.locale('pt-br');
 import { Lancamento } from '../..//models/Lancamento';
-import { ComunicationService } from '../..//services/comunication.service';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 
 @Component({
@@ -16,8 +14,8 @@ export class DashboardComponent implements OnInit {
 
   selectedMonth!: string;
 
-  despesasList: Lancamento[] = [];
-  receitasList: Lancamento[] = [];
+  despesasList: any = [];
+  receitasList: any = [];
 
   inflowByMonth: Lancamento[] = [];
   outflowByMonth: Lancamento[] = [];
@@ -37,11 +35,13 @@ export class DashboardComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.despesasList = localStorage.getItem('DESPESAS');
+    this.receitasList = localStorage.getItem('RECEITAS');
+
+    this.despesasList = JSON.parse(this.despesasList);
+    this.receitasList = JSON.parse(this.receitasList);
+
     console.log('INCINANDO DASHBOARD');
-    
-    const mesAtual = new Date();
-    const mesAtualstr = (this.meses[mesAtual.getMonth()]);
-    this.selectDataByMonth(mesAtualstr);
   }
 
   onChange(event: any): void {
@@ -50,28 +50,26 @@ export class DashboardComponent implements OnInit {
     this.inflowByMonth = [];
     this.outflowByMonth = [];
 
-    console.log('BEFORE FUNCTION ', this.valorTotalDepesas, this.valorTotalReceita);
     this.selectDataByMonth(event.value);    
-    console.log('AFTER FUNCTION ', this.valorTotalDepesas, this.valorTotalReceita);
   }
 
   selectDataByMonth(month: string): void {
-    this.despesasList.forEach((el) => {
-      let monthInt = 0;
+    this.valorTotalDepesas = 0;
+    this.valorTotalReceita = 0;
+    this.despesasList.forEach((el: any) => {
+      let monthInt = '';
       let monthStr = '';
-      monthInt = moment(el.data_lan).month();
-      monthStr = this.meses[monthInt];
+      monthInt = (typeof el.data_lan);
+      // monthStr = this.meses[monthInt];      
 
       if (monthStr === month) {
         this.outflowByMonth.push(el);
       }
     });
 
-    this.receitasList.forEach((el) => {
-      let monthInt = 0;
-      let monthStr = '';
-      monthInt = moment(el.data_lan).month();
-      monthStr = this.meses[monthInt];
+    this.receitasList.forEach((el: any) => {
+      let monthInt = moment(el.data_lan).month();
+      let monthStr = this.meses[monthInt];
 
       if (monthStr === month) {
         this.inflowByMonth.push(el);
@@ -86,5 +84,4 @@ export class DashboardComponent implements OnInit {
       this.valorTotalDepesas += parseFloat(lanc.valor);
     });
   }
-
 }

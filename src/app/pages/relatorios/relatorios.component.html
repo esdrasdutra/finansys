@@ -31,11 +31,11 @@
                                 {{ element[item] | currency: 'BRL' }}
                             </ng-container>
 
-                            <ng-container *ngIf="item === 'data_lan' || item === 'data_ven'">
-                                {{ element[item] | slice:0:5 }}
+                            <ng-container *ngIf="item === 'data_lan' || item === 'data_ven' || item === 'mes'">
+                                {{ element[item] | slice:3:5 }}
                             </ng-container>
 
-                            <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven'">
+                            <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
                                 {{ element[item] }}
                             </ng-container>
 
@@ -63,11 +63,11 @@
                                 {{ element[item] | currency: 'BRL' }}
                             </ng-container>
 
-                            <ng-container *ngIf="item === 'data_lan' || item === 'data_ven'">
-                                {{ element[item] | slice:0:5 }}
+                            <ng-container *ngIf="item === 'data_lan' || item === 'data_ven' || item === 'mes'">
+                                {{ element[item] | slice:3:5 }}
                             </ng-container>
 
-                            <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven'">
+                            <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
                                 {{ element[item] }}
                             </ng-container>
 

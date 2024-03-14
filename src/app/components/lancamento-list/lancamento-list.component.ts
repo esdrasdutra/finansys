@@ -40,8 +40,8 @@ export class LancamentoListComponent implements OnInit {
   dataSourceDespesas = new MatTableDataSource<Lancamento>();
   dataSourceReceitas = new MatTableDataSource<Lancamento>();
 
-  dataDespesas: Lancamento[] = [];
-  dataReceitas: Lancamento[] = [];
+  dataDespesas: any = [];
+  dataReceitas: any = [];
 
   selectedRowIndex = -1;
 
@@ -58,13 +58,13 @@ export class LancamentoListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.lancamentoService.despesasList$.subscribe(
-      data => this.dataSourceDespesas.data = data
-    );
+    this.dataDespesas = localStorage.getItem('DESPESAS');
+    this.dataReceitas = localStorage.getItem('RECEITAS');
+    this.dataDespesas = JSON.parse(this.dataDespesas);
+    this.dataReceitas = JSON.parse(this.dataReceitas);
 
-    this.lancamentoService.receitasList$.subscribe(
-      data => this.dataSourceReceitas.data = data
-    );
+    this.dataSourceDespesas = this.dataDespesas;
+    this.dataSourceReceitas = this.dataReceitas;
   }
 
   onClickRow(row: any, event: any) {

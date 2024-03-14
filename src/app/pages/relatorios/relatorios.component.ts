@@ -5,6 +5,7 @@ import { Congregation } from '../..//enums/congregation.enum';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import moment from 'moment';
 
 @Component({
   selector: 'app-relatorios',
@@ -73,6 +74,7 @@ export class RelatoriosComponent implements OnInit {
   dataReceitasFiltered: any = [];
 
   selected3: string[] = [];
+  dataReceitasByArray: any;
 
   constructor(
     private lancamentoService: LancamentoService,
@@ -81,51 +83,63 @@ export class RelatoriosComponent implements OnInit {
   ngOnInit(): void {
     this.dataDespesas = localStorage.getItem('DESPESAS');
     this.dataReceitas = localStorage.getItem('RECEITAS');
-
     this.dataDespesas = JSON.parse(this.dataDespesas);
     this.dataReceitas = JSON.parse(this.dataReceitas);
   }
 
   filterAndSumByCongregation(arrayCong: any): void {
-    console.log('Function Call with the array:', arrayCong);
-    this.receitasPerCong = [];
+    console.log(this.dataSourceDespesa.data.length);
+    console.log(this.dataSourceReceita.data.length);
+    this.dataReceitasByArray = this.dataReceitas.filter((el: any) => {
+      return this.selected3.includes(el.cong);
+    });
 
     arrayCong.forEach((cong: any) => {
       this.receitasPerCong.push(
-        this.dataReceitas.filter((el : any) => el.cong === cong),
+        this.dataReceitas.filter((el: any) => el.cong === cong),
       );
+
       this.despesasPerCong.push(
         this.dataDespesas.filter((el: any) => el.cong === cong)
       );
     });
-    console.log('RECEITAS PER CONG',this.receitasPerCong);
-    console.log('DESPESAS PER CONG', this.despesasPerCong);
 
-    this.despesasPerCong.forEach((cong: any, index: number) => {
+    this.despesasPerCong.forEach((cong: any) => {
       let valueTemp = 0;
+      let congName = '';
+      let month = null;
       cong.forEach((res: any) => {
         valueTemp += parseFloat(res.valor)
+        congName = res.cong
+        month = res.data_lan
       });
-      this.dataDespesasFiltered.push({ congregation: this.congregations[index], mes: '02', valor: valueTemp, })
+      this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
     });
 
-    this.receitasPerCong.forEach((cong: any, index: number) => {
+    this.receitasPerCong.forEach((cong: any) => {
       let valueTemp = 0;
+      let congName = '';
+      let month = null;
       cong.forEach((res: any) => {
         valueTemp += parseFloat(res.valor)
+        congName = res.cong
+        month = res.data_lan
       })
-      this.dataReceitasFiltered.push({ congregation: this.congregations[index], mes: '02', valor: valueTemp })
+      this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
     this.dataSourceReceita.data = this.dataReceitasFiltered;
   }
 
-  filterAndSumByArea(area: number): void {
-
-  }
+  filterAndSumByArea(area: number): void { }
 
   handleToogle(item: string, event: MatCheckboxChange): void {
+    this.receitasPerCong.length = 0;
+    this.despesasPerCong.length = 0;
+    this.dataReceitasFiltered.length = 0;
+    this.dataDespesasFiltered.length = 0;
+
     if (event.checked) {
       this.selected3.push(item);
     } else {
@@ -135,7 +149,6 @@ export class RelatoriosComponent implements OnInit {
       }
     }
     console.log('Chamando FUNÇÃO DE FILTRAR POR CONGREGACAO');
-
     this.filterAndSumByCongregation(this.selected3);
   }
 
@@ -156,8 +169,22 @@ export class RelatoriosComponent implements OnInit {
       this.congregations.forEach(row => {
         this.selected3.push(row)
       });
+      console.log('Antes de zerar', this.dataSourceDespesa.data.length);
+      console.log('Antes de zerar', this.dataSourceReceita.data.length);
+      this.dataSourceDespesa.data = [];
+      this.dataSourceReceita.data = [];
+      console.log('Depois de zerar', this.dataSourceDespesa.data.length);
+      console.log('Depois de zerar', this.dataSourceReceita.data.length);
+      this.filterAndSumByCongregation(this.selected3);
     } else {
       this.selected3.length = 0;
+
+      console.log('Antes de zerar', this.dataSourceDespesa.data.length);
+      console.log('Antes de zerar', this.dataSourceReceita.data.length);
+      this.dataSourceDespesa.data = [];
+      this.dataSourceReceita.data = [];
+      console.log('Depois de zerar', this.dataSourceDespesa.data.length);
+      console.log('Depois de zerar', this.dataSourceReceita.data.length);
     }
   }
 
@@ -176,8 +203,7 @@ export class RelatoriosComponent implements OnInit {
           tempObj.push(formattedValue);
           prepare.push(tempObj);
         }) */
-
-    this.dataReceitasFiltered.forEach((e: any) => {
+    this.dataReceitasByArray.forEach((e: any) => {
       var tempObj = [];
       // Parse value to ensure it's treated as a number
       const parsedValue = parseFloat(e.valor);
@@ -188,6 +214,7 @@ export class RelatoriosComponent implements OnInit {
       tempObj.push(formattedValue);
       prepare.push(tempObj);
     });
+
     autoTable(this.doc, {
       head: [['CONGREGAÇÃO', 'MÊS', 'VALOR']],
       body: prepare,

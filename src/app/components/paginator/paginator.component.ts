@@ -25,51 +25,12 @@ export class PaginatorComponent implements OnInit {
 
   ngOnInit(): void {
     console.log(this.currentPage);
-    this.lancamentoService.getLancamentos().subscribe(
-      (data: any) => {
-        this.dataDespesas = [];
-        this.dataReceitas = [];
-        
-        data.forEach((el: any) => {
-          if (el.data_lan || el.data_ven) {           
-            el.data_lan = moment(el.data_lan).format("DD/MM/YYYY");
-            el.data_ven = moment(el.data_ven).format("DD/MM/YYYY")
-          }
-
-          if (el.tipo_lanc === "RECEITA") {
-            this.dataReceitas.push(el);
-          } else if (el.tipo_lanc === "DESPESA") {
-            this.dataDespesas.push(el);
-          }
-        });
-        
-        this.lancamentoService.setDespesas(this.dataDespesas);
-        this.lancamentoService.setReceitas(this.dataReceitas);
-    });    
+    
   }
   
   handlePageEvent(pageEvent: PageEvent){
     this.currentPage = pageEvent.pageIndex;
     this.pageSize = pageEvent.pageSize;
-
-    this.lancamentoService.getLancamentos().subscribe(
-      (data: any) => {
-        this.dataDespesas = [];
-        this.dataReceitas = [];
-        
-        data.forEach((el: any) => {
-          if (el.data_lan || el.data_ven) {           
-            el.data_lan = moment(el.data_lan).format("DD/MM/YYYY");
-            el.data_ven = moment(el.data_ven).format("DD/MM/YYYY")
-          }
-
-          if (el.tipo_lanc === "RECEITA") this.dataReceitas.push(el);
-          if (el.tipo_lanc === "DESPESA") this.dataDespesas.push(el);
-      
-          this.lancamentoService.setReceitas(this.dataReceitas);          
-          this.lancamentoService.setDespesas(this.dataDespesas);
-        });
-    }); 
 
     console.log('handgleEvent', pageEvent);
   }

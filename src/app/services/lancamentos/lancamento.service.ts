@@ -60,7 +60,7 @@ export class LancamentoService {
       .pipe(
         map((response: any) => response.data),
         tap(data => {
-          this.lancamentosCacheService.setValue(data, 'lancamentos')}), // Cache the fetched data
+          localStorage.setItem("LANÇAMENTOS", data)}), // Cache the fetched data
         shareReplay(1)
       );
     }

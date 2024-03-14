@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LancamentoService } from './services/lancamentos/lancamento.service';
+import moment from 'moment';
+import { Lancamento } from './models/Lancamento';
 
 @Component({
   selector: 'app-root',
@@ -17,11 +19,11 @@ export class AppComponent implements OnInit {
     "RELATORIOS"
   ]
 
-  pathArray =[
+  pathArray = [
     'assets/home_icon.svg',
     'assets/balancesheet_icon.svg',
     'assets/add_obreiro_icon.svg',
-    'assets/add_cong_icon.svg',    
+    'assets/add_cong_icon.svg',
     'assets/fornecedores_icons.svg',
   ]
 
@@ -33,9 +35,25 @@ export class AppComponent implements OnInit {
     "relatorios"
   ]
 
-  constructor(){}
+  constructor(
+    private lancamentoService: LancamentoService,
+  ) { }
 
-  ngOnInit(): void {    
+  ngOnInit(): void {
+    this.lancamentoService.getLancamentos().subscribe(
+      (data: any) => {
+        let dataDespesas: Lancamento[] = [];
+        let dataReceitas: Lancamento[] = [];
+        data.forEach((el: any) => {
+          if (el.tipo_lanc === "RECEITA") {
+            dataReceitas.push(el);
+          } else if (el.tipo_lanc === "DESPESA") {
+            dataDespesas.push(el);
+          }
+        });
+        localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
+        localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
+      });
   }
 
   handleChange(event: Event) {
