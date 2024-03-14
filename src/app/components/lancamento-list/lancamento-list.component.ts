@@ -1,11 +1,11 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 
-import { Lancamento } from 'src/app/models/Lancamento';
+import { Lancamento } from '../..//models/Lancamento';
 import moment from 'moment';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import { MatPaginatorIntl } from '@angular/material/paginator';
-import { PaginatorIntl } from 'src/app/services/paginator-intl.service';
+import { PaginatorIntl } from '../..//services/paginator-intl.service';
 moment.locale('pt-br');
 
 @Component({

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { Congregation } from 'src/app/enums/congregation.enum';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { Congregation } from '../..//enums/congregation.enum';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map, shareReplay, tap } from 'rxjs';
 import { RequestService } from '../request/request.service';
 import { ListLancamentoResponse } from '../response/ListLancamentoResponse';
-import { Lancamento } from 'src/app/models/Lancamento';
+import { Lancamento } from '../..//models/Lancamento';
 import { AddLancamentoResponse } from '../response/AddLancamentoResponse';
 import { RemoveLancamentoResponse } from '../response/RemoveLancamentoResponse';
 import { LancamentosCacheService } from '../lancamentos-cache.service';
@@ -49,7 +49,7 @@ export class LancamentoService {
     this.receitasBs$.next(lancamentos);
   }
 
-  getLancamentos(currentPage: number, pageSize: number): Observable<ListLancamentoResponse>{
+  getLancamentos(): Observable<ListLancamentoResponse>{
 
     const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
 

@@ -7,7 +7,7 @@ import { default as _rollupMoment, Moment } from 'moment';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
-import { ComunicationService } from 'src/app/services/comunication.service';
+import { ComunicationService } from '../..//services/comunication.service';
 
 const moment = _rollupMoment || _moment;
 

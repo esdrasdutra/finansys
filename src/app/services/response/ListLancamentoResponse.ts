@@ -1,4 +1,4 @@
-import { Lancamento } from "src/app/models/Lancamento";
+import { Lancamento } from "../..//models/Lancamento";
 
 export interface ListLancamentoResponse {
     data: Lancamento[];

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 
 @Component({
   selector: 'app-Home',

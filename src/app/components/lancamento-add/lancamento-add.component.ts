@@ -1,17 +1,17 @@
 import { Component, Inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Account } from 'src/app/enums/account.enum';
-import { Congregation } from 'src/app/enums/congregation.enum';
-import { DocType } from 'src/app/enums/doc-type.enum';
-import { FormCadastro } from 'src/app/enums/forms.enum';
-import { Inflows } from 'src/app/enums/inflows.enum';
-import { Outflows } from 'src/app/enums/outflows.enum';
-import { Supliers } from 'src/app/enums/supliers.enum';
-import { LancamentoDeleteComponent } from 'src/app/components/lancamento-delete/lancamento-delete.component';
+import { Account } from '../..//enums/account.enum';
+import { Congregation } from '../..//enums/congregation.enum';
+import { DocType } from '../..//enums/doc-type.enum';
+import { FormCadastro } from '../..//enums/forms.enum';
+import { Inflows } from '../..//enums/inflows.enum';
+import { Outflows } from '../..//enums/outflows.enum';
+import { Supliers } from '../..//enums/supliers.enum';
+import { LancamentoDeleteComponent } from '../..//components/lancamento-delete/lancamento-delete.component';
 import { first } from 'rxjs';
-import { ComunicationService } from 'src/app/services/comunication.service';
+import { ComunicationService } from '../..//services/comunication.service';
 
 @Component({
   selector: 'app-lancamento-add',

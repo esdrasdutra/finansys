@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
-import { ComunicationService } from 'src/app/services/comunication.service';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
-import { ModalService } from 'src/app/services/modal.service';
+import { ComunicationService } from '../..//services/comunication.service';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
+import { ModalService } from '../..//services/modal.service';
 
 @Component({
   selector: 'app-crud-buttons',

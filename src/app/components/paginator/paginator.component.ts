@@ -1,11 +1,9 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { MatPaginatorIntl, PageEvent } from '@angular/material/paginator';
-import { MatTableDataSource } from '@angular/material/table';
 import moment from 'moment';
-import { Congregation } from 'src/app/enums/congregation.enum';
-import { Lancamento } from 'src/app/models/Lancamento';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
-import { PaginatorIntl } from 'src/app/services/paginator-intl.service';
+import { Lancamento } from '../../models/Lancamento';
+import { LancamentoService } from '../../services/lancamentos/lancamento.service';
+import { PaginatorIntl } from '../../services/paginator-intl.service';
 
 @Component({
   selector: 'app-paginator',
@@ -27,7 +25,7 @@ export class PaginatorComponent implements OnInit {
 
   ngOnInit(): void {
     console.log(this.currentPage);
-    this.lancamentoService.getLancamentos(this.currentPage, this.pageSize).subscribe(
+    this.lancamentoService.getLancamentos().subscribe(
       (data: any) => {
         this.dataDespesas = [];
         this.dataReceitas = [];
@@ -54,7 +52,7 @@ export class PaginatorComponent implements OnInit {
     this.currentPage = pageEvent.pageIndex;
     this.pageSize = pageEvent.pageSize;
 
-    this.lancamentoService.getLancamentos(this.currentPage, this.pageSize).subscribe(
+    this.lancamentoService.getLancamentos().subscribe(
       (data: any) => {
         this.dataDespesas = [];
         this.dataReceitas = [];

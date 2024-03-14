@@ -1,4 +1,4 @@
-import { Obreiros } from "src/app/models/Obreiros";
+import { Obreiros } from "../..//models/Obreiros";
 
 export interface ListObreirosResponse {
     data: Obreiros[]

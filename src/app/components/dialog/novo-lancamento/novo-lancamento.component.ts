@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
-import { LancamentoAddComponent } from 'src/app/components/lancamento-add/lancamento-add.component';
+import { LancamentoAddComponent } from '../..//components/lancamento-add/lancamento-add.component';
 
 
 

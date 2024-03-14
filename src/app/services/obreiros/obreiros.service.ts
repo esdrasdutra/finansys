@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { RequestService } from '../request/request.service';
 import { ListObreirosResponse } from '../response/ListObreirosResponse';
-import { Obreiros } from 'src/app/models/Obreiros';
+import { Obreiros } from '../..//models/Obreiros';
 import { AddObreiroResponse } from '../response/AddObreiroResponse';
 
 @Injectable({

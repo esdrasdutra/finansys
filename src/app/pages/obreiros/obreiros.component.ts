@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 
-import { Obreiros } from 'src/app/models/Obreiros';
-import { ObreirosService } from 'src/app/services/obreiros/obreiros.service';
+import { Obreiros } from '../..//models/Obreiros';
+import { ObreirosService } from '../..//services/obreiros/obreiros.service';
 
 @Component({
   selector: 'app-obreiros',

@@ -12,22 +12,22 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { SnackBarComponent } from 'src/app/components/snack-bar/snack-bar.component';
-import { LancamentoDeleteComponent } from 'src/app/components/lancamento-delete/lancamento-delete.component';
+import { SnackBarComponent } from '../..//components/snack-bar/snack-bar.component';
+import { LancamentoDeleteComponent } from '../..//components/lancamento-delete/lancamento-delete.component';
 import { MatButtonModule } from '@angular/material/button';
 import { LancamentoAddComponent } from '../../components/lancamento-add/lancamento-add.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { ObreirosComponent } from '../obreiros/obreiros.component';
 import { DatepickerViewsSelectionExampleComponent } from "../../components/datepicker/datepicker-views-selection-example.component";
-import { CrudButtonsComponent } from 'src/app/components/crud-buttons/crud-buttons.component';
-import { DashboardComponent } from 'src/app/components/dashboard/dashboard.component';
+import { CrudButtonsComponent } from '../..//components/crud-buttons/crud-buttons.component';
+import { DashboardComponent } from '../..//components/dashboard/dashboard.component';
 
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localePtBr from '@angular/common/locales/pt';
-import { PaginatorComponent } from 'src/app/components/paginator/paginator.component';
-import { RelatoriosComponent } from 'src/app/pages/relatorios/relatorios.component';
+import { PaginatorComponent } from '../..//components/paginator/paginator.component';
+import { RelatoriosComponent } from '../..//pages/relatorios/relatorios.component';
 
 registerLocaleData(localePtBr);
 

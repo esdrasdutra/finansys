@@ -2,9 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import moment from 'moment';
 import { tap } from 'rxjs';
 moment.locale('pt-br');
-import { Lancamento } from 'src/app/models/Lancamento';
-import { ComunicationService } from 'src/app/services/comunication.service';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { Lancamento } from '../..//models/Lancamento';
+import { ComunicationService } from '../..//services/comunication.service';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 
 @Component({
   selector: 'app-dashboard',

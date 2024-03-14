@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { first } from 'rxjs';
-import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
+import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 
 @Component({
   selector: 'app-lancamento-delete',
