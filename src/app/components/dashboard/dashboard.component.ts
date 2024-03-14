@@ -57,10 +57,8 @@ export class DashboardComponent implements OnInit {
     this.valorTotalDepesas = 0;
     this.valorTotalReceita = 0;
     this.despesasList.forEach((el: any) => {
-      let monthInt = '';
-      let monthStr = '';
-      monthInt = (typeof el.data_lan);
-      // monthStr = this.meses[monthInt];      
+      let monthInt = moment(el.data_lan).month();
+      let monthStr = this.meses[monthInt];     
 
       if (monthStr === month) {
         this.outflowByMonth.push(el);
