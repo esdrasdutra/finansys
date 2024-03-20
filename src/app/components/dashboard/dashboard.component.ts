@@ -29,6 +29,7 @@ export class DashboardComponent implements OnInit {
   ];
 
   saldoMensal: any;
+  mes_atual: string = '';
 
   constructor(
     private commService: ComunicationService,
@@ -36,6 +37,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     let today = Date.now()
+    const currentMonthIndex = moment(today).month();
 
     this.commService.despesasList$.subscribe(
       {
@@ -50,7 +52,10 @@ export class DashboardComponent implements OnInit {
         error: (err) => console.log(err),
       }
     )
-    this.selectDataByMonth(this.meses[moment(today).month()]);
+    
+    this.selectedMonth = this.meses[currentMonthIndex];
+
+    this.selectDataByMonth(this.selectedMonth)
   }
 
   onChange(event: any): void {

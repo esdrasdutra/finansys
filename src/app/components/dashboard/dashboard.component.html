@@ -3,9 +3,9 @@
         <div id="main" class="col">
             <div class="dashboard-spacer">
                 <span class="dashboard-header">RECEITA DO MÊS</span>
-                <select class="form-select" id="month-select" (change)="onChange($event.target)">
+                <select class="form-select" id="month-select" (change)="onChange($event.target)" [(ngModel)]="selectedMonth">
                     <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
-                </select>
+                  </select>
             </div>
 
             <div class="dashboard-spacer">
