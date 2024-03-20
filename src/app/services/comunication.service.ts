@@ -20,22 +20,19 @@ export class ComunicationService {
   private receitasBus$ = new BehaviorSubject<Lancamento[]>([]);
   receitasList$ = this.receitasBus$.asObservable();
   
-
-  constructor(
-    private lancamentoService: LancamentoService,
-  ) { }
-
-
+  constructor() { }
 
   setDate(date: any){
     this.date$.next(date);
   }
 
-  setDespesas(lancamentos: Lancamento[]) {
+  setDespesas(lancamentos: Lancamento[], component: string) {
+    console.log(`SETTING DESPESAS FROM ${component}`);
     this.despesasBus$.next(lancamentos)
   }
 
-  setReceitas(lancamentos: any) {
+  setReceitas(lancamentos: Lancamento[], component: string) {
+    console.log(`SETTING RECEITAS FROM ${component}`);
     this.receitasBus$.next(lancamentos);
   }
 }

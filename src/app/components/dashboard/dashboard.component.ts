@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import moment from 'moment';
 moment.locale('pt-br');
 import { Lancamento } from '../..//models/Lancamento';
-import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
+import { ComunicationService } from 'src/app/services/comunication.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -31,17 +31,26 @@ export class DashboardComponent implements OnInit {
   saldoMensal: any;
 
   constructor(
-    private lancamentoService: LancamentoService,
+    private commService: ComunicationService,
   ) { }
 
   ngOnInit(): void {
-    this.despesasList = localStorage.getItem('DESPESAS');
-    this.receitasList = localStorage.getItem('RECEITAS');
+    let today = Date.now()
 
-    this.despesasList = JSON.parse(this.despesasList);
-    this.receitasList = JSON.parse(this.receitasList);
+    this.commService.despesasList$.subscribe(
+      {
+        next: (data) => { this.despesasList = data },
+        error: (err) => console.log(err),
+      }
+    )
 
-    console.log('INCINANDO DASHBOARD');
+    this.commService.receitasList$.subscribe(
+      {
+        next: (data) => { this.receitasList = data },
+        error: (err) => console.log(err),
+      }
+    )
+    this.selectDataByMonth(this.meses[moment(today).month()]);
   }
 
   onChange(event: any): void {
@@ -50,7 +59,7 @@ export class DashboardComponent implements OnInit {
     this.inflowByMonth = [];
     this.outflowByMonth = [];
 
-    this.selectDataByMonth(event.value);    
+    this.selectDataByMonth(event.value);
   }
 
   selectDataByMonth(month: string): void {

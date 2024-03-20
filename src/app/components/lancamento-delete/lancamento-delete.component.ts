@@ -3,6 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { first } from 'rxjs';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import { Lancamento } from 'src/app/models/Lancamento';
+import { ComunicationService } from 'src/app/services/comunication.service';
 
 @Component({
   selector: 'app-lancamento-delete',
@@ -16,6 +17,7 @@ export class LancamentoDeleteComponent {
   idLancamento!: number;
 
   constructor(
+    private commService: ComunicationService,    
     @Inject(MAT_DIALOG_DATA) private data: any,
     private dialogRef: MatDialogRef<LancamentoDeleteComponent>,
     private lancamentoService: LancamentoService) {
@@ -35,7 +37,6 @@ export class LancamentoDeleteComponent {
       .pipe(first())
       .subscribe({
         next: () => {
-          setTimeout(() => { console.log('LOADING NEW RESOURCES AFTER DELETES')}, 3000);
           this.lancamentoService.getLancamentos().subscribe(
             (data: any) => {
               let dataDespesas: Lancamento[] = [];
@@ -47,16 +48,16 @@ export class LancamentoDeleteComponent {
                   dataDespesas.push(el);
                 }
               });
+              this.commService.setDespesas(dataDespesas, 'DELET COMPONENT');
+              this.commService.setReceitas(dataReceitas, 'DELET COMPONENT');
               
               localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
               localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
             });
           console.log('COMPLETE');
-          console.log('COMPLETE');
         },
         error: (err) => console.log(err),
-      })
-    
+      })    
   }
 
   onConfirmClick(): void {

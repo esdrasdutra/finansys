@@ -1,11 +1,11 @@
 import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-
 import { Lancamento } from '../..//models/Lancamento';
 import moment from 'moment';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { PaginatorIntl } from '../..//services/paginator-intl.service';
+import { ComunicationService } from 'src/app/services/comunication.service';
 moment.locale('pt-br');
 
 @Component({
@@ -55,18 +55,29 @@ export class LancamentoListComponent implements OnInit {
   constructor(
     private elementRef: ElementRef,
     private lancamentoService: LancamentoService,
+    private commService: ComunicationService,
   ) { }
 
   ngOnInit(): void {
-    this.dataDespesas = localStorage.getItem('DESPESAS');
-    this.dataReceitas = localStorage.getItem('RECEITAS');
     let today = Date.now()
 
-    this.dataDespesas = JSON.parse(this.dataDespesas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
-    this.dataReceitas = JSON.parse(this.dataReceitas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+    this.commService.despesasList$.subscribe(
+      {
+        next: (data) => { 
+          this.dataSourceDespesas.data = data.filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+        },
+        error: (err) => console.log(err),
+      }
+    )
 
-    this.dataSourceDespesas = this.dataDespesas;
-    this.dataSourceReceitas = this.dataReceitas;
+    this.commService.receitasList$.subscribe(
+      {
+        next: (data) => {
+          this.dataSourceReceitas.data = data.filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+        },
+        error: (err) => console.log(err),
+      }
+    )
   }
 
   onClickRow(row: any, event: any) {

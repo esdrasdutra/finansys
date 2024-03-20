@@ -201,7 +201,6 @@ export class LancamentoAddComponent {
       .pipe(first())
       .subscribe({
         next: () => {
-          setTimeout(() => { console.log('LOADING NEW RESOURCES AFTER ADD')}, 3000);
           this.lancamentoService.getLancamentos().subscribe(
             (data: any) => {
               let dataDespesas: Lancamento[] = [];
@@ -213,16 +212,13 @@ export class LancamentoAddComponent {
                   dataDespesas.push(el);
                 }
               });
-              
-              localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
-              localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
+
+              this.commService.setDespesas(dataDespesas, 'ADD COMPONENT');
+              this.commService.setReceitas(dataReceitas, 'ADD COMPONENT');
             });
-          console.log('COMPLETE');
         },
         error: (err) => console.log(err),
       });
-
-
   }
 
   private updateLancamento(updatedForm: any) {
@@ -231,8 +227,7 @@ export class LancamentoAddComponent {
     this.lancamentoService.updateLancamento(updatedForm)
       .pipe(first())
       .subscribe({
-        next: () => {
-          setTimeout(() => { console.log('LOADING NEW RESOURCES AFTER UPDATE')}, 3000);
+        next: () => {          
           this.lancamentoService.getLancamentos().subscribe(
             (data: any) => {
               let dataDespesas: Lancamento[] = [];
@@ -244,10 +239,10 @@ export class LancamentoAddComponent {
                   dataDespesas.push(el);
                 }
               });
-              
-              localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
-              localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
-            });
+
+              this.commService.setDespesas(dataDespesas, 'UPDATE COMPONENT');
+              this.commService.setReceitas(dataReceitas, 'UPDATE COMPONENT');
+            });        
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),

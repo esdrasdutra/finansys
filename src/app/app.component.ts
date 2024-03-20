@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { LancamentoService } from './services/lancamentos/lancamento.service';
-import moment from 'moment';
 import { Lancamento } from './models/Lancamento';
+import { ComunicationService } from './services/comunication.service';
 
 @Component({
   selector: 'app-root',
@@ -37,6 +37,7 @@ export class AppComponent implements OnInit {
 
   constructor(
     private lancamentoService: LancamentoService,
+    private commService: ComunicationService,
   ) { }
 
   ngOnInit(): void {
@@ -51,8 +52,9 @@ export class AppComponent implements OnInit {
             dataDespesas.push(el);
           }
         });
-        localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
-        localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
+
+        this.commService.setDespesas(dataDespesas, 'App Component');
+        this.commService.setReceitas(dataReceitas, 'App Component');
       });
   }
 
