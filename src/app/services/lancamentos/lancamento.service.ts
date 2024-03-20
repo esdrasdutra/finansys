@@ -32,16 +32,16 @@ export class LancamentoService {
 
     const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
     let lancamentos$ = new Observable<ListLancamentoResponse>();
-    let lancamentosCached = localStorage.getItem('LancamentoService');
+    // let lancamentosCached = localStorage.getItem('LancamentoService');
 
-    if(!lancamentosCached){
+    // if(!lancamentosCached){
       lancamentos$ = this.requestService.get<ListLancamentoResponse>(url)
       .pipe(
         map((response: any) => response.data),
-        tap( data =>  this.lancamentosCacheService.setValue(data, 'LancamentoService')), // Cache the fetched data
+        // tap( data =>  this.lancamentosCacheService.setValue(data, 'LancamentoService')), // Cache the fetched data
         shareReplay(1)
       );
-    }
+    //}
 
     return lancamentos$;
   }

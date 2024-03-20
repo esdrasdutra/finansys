@@ -201,25 +201,28 @@ export class LancamentoAddComponent {
       .pipe(first())
       .subscribe({
         next: () => {
+          setTimeout(() => { console.log('LOADING NEW RESOURCES AFTER ADD')}, 3000);
+          this.lancamentoService.getLancamentos().subscribe(
+            (data: any) => {
+              let dataDespesas: Lancamento[] = [];
+              let dataReceitas: Lancamento[] = [];
+              data.forEach((el: any) => {
+                if (el.tipo_lanc === "RECEITA") {
+                  dataReceitas.push(el);
+                } else if (el.tipo_lanc === "DESPESA") {
+                  dataDespesas.push(el);
+                }
+              });
+              
+              localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
+              localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
+            });
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),
       });
 
-    this.lancamentoService.getLancamentos().subscribe(
-      (data: any) => {
-        let dataDespesas: Lancamento[] = [];
-        let dataReceitas: Lancamento[] = [];
-        data.forEach((el: any) => {
-          if (el.tipo_lanc === "RECEITA") {
-            dataReceitas.push(el);
-          } else if (el.tipo_lanc === "DESPESA") {
-            dataDespesas.push(el);
-          }
-        });
-        localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
-        localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
-      });
+
   }
 
   private updateLancamento(updatedForm: any) {
@@ -229,6 +232,22 @@ export class LancamentoAddComponent {
       .pipe(first())
       .subscribe({
         next: () => {
+          setTimeout(() => { console.log('LOADING NEW RESOURCES AFTER UPDATE')}, 3000);
+          this.lancamentoService.getLancamentos().subscribe(
+            (data: any) => {
+              let dataDespesas: Lancamento[] = [];
+              let dataReceitas: Lancamento[] = [];
+              data.forEach((el: any) => {
+                if (el.tipo_lanc === "RECEITA") {
+                  dataReceitas.push(el);
+                } else if (el.tipo_lanc === "DESPESA") {
+                  dataDespesas.push(el);
+                }
+              });
+              
+              localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
+              localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
+            });
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),

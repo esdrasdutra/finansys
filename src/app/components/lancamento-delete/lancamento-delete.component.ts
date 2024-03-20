@@ -2,6 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { first } from 'rxjs';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
+import { Lancamento } from 'src/app/models/Lancamento';
 
 @Component({
   selector: 'app-lancamento-delete',
@@ -19,7 +20,6 @@ export class LancamentoDeleteComponent {
     private dialogRef: MatDialogRef<LancamentoDeleteComponent>,
     private lancamentoService: LancamentoService) {
     if (data) {
-      console.log(data, 'ID LANCAMENTO IN THE INITIALIZATION');
       this.idLancamento = data;
       this.message = data.message || this.message;
       if (data.buttonText) {
@@ -30,12 +30,28 @@ export class LancamentoDeleteComponent {
   }
 
   private deleteLancamento(idLancamento: any) {
-    console.log(idLancamento, 'ID LANCAMENTO IN THE METHOD');
 
     this.lancamentoService.deleteLancamento(idLancamento)
       .pipe(first())
       .subscribe({
         next: () => {
+          setTimeout(() => { console.log('LOADING NEW RESOURCES AFTER DELETES')}, 3000);
+          this.lancamentoService.getLancamentos().subscribe(
+            (data: any) => {
+              let dataDespesas: Lancamento[] = [];
+              let dataReceitas: Lancamento[] = [];
+              data.forEach((el: any) => {
+                if (el.tipo_lanc === "RECEITA") {
+                  dataReceitas.push(el);
+                } else if (el.tipo_lanc === "DESPESA") {
+                  dataDespesas.push(el);
+                }
+              });
+              
+              localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
+              localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
+            });
+          console.log('COMPLETE');
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),
