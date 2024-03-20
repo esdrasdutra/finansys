@@ -14,22 +14,25 @@ export abstract class AbstractCacheService<T> {
 
   private cache: Map<string | object, CacheItem<T>> = new Map();
 
-  getValue(object?: any): Observable<T> | null {
+  getValue(object?: any): string | null {
     const now = new Date();
-    const key: string | object = object ? object : this.DEFAULT_KEY;
+    const key: string = object ? object : this.DEFAULT_KEY;
 
-    const item: CacheItem<T> | undefined = (this.cache.has(key)) ? this.cache.get(key) : undefined;
-    if (!item || (now.getTime() - item.date.getTime() > this.CACHE_DURATION_IN_MINUTES * 60 * 1000)) {
+    const item = (localStorage['has'](key)) ? localStorage.getItem(key) : undefined;
+    if (!item ) {
       return null;
     }
-    return item.value;
+    return item;
   }
 
 
-  setValue(value: Observable<T>, object?: any) {
+  setValue(value: string, object?: any) {
+    console.log(value);
     const key = object ? object : this.DEFAULT_KEY;
     const date = new Date();
-    this.cache.set(key, { date, value });
+    // value = JSON.stringify(value);
+
+    localStorage.setItem(key, value);
   }
 
   clearCache() {

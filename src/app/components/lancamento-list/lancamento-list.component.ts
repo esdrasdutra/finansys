@@ -60,8 +60,10 @@ export class LancamentoListComponent implements OnInit {
   ngOnInit(): void {
     this.dataDespesas = localStorage.getItem('DESPESAS');
     this.dataReceitas = localStorage.getItem('RECEITAS');
-    this.dataDespesas = JSON.parse(this.dataDespesas);
-    this.dataReceitas = JSON.parse(this.dataReceitas);
+    let today = Date.now()
+
+    this.dataDespesas = JSON.parse(this.dataDespesas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+    this.dataReceitas = JSON.parse(this.dataReceitas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
 
     this.dataSourceDespesas = this.dataDespesas;
     this.dataSourceReceitas = this.dataReceitas;

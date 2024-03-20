@@ -37,7 +37,7 @@ export class RelatoriosComponent implements OnInit {
   doc = new jsPDF({
     orientation: "landscape",
     unit: "cm",
-    format: [29.7, 21]
+    format:'a4'
   });
 
   dataSourceDespesa = new MatTableDataSource();
@@ -49,17 +49,19 @@ export class RelatoriosComponent implements OnInit {
 
   congregations = Object.values(Congregation);
 
-  areaMapping: { [key: number]: Congregation[] } = {
-    0: [this.congregations[36]],
-    1: [this.congregations[5], this.congregations[13], this.congregations[25], this.congregations[12], this.congregations[8]],
-    2: [this.congregations[19], this.congregations[23], this.congregations[18]],
-    3: [this.congregations[30], this.congregations[4], this.congregations[24], this.congregations[21]],
-    4: [this.congregations[27], this.congregations[28], this.congregations[3], this.congregations[26], this.congregations[1]],
-    5: [this.congregations[17], this.congregations[2], this.congregations[16], this.congregations[15]],
-    6: [this.congregations[9], this.congregations[20], this.congregations[22], this.congregations[14], this.congregations[31], this.congregations[35]],
-    7: [this.congregations[0], this.congregations[29], this.congregations[33], this.congregations[11], this.congregations[7]],
-    8: [this.congregations[32], this.congregations[6], this.congregations[10], this.congregations[34]],
+  areaMapping: { [key: string]: Congregation[] } = {
+    'TC': [this.congregations[36]],
+    '1': [this.congregations[5], this.congregations[13], this.congregations[25], this.congregations[12], this.congregations[8]],
+    '2': [this.congregations[19], this.congregations[23], this.congregations[18]],
+    '3': [this.congregations[30], this.congregations[4], this.congregations[24], this.congregations[21]],
+    '4': [this.congregations[27], this.congregations[28], this.congregations[3], this.congregations[26], this.congregations[1]],
+    '5': [this.congregations[17], this.congregations[2], this.congregations[16], this.congregations[15]],
+    '6': [this.congregations[9], this.congregations[20], this.congregations[22], this.congregations[14], this.congregations[31], this.congregations[35]],
+    '7': [this.congregations[0], this.congregations[29], this.congregations[33], this.congregations[11], this.congregations[7]],
+    '8': [this.congregations[32], this.congregations[6], this.congregations[10], this.congregations[34]],
   }
+
+  areas = ['TC', 1, 2, 3, 4, 5, 6, 7, 8]
 
   dataReceitas: any = [];
   dataDespesas: any = [];
@@ -75,21 +77,24 @@ export class RelatoriosComponent implements OnInit {
 
   selected3: string[] = [];
   dataReceitasByArray: any;
+  sumTotal: boolean = false;
 
-  constructor(
-    private lancamentoService: LancamentoService,
-  ) { }
+  constructor() { }
 
   ngOnInit(): void {
     this.dataDespesas = localStorage.getItem('DESPESAS');
     this.dataReceitas = localStorage.getItem('RECEITAS');
-    this.dataDespesas = JSON.parse(this.dataDespesas);
-    this.dataReceitas = JSON.parse(this.dataReceitas);
+
+    let today = Date.now()
+
+    this.dataDespesas = JSON.parse(this.dataDespesas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+    this.dataReceitas = JSON.parse(this.dataReceitas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
   }
 
   filterAndSumByCongregation(arrayCong: any): void {
     console.log(this.dataSourceDespesa.data.length);
     console.log(this.dataSourceReceita.data.length);
+    
     this.dataReceitasByArray = this.dataReceitas.filter((el: any) => {
       return this.selected3.includes(el.cong);
     });
@@ -152,6 +157,10 @@ export class RelatoriosComponent implements OnInit {
     this.filterAndSumByCongregation(this.selected3);
   }
 
+  handleAreaSelection(event: any): void {
+    this.option = event.value;
+  }
+
   exists(item: string) {
     return this.selected3.indexOf(item) > -1;
   };
@@ -169,22 +178,13 @@ export class RelatoriosComponent implements OnInit {
       this.congregations.forEach(row => {
         this.selected3.push(row)
       });
-      console.log('Antes de zerar', this.dataSourceDespesa.data.length);
-      console.log('Antes de zerar', this.dataSourceReceita.data.length);
       this.dataSourceDespesa.data = [];
       this.dataSourceReceita.data = [];
-      console.log('Depois de zerar', this.dataSourceDespesa.data.length);
-      console.log('Depois de zerar', this.dataSourceReceita.data.length);
       this.filterAndSumByCongregation(this.selected3);
     } else {
       this.selected3.length = 0;
-
-      console.log('Antes de zerar', this.dataSourceDespesa.data.length);
-      console.log('Antes de zerar', this.dataSourceReceita.data.length);
       this.dataSourceDespesa.data = [];
       this.dataSourceReceita.data = [];
-      console.log('Depois de zerar', this.dataSourceDespesa.data.length);
-      console.log('Depois de zerar', this.dataSourceReceita.data.length);
     }
   }
 

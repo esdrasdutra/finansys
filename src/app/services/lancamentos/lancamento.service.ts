@@ -16,17 +16,8 @@ export class LancamentoService {
   private lancamento$ = new BehaviorSubject<any>({});
   selectedLancamento$ = this.lancamento$.asObservable();
 
-  private currentPage$ = new BehaviorSubject<number>(0);  
-  currentPage = this.currentPage$.asObservable();
-
   private lancamentosBs$ = new BehaviorSubject<Lancamento[]>([]);
   lancamentosList$ = this.lancamentosBs$.asObservable();
-
-  private despesasBs$ = new BehaviorSubject<Lancamento[]>([]);
-  despesasList$ = this.despesasBs$.asObservable();
-
-  private receitasBs$ = new BehaviorSubject<Lancamento[]>([]);
-  receitasList$ = this.receitasBs$.asObservable();
 
   constructor(
     private requestService: RequestService,
@@ -37,30 +28,17 @@ export class LancamentoService {
     this.lancamento$.next(lancamento);
   }
 
-  setCurrentPage(pageIndex: number) {
-    this.currentPage$.next(pageIndex);
-  }
-
-  setDespesas(lancamentos: any) {
-    this.despesasBs$.next(lancamentos);
-  }
-
-  setReceitas(lancamentos: any) {
-    this.receitasBs$.next(lancamentos);
-  }
-
   getLancamentos(): Observable<ListLancamentoResponse>{
 
     const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
+    let lancamentos$ = new Observable<ListLancamentoResponse>();
+    let lancamentosCached = localStorage.getItem('LancamentoService');
 
-    let lancamentos$ = this.lancamentosCacheService.getValue();
-
-    if(!lancamentos$){
+    if(!lancamentosCached){
       lancamentos$ = this.requestService.get<ListLancamentoResponse>(url)
       .pipe(
         map((response: any) => response.data),
-        tap(data => {
-          localStorage.setItem("LANÇAMENTOS", data)}), // Cache the fetched data
+        tap( data =>  this.lancamentosCacheService.setValue(data, 'LancamentoService')), // Cache the fetched data
         shareReplay(1)
       );
     }

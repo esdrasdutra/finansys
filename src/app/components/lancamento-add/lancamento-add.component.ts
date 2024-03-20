@@ -12,6 +12,7 @@ import { Supliers } from '../..//enums/supliers.enum';
 import { LancamentoDeleteComponent } from '../..//components/lancamento-delete/lancamento-delete.component';
 import { first } from 'rxjs';
 import { ComunicationService } from '../..//services/comunication.service';
+import { Lancamento } from 'src/app/models/Lancamento';
 
 @Component({
   selector: 'app-lancamento-add',
@@ -84,7 +85,6 @@ export class LancamentoAddComponent {
     });
 
     if (!this.isAddMode) {
-      console.log(data.lancamento);
       this.lancamentoService.getLancamentoById(data.lancamento)
         .pipe(first())
         .subscribe((x) => {
@@ -162,8 +162,7 @@ export class LancamentoAddComponent {
   }
 
   updateDate(data: any): void {
-    console.log('Inside Function: ',data);
-    const dataInt = parseInt(data.target.slice(10)) + 1;
+    const dataInt = data.target ? parseInt(data.target.slice(10)) + 1 : 0;
     const dataIn = data.date;
     if (dataInt % 2 === 0) {
       const data_ven = dataIn;
@@ -198,20 +197,34 @@ export class LancamentoAddComponent {
   }
 
   private addLancamento() {
-    console.log(this.transactionForm.value);
     this.lancamentoService.addLancamento(this.transactionForm.value)
       .pipe(first())
       .subscribe({
         next: () => {
-          console.log('COMPLETE')
+          console.log('COMPLETE');
         },
         error: (err) => console.log(err),
+      });
+
+    this.lancamentoService.getLancamentos().subscribe(
+      (data: any) => {
+        let dataDespesas: Lancamento[] = [];
+        let dataReceitas: Lancamento[] = [];
+        data.forEach((el: any) => {
+          if (el.tipo_lanc === "RECEITA") {
+            dataReceitas.push(el);
+          } else if (el.tipo_lanc === "DESPESA") {
+            dataDespesas.push(el);
+          }
+        });
+        localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
+        localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
       });
   }
 
   private updateLancamento(updatedForm: any) {
-    updatedForm.data_lan = new Date(updatedForm.data_lan).toISOString().slice(0, 10);
-    updatedForm.data_ven = new Date(updatedForm.data_ven).toISOString().slice(0, 10);
+    updatedForm.data_lan = updatedForm.data_lan ? new Date(updatedForm.data_lan).toISOString().slice(0, 10) : 0;
+    updatedForm.data_ven = updatedForm.data_ven ? new Date(updatedForm.data_ven).toISOString().slice(0, 10) : 0;
     this.lancamentoService.updateLancamento(updatedForm)
       .pipe(first())
       .subscribe({
