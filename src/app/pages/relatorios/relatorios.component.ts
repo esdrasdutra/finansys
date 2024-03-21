@@ -35,9 +35,9 @@ export class RelatoriosComponent implements OnInit {
   };
 
   doc = new jsPDF({
-    orientation: "landscape",
+    orientation: "portrait",
     unit: "cm",
-    format:'a4'
+    format: 'a4'
   });
 
   dataSourceDespesa = new MatTableDataSource();
@@ -71,13 +71,13 @@ export class RelatoriosComponent implements OnInit {
   despesasPerCong: any = [];
   receitasPerCong: any = [];
 
-
   dataDespesasFiltered: any = [];
   dataReceitasFiltered: any = [];
 
-  selected3: string[] = [];
+  congSelected: string[] = [];
   dataReceitasByArray: any;
-  sumTotal: boolean = false;
+  sumTotal: boolean = true;
+  filterByArea: boolean = false;
 
   constructor() { }
 
@@ -92,12 +92,8 @@ export class RelatoriosComponent implements OnInit {
   }
 
   filterAndSumByCongregation(arrayCong: any): void {
-    console.log(this.dataSourceDespesa.data.length);
-    console.log(this.dataSourceReceita.data.length);
-    
-    this.dataReceitasByArray = this.dataReceitas.filter((el: any) => {
-      return this.selected3.includes(el.cong);
-    });
+    this.receitasPerCong.length = 0;
+    this.despesasPerCong.length = 0;
 
     arrayCong.forEach((cong: any) => {
       this.receitasPerCong.push(
@@ -120,6 +116,8 @@ export class RelatoriosComponent implements OnInit {
       });
       this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
     });
+    
+    let totalValue = 0;
 
     this.receitasPerCong.forEach((cong: any) => {
       let valueTemp = 0;
@@ -132,6 +130,12 @@ export class RelatoriosComponent implements OnInit {
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
+
+    this.dataReceitasFiltered.forEach((obj: any) => {
+      totalValue += obj.valor
+    });
+
+    this.dataReceitasFiltered.push({congregation: 'TOTAL', mes: '03', valor: totalValue});
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
     this.dataSourceReceita.data = this.dataReceitasFiltered;
@@ -146,15 +150,23 @@ export class RelatoriosComponent implements OnInit {
     this.dataDespesasFiltered.length = 0;
 
     if (event.checked) {
-      this.selected3.push(item);
+      this.congSelected.push(item);
+      if (this.congSelected.length !== 1) {
+        this.filterAndSumByCongregation(this.congSelected);
+      } else {
+        console.log('Relatório Analítico Completo da Congregação');
+        this.dataReceitasByArray = this.dataReceitas.filter((el: any) => {
+          return this.congSelected.includes(el.cong);
+        });
+        console.log(this.dataReceitasByArray);
+      }
     } else {
-      const index = this.selected3.indexOf(item);
+      const index = this.congSelected.indexOf(item);
       if (index >= 0) {
-        this.selected3.splice(index, 1);
+        this.congSelected.splice(index, 1);
       }
     }
-    console.log('Chamando FUNÇÃO DE FILTRAR POR CONGREGACAO');
-    this.filterAndSumByCongregation(this.selected3);
+    console.log(this.congSelected.length);
   }
 
   handleAreaSelection(event: any): void {
@@ -162,55 +174,48 @@ export class RelatoriosComponent implements OnInit {
   }
 
   exists(item: string) {
-    return this.selected3.indexOf(item) > -1;
+    return this.congSelected.indexOf(item) > -1;
   };
 
   isIndeterminate() {
-    return (this.selected3.length > 0 && !this.isChecked());
+    return (this.congSelected.length > 0 && !this.isChecked());
   };
 
   isChecked() {
-    return this.selected3.length === this.congregations.length;
+    return this.congSelected.length === this.congregations.length;
   };
 
   toggleAll(event: MatCheckboxChange) {
     if (event.checked) {
+      this.congSelected = [];
       this.congregations.forEach(row => {
-        this.selected3.push(row)
+        this.congSelected.push(row);
       });
       this.dataSourceDespesa.data = [];
       this.dataSourceReceita.data = [];
-      this.filterAndSumByCongregation(this.selected3);
+      this.filterAndSumByCongregation(this.congSelected);
     } else {
-      this.selected3.length = 0;
-      this.dataSourceDespesa.data = [];
+      this.congSelected = [];
       this.dataSourceReceita.data = [];
+      this.dataReceitasFiltered.length = 0;
+      this.dataSourceDespesa.data = [];
+      this.dataDespesasFiltered.length = 0;
     }
   }
-
 
   downloadPdf() {
     let prepare: any = [];
 
-    /*     let dataReceitasTC = this.dataReceitas.filter((e: any) => e.cong === "TEMPLO CENTRAL");
-    
-        dataReceitasTC.forEach((e: any) => {
-          var tempObj = [];
-          const parsedValue = parseFloat(e.valor);
-          const formattedValue = parsedValue.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-          tempObj.push(e.cong);
-          tempObj.push(new Date(e.data_lan).toISOString().slice(0,10));
-          tempObj.push(formattedValue);
-          prepare.push(tempObj);
-        }) */
-    this.dataReceitasFiltered.forEach((e: any) => {
-      var tempObj = [];
-      // Parse value to ensure it's treated as a number
+    if (this.sumTotal) {
+      let totalValue = 0;
+      
+    this.dataReceitasFiltered.forEach((e: any) => {      
+      let tempObj: any = [];
       const parsedValue = parseFloat(e.valor);
-      // Format the value as currency with thousand separators and cents
+      totalValue += parsedValue;
       const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
       tempObj.push(e.congregation);
-      tempObj.push(e.mes);
+      tempObj.push(moment(e.data_lan).format('MM'));
       tempObj.push(formattedValue);
       prepare.push(tempObj);
     });
@@ -220,6 +225,18 @@ export class RelatoriosComponent implements OnInit {
       body: prepare,
     });
 
-    this.doc.save('RelatórioAnalitico-TC.pdf');
+    this.doc.save('RelatórioAnalíticoGeral.pdf');
+    }
+
+    /*let dataReceitasTC = this.dataReceitas.filter((e: any) => e.cong === "TEMPLO CENTRAL");    
+        dataReceitasTC.forEach((e: any) => {
+          var tempObj = [];
+          const parsedValue = parseFloat(e.valor);
+          const formattedValue = parsedValue.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
+          tempObj.push(e.cong);
+          tempObj.push(new Date(e.data_lan).toISOString().slice(0,10));
+          tempObj.push(formattedValue);
+          prepare.push(tempObj);
+        }) */
   }
 }
