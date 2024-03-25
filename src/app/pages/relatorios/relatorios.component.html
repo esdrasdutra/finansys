@@ -1,4 +1,7 @@
 <div class="custom-container">
+    <button type="button" (click)="handleSumTotal()">Relatório de Despesas / Receitas das Congregações</button>
+    <button type="button" (click)="handleSumByArea()">Relatório de Despesas / Receitas por Área</button>
+
     <ng-container *ngIf="sumTotal">
         <fieldset class="demo-fieldset">
             <div>
@@ -13,8 +16,7 @@
                     {{ cong }}
                 </mat-checkbox>
             </div>
-        </fieldset>
-        
+        </fieldset>        
     </ng-container>
 
     <ng-container *ngIf="filterByArea">

@@ -2,10 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { Congregation } from '../..//enums/congregation.enum';
-import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
+
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
+import { ComunicationService } from 'src/app/services/comunication.service';
 
 @Component({
   selector: 'app-relatorios',
@@ -35,16 +36,16 @@ export class RelatoriosComponent implements OnInit {
   };
 
   doc = new jsPDF({
-    orientation: "portrait",
+    orientation: "landscape",
     unit: "cm",
-    format: 'a4'
+    format: 'a4',   
   });
 
   dataSourceDespesa = new MatTableDataSource();
   dataSourceReceita = new MatTableDataSource();
 
   displayedColumnsLancamento = [
-    'congregation', 'mes', 'valor',
+    'mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor'
   ]
 
   congregations = Object.values(Congregation);
@@ -61,12 +62,13 @@ export class RelatoriosComponent implements OnInit {
     '8': [this.congregations[32], this.congregations[6], this.congregations[10], this.congregations[34]],
   }
 
-  areas = ['TC', 1, 2, 3, 4, 5, 6, 7, 8]
+  areas = ['TC', '1', '2', '3', '4', '5', '6', '7', '8']
 
   dataReceitas: any = [];
   dataDespesas: any = [];
 
-  option: number = 0;
+  option: number = 0;  
+  clicked: number = 0;
 
   despesasPerCong: any = [];
   receitasPerCong: any = [];
@@ -76,26 +78,56 @@ export class RelatoriosComponent implements OnInit {
 
   congSelected: string[] = [];
   dataReceitasByArray: any;
-  sumTotal: boolean = true;
+  sumTotal: boolean = false;
   filterByArea: boolean = false;
 
-  constructor() { }
+  constructor(
+    private commService: ComunicationService,
+  ) { }
 
   ngOnInit(): void {
-    this.dataDespesas = localStorage.getItem('DESPESAS');
-    this.dataReceitas = localStorage.getItem('RECEITAS');
+    this.commService.despesasList$.subscribe(
+      {
+        next: (data) => { 
+          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === 1)
+        },
+        error: (err) => console.log(err),
+      }
+    )
 
-    let today = Date.now()
-
-    this.dataDespesas = JSON.parse(this.dataDespesas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
-    this.dataReceitas = JSON.parse(this.dataReceitas).filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+    this.commService.receitasList$.subscribe(
+      {
+        next: (data) => {
+          this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === 1);
+        },
+        error: (err) => console.log(err),
+      }
+    )
   }
 
-  filterAndSumByCongregation(arrayCong: any): void {
+  handleSumTotal() {
+    this.sumTotal = !this.sumTotal;
+    this.clicked += 1;
+    if (this.clicked === 1) {
+      this.getSumTotal();
+    }
+  }
+
+  handleSumByArea() {
+    this.filterByArea = !this.filterByArea;
+    this.dataSourceDespesa.data = [];
+    this.dataSourceReceita.data = [];
+    this.dataReceitasFiltered = [];
+    this.dataDespesasFiltered = [];
+  }
+
+  getSumTotal(): void {
     this.receitasPerCong.length = 0;
     this.despesasPerCong.length = 0;
+    let totalReceitas = 0;
+    let totalDespesas = 0;
 
-    arrayCong.forEach((cong: any) => {
+    this.congregations.forEach((cong: any) => {      
       this.receitasPerCong.push(
         this.dataReceitas.filter((el: any) => el.cong === cong),
       );
@@ -116,8 +148,6 @@ export class RelatoriosComponent implements OnInit {
       });
       this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
     });
-    
-    let totalValue = 0;
 
     this.receitasPerCong.forEach((cong: any) => {
       let valueTemp = 0;
@@ -130,18 +160,132 @@ export class RelatoriosComponent implements OnInit {
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
-
+    
     this.dataReceitasFiltered.forEach((obj: any) => {
-      totalValue += obj.valor
+      totalReceitas += obj.valor
     });
 
-    this.dataReceitasFiltered.push({congregation: 'TOTAL', mes: '03', valor: totalValue});
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      totalDespesas += obj.valor
+    });
+
+    this.dataReceitasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas});
+    this.dataDespesasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas});
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
     this.dataSourceReceita.data = this.dataReceitasFiltered;
   }
 
-  filterAndSumByArea(area: number): void { }
+  filterAndSumByArea(area: any): void {
+    this.receitasPerCong.length = 0;
+    this.despesasPerCong.length = 0;
+    let totalDespesas = 0;
+    let totalReceitas = 0;
+    this.dataDespesasFiltered = [];
+    this.dataReceitasFiltered = [];
+
+    area.forEach((cong: any) => {
+      this.receitasPerCong.push(
+        this.dataReceitas.filter((el: any) => el.cong === cong),
+      );
+
+      this.despesasPerCong.push(
+        this.dataDespesas.filter((el: any) => el.cong === cong)
+      );
+    });
+
+    this.despesasPerCong.forEach((cong: any) => {
+      let valueTemp = 0;
+      let congName = '';
+      let month = null;
+      cong.forEach((res: any) => {
+        valueTemp += parseFloat(res.valor)
+        congName = res.cong
+        month = res.data_lan
+      });
+      this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
+    });
+
+    this.receitasPerCong.forEach((cong: any) => {
+      let valueTemp = 0;
+      let congName = '';
+      let month = null;
+      cong.forEach((res: any) => {
+        valueTemp += parseFloat(res.valor)
+        congName = res.cong
+        month = res.data_lan
+      })
+      this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
+    });
+    
+    this.dataReceitasFiltered.forEach((obj: any) => {
+      totalReceitas += obj.valor
+    });
+
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      totalDespesas += obj.valor
+    });
+
+    this.dataReceitasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas});
+    this.dataDespesasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas});
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered;
+    this.dataSourceReceita.data = this.dataReceitasFiltered;
+  }
+
+  receitasByCong(array: any): void {
+    let congName = '';
+    let month = null;
+    let totalValue = 0;
+    let entradas = '';
+    let obs = '';
+
+    array.forEach((obj: any) => {
+      congName = obj.cong;
+      month = moment(obj.data_lan).format('MM');
+      entradas = obj.entrada
+      obs = obj.obs
+
+      this.dataReceitasFiltered.push({mes: month, recibo: obj.recibo, congregation: congName, entries: entradas, dizimista: obj.dizimista, obs: obs, valor: obj.valor })
+    });
+    
+    this.dataReceitasFiltered.forEach((obj: any) => {
+      let valor =  parseFloat(obj.valor)
+      totalValue += valor
+    });
+
+    this.dataReceitasFiltered.push({mes: '', recibo: '', congregation: 'TOTAL GERAL', entries: '', dizimista: '', historico: '', valor: totalValue });
+
+    this.dataSourceReceita.data = this.dataReceitasFiltered; 
+  }
+
+  despesasByCong(array: any): void {
+    let congName = '';
+    let month = null;
+    let totalValue = 0;
+    let entradas = '';
+    let obs = '';
+
+    console.log(array);
+
+    array.forEach((obj: any) => {
+      congName = obj.cong;
+      month = moment(obj.data_lan).format('MM');
+      entradas = obj.entrada
+      obs = obj.obs
+
+      this.dataDespesasFiltered.push({mes: month, recibo: obj.recibo, congregation: congName, entries: entradas, dizimista: obj.dizimista, obs: obs, valor: obj.valor })
+    });
+    
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      let valor =  parseFloat(obj.valor)
+      totalValue += valor
+    });
+
+    this.dataDespesasFiltered.push({mes: '', recibo: '', congregation: 'TOTAL GERAL', entries: '', dizimista: '', historico: '', valor: totalValue });
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered; 
+  }
 
   handleToogle(item: string, event: MatCheckboxChange): void {
     this.receitasPerCong.length = 0;
@@ -152,13 +296,18 @@ export class RelatoriosComponent implements OnInit {
     if (event.checked) {
       this.congSelected.push(item);
       if (this.congSelected.length !== 1) {
-        this.filterAndSumByCongregation(this.congSelected);
+        //this.getSumTotal(this.congSelected);
       } else {
         console.log('Relatório Analítico Completo da Congregação');
         this.dataReceitasByArray = this.dataReceitas.filter((el: any) => {
           return this.congSelected.includes(el.cong);
         });
-        console.log(this.dataReceitasByArray);
+
+        let despesasByCong =  this.dataDespesas.filter((el: any) => {
+          return this.congSelected.includes(el.cong);
+        })
+        this.receitasByCong(this.dataReceitasByArray);
+        this.despesasByCong(despesasByCong);
       }
     } else {
       const index = this.congSelected.indexOf(item);
@@ -166,11 +315,11 @@ export class RelatoriosComponent implements OnInit {
         this.congSelected.splice(index, 1);
       }
     }
-    console.log(this.congSelected.length);
   }
 
   handleAreaSelection(event: any): void {
     this.option = event.value;
+    console.log(this.option);
   }
 
   exists(item: string) {
@@ -188,12 +337,12 @@ export class RelatoriosComponent implements OnInit {
   toggleAll(event: MatCheckboxChange) {
     if (event.checked) {
       this.congSelected = [];
-      this.congregations.forEach(row => {
-        this.congSelected.push(row);
-      });
-      this.dataSourceDespesa.data = [];
-      this.dataSourceReceita.data = [];
-      this.filterAndSumByCongregation(this.congSelected);
+      if (this.filterByArea) {
+        this.areaMapping[this.option].forEach(el => this.congSelected.push(el));
+        this.dataSourceDespesa.data = [];
+        this.dataSourceReceita.data = [];
+        this.filterAndSumByArea(this.congSelected);
+      }
     } else {
       this.congSelected = [];
       this.dataSourceReceita.data = [];
@@ -204,29 +353,32 @@ export class RelatoriosComponent implements OnInit {
   }
 
   downloadPdf() {
+    console.log('Imprimindo o Relatório');
     let prepare: any = [];
-
-    if (this.sumTotal) {
-      let totalValue = 0;
-      
+     
     this.dataReceitasFiltered.forEach((e: any) => {      
       let tempObj: any = [];
       const parsedValue = parseFloat(e.valor);
-      totalValue += parsedValue;
       const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      tempObj.push(e.congregation);
       tempObj.push(moment(e.data_lan).format('MM'));
+      tempObj.push(e.recibo)
+      tempObj.push(e.congregation);
+      tempObj.push(e.entries);
+      tempObj.push(e.dizimista);
+      tempObj.push(e.obs);
       tempObj.push(formattedValue);
       prepare.push(tempObj);
     });
 
+    
+
     autoTable(this.doc, {
-      head: [['CONGREGAÇÃO', 'MÊS', 'VALOR']],
+      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO','ENTRADA','DIZIMISTA', 'HISTORICO', 'VALOR']],
       body: prepare,
+      styles: { fontSize: 7 },
     });
 
-    this.doc.save('RelatórioAnalíticoGeral.pdf');
-    }
+    this.doc.save('RelatórioAnalíticoTC.pdf');
 
     /*let dataReceitasTC = this.dataReceitas.filter((e: any) => e.cong === "TEMPLO CENTRAL");    
         dataReceitasTC.forEach((e: any) => {
