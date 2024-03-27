@@ -76,7 +76,8 @@ export class RelatoriosComponent implements OnInit {
   sumTotal: boolean = false;
   filterByArea: boolean = false;
   outflowCenter: string = '';
-  file_name!: string;
+  file_name_out!: string;
+  file_name_in!: string;
 
   constructor(
     private commService: ComunicationService,
@@ -253,6 +254,8 @@ export class RelatoriosComponent implements OnInit {
       this.dataReceitasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor })
     });
 
+    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ${congName}`
+
     this.dataReceitasFiltered.forEach((obj: any) => {
       let valor = parseFloat(obj.valor)
       totalValue += valor
@@ -275,14 +278,15 @@ export class RelatoriosComponent implements OnInit {
       this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, tipo_doc: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
     });
 
+    
+    this.file_name_out = `RELATÓRIO ANALÍTICO DE SAìDAS - ${congName}`
+
     this.dataDespesasFiltered.forEach((obj: any) => {
       let valor = parseFloat(obj.valor)
       totalValue += valor
     });
     console.log(this.dataDespesasFiltered);
-
     this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
-
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
   }
 
@@ -290,7 +294,7 @@ export class RelatoriosComponent implements OnInit {
     let congName = '';
     let month = null;
     let totalValue = 0;
-    this.file_name = `RELATÓRIO GERAL DE RECEITAS - DÌZIMO OBREIROS`
+    this.file_name_in = `RELATÓRIO GERAL DE RECEITAS - DÌZIMO OBREIROS`
 
     let dizimistasList = this.dataReceitas.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
     dizimistasList.filter((el: any) => { moment(el.data_lan).month() === 1 })
@@ -313,7 +317,7 @@ export class RelatoriosComponent implements OnInit {
   }
 
   despesasTotal(tipoDespesa: string): void {
-    this.file_name = `RELATÓRIO GERAL DE DESPESAS - ${tipoDespesa}`
+    this.file_name_out = `RELATÓRIO GERAL DE DESPESAS - ${tipoDespesa}`
     let congName = '';
     let month = null;
     let totalValue = 0;
@@ -470,7 +474,7 @@ export class RelatoriosComponent implements OnInit {
       data.settings.margin.top = 0.5;
       if (data.pageNumber === 1) {
         docIn.setFontSize(12); // Adjust font size as needed
-        docIn.text('Relatório Analítico de Entradas', docIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+        docIn.text(this.file_name_in, docIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
       } else {
       }
     };
@@ -479,7 +483,7 @@ export class RelatoriosComponent implements OnInit {
       data.settings.margin.top = 0.5;
       if (data.pageNumber === 1) {
         docOut.setFontSize(12); // Adjust font size as needed
-        docOut.text('Relatório Analítico de Saídas', docOut.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+        docOut.text(this.file_name_out, docOut.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
       } else {
       }
     };
@@ -502,7 +506,7 @@ export class RelatoriosComponent implements OnInit {
       willDrawPage: (data) => setHeaderPageConfigOut(data)
     });
 
-    docIn.save(`RelatórioAnalicoDeEntrada.pdf`);
-    docOut.save(`RelatórioAnalicoDeSaida.pdf`);
+    docIn.save(`${this.file_name_in}.pdf`);
+    docOut.save(`${this.file_name_out}.pdf`);
   }
 }
