@@ -1,6 +1,10 @@
 <div class="custom-container">
     <button type="button" (click)="handleSumTotal()">Relatório de Despesas / Receitas das Congregações</button>
     <button type="button" (click)="handleSumByArea()">Relatório de Despesas / Receitas por Área</button>
+    <button type="button" (click)="getDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
+    <select name="saidas" id="custoOption" (change)="handleCustoSelection($event.target)">
+        <option *ngFor="let outflow of outflows" [value]="outflow">{{ outflow }}</option>
+    </select>    
 
     <ng-container *ngIf="sumTotal">
         <fieldset class="demo-fieldset">
@@ -46,7 +50,7 @@
         <mat-tab label="DESPESAS" class="despesas-tab">
             <section class="mat-elevation-z8" tabindex="0">
                 <table mat-table [dataSource]="dataSourceDespesa">
-                    <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
+                    <ng-container *ngFor="let item of displayedColumnsOut" [matColumnDef]="item">
                         <th mat-header-cell class="f-sm" *matHeaderCellDef>
                             <div *ngIf="item === 'valor';then isValue else notValue"></div>
                             <ng-template #isValue> (R$) {{ columnMapping[item] }} </ng-template>
@@ -58,7 +62,7 @@
                             </ng-container>
 
                             <ng-container *ngIf="item === 'data_lan' || item === 'data_ven' || item === 'mes'">
-                                {{ element[item] | slice:5:7 }}
+                                {{ element[item] }}
                             </ng-container>
 
                             <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
@@ -67,9 +71,9 @@
 
                         </td>
                     </ng-container>
-                    <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsLancamento, sticky: true"></tr>
+                    <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsOut, sticky: true"></tr>
 
-                    <tr mat-row class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
+                    <tr mat-row class="f-sm" *matRowDef="let row; columns: displayedColumnsOut">
                     </tr>
                 </table>
             </section>
@@ -78,7 +82,7 @@
         <mat-tab label="RECEITAS" class="receitas-tab" id="#mat-table-receitas">
             <section class="mat-elevation-z8" tabindex="0">
                 <table mat-table [dataSource]="dataSourceReceita">
-                    <ng-container *ngFor="let item of displayedColumnsLancamento" [matColumnDef]="item">
+                    <ng-container *ngFor="let item of displayedColumnsIn" [matColumnDef]="item">
                         <th mat-header-cell class="f-sm" *matHeaderCellDef>
                             <div *ngIf="item === 'valor';then isValue else notValue"></div>
                             <ng-template #isValue> (R$) {{ columnMapping[item] }} </ng-template>
@@ -90,7 +94,7 @@
                             </ng-container>
 
                             <ng-container *ngIf="item === 'data_lan' || item === 'data_ven' || item === 'mes'">
-                                {{ element[item] | slice:5:7 }}
+                                {{ element[item] }}
                             </ng-container>
 
                             <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
@@ -99,9 +103,9 @@
 
                         </td>
                     </ng-container>
-                    <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsLancamento, sticky: true"></tr>
+                    <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumnsIn, sticky: true"></tr>
 
-                    <tr mat-row class="f-sm" *matRowDef="let row; columns: displayedColumnsLancamento">
+                    <tr mat-row class="f-sm" *matRowDef="let row; columns: displayedColumnsIn">
                     </tr>
                 </table>
             </section>

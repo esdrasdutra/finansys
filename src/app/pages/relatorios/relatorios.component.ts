@@ -7,6 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
 import { ComunicationService } from 'src/app/services/comunication.service';
+import { Outflows } from 'src/app/enums/outflows.enum';
 
 @Component({
   selector: 'app-relatorios',
@@ -35,20 +36,15 @@ export class RelatoriosComponent implements OnInit {
     'mes': 'MÊS'
   };
 
-  doc = new jsPDF({
-    orientation: "landscape",
-    unit: "cm",
-    format: 'a4',   
-  });
-
   dataSourceDespesa = new MatTableDataSource();
   dataSourceReceita = new MatTableDataSource();
 
-  displayedColumnsLancamento = [
-    'mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor'
-  ]
+  displayedColumnsIn: string[] = []
+  displayedColumnsOut: string[] = []
 
   congregations = Object.values(Congregation);
+
+  outflows = Object.values(Outflows);
 
   areaMapping: { [key: string]: Congregation[] } = {
     'TC': [this.congregations[36]],
@@ -67,7 +63,7 @@ export class RelatoriosComponent implements OnInit {
   dataReceitas: any = [];
   dataDespesas: any = [];
 
-  option: number = 0;  
+  option: number = 0;
   clicked: number = 0;
 
   despesasPerCong: any = [];
@@ -77,9 +73,10 @@ export class RelatoriosComponent implements OnInit {
   dataReceitasFiltered: any = [];
 
   congSelected: string[] = [];
-  dataReceitasByArray: any;
   sumTotal: boolean = false;
   filterByArea: boolean = false;
+  outflowCenter: string = '';
+  file_name!: string;
 
   constructor(
     private commService: ComunicationService,
@@ -88,7 +85,7 @@ export class RelatoriosComponent implements OnInit {
   ngOnInit(): void {
     this.commService.despesasList$.subscribe(
       {
-        next: (data) => { 
+        next: (data) => {
           this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === 1)
         },
         error: (err) => console.log(err),
@@ -107,10 +104,21 @@ export class RelatoriosComponent implements OnInit {
 
   handleSumTotal() {
     this.sumTotal = !this.sumTotal;
+    console.log(this.sumTotal);
     this.clicked += 1;
     if (this.clicked === 1) {
-      this.getSumTotal();
+      //this.getSumTotal();
     }
+  }
+
+
+  handleCustoSelection(event: any) {
+    this.outflowCenter = event.value
+    this.dataSourceDespesa.data = [];
+    this.dataSourceReceita.data = [];
+    this.dataReceitasFiltered = [];
+    this.dataDespesasFiltered = [];
+    this.despesasTotal(this.outflowCenter);
   }
 
   handleSumByArea() {
@@ -121,13 +129,13 @@ export class RelatoriosComponent implements OnInit {
     this.dataDespesasFiltered = [];
   }
 
-  getSumTotal(): void {
+  getSumTotal(array: any): void {
     this.receitasPerCong.length = 0;
     this.despesasPerCong.length = 0;
     let totalReceitas = 0;
     let totalDespesas = 0;
 
-    this.congregations.forEach((cong: any) => {      
+    array.forEach((cong: any) => {
       this.receitasPerCong.push(
         this.dataReceitas.filter((el: any) => el.cong === cong),
       );
@@ -160,7 +168,7 @@ export class RelatoriosComponent implements OnInit {
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
-    
+
     this.dataReceitasFiltered.forEach((obj: any) => {
       totalReceitas += obj.valor
     });
@@ -169,8 +177,8 @@ export class RelatoriosComponent implements OnInit {
       totalDespesas += obj.valor
     });
 
-    this.dataReceitasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas});
-    this.dataDespesasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas});
+    this.dataReceitasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
+    this.dataDespesasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas });
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
     this.dataSourceReceita.data = this.dataReceitasFiltered;
@@ -217,7 +225,7 @@ export class RelatoriosComponent implements OnInit {
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
-    
+
     this.dataReceitasFiltered.forEach((obj: any) => {
       totalReceitas += obj.valor
     });
@@ -226,8 +234,8 @@ export class RelatoriosComponent implements OnInit {
       totalDespesas += obj.valor
     });
 
-    this.dataReceitasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas});
-    this.dataDespesasFiltered.push({congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas});
+    this.dataReceitasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
+    this.dataDespesasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas });
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
     this.dataSourceReceita.data = this.dataReceitasFiltered;
@@ -237,54 +245,98 @@ export class RelatoriosComponent implements OnInit {
     let congName = '';
     let month = null;
     let totalValue = 0;
-    let entradas = '';
-    let obs = '';
+    let entrada = '';
 
     array.forEach((obj: any) => {
       congName = obj.cong;
       month = moment(obj.data_lan).format('MM');
-      entradas = obj.entrada
-      obs = obj.obs
-
-      this.dataReceitasFiltered.push({mes: month, recibo: obj.recibo, congregation: congName, entries: entradas, dizimista: obj.dizimista, obs: obs, valor: obj.valor })
+      this.dataReceitasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor })
     });
-    
+
     this.dataReceitasFiltered.forEach((obj: any) => {
-      let valor =  parseFloat(obj.valor)
+      let valor = parseFloat(obj.valor)
       totalValue += valor
     });
 
-    this.dataReceitasFiltered.push({mes: '', recibo: '', congregation: 'TOTAL GERAL', entries: '', dizimista: '', historico: '', valor: totalValue });
+    //
 
-    this.dataSourceReceita.data = this.dataReceitasFiltered; 
+    this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entrada: '', dizimista: '', obs: '', valor: totalValue });
+    console.log(this.dataReceitasFiltered);
+
+    this.dataSourceReceita.data = this.dataReceitasFiltered;
   }
 
   despesasByCong(array: any): void {
     let congName = '';
     let month = null;
     let totalValue = 0;
-    let entradas = '';
-    let obs = '';
-
-    console.log(array);
 
     array.forEach((obj: any) => {
       congName = obj.cong;
       month = moment(obj.data_lan).format('MM');
-      entradas = obj.entrada
-      obs = obj.obs
-
-      this.dataDespesasFiltered.push({mes: month, recibo: obj.recibo, congregation: congName, entries: entradas, dizimista: obj.dizimista, obs: obs, valor: obj.valor })
+      this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, tipo_doc: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
     });
-    
+
     this.dataDespesasFiltered.forEach((obj: any) => {
-      let valor =  parseFloat(obj.valor)
+      let valor = parseFloat(obj.valor)
+      totalValue += valor
+    });
+    console.log(this.dataDespesasFiltered);
+
+    this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered;
+  }
+
+  getDizimistas() {
+    let congName = '';
+    let month = null;
+    let totalValue = 0;
+    this.file_name = `RELATÓRIO GERAL DE RECEITAS - DÌZIMO OBREIROS`
+
+    let dizimistasList = this.dataReceitas.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
+    dizimistasList.filter((el: any) => { moment(el.data_lan).month() === 1 })
+
+    dizimistasList.forEach((obj: any) => {
+      congName = obj.cong;
+      month = moment(obj.data_lan).format('MM');
+      console.log(month);
+      this.dataReceitasFiltered.push({ mes: month, congregation: congName, dizimista: obj.dizimista })
+    });
+
+    this.dataReceitasFiltered.forEach((obj: any) => {
+      let valor = parseFloat(obj.valor)
       totalValue += valor
     });
 
-    this.dataDespesasFiltered.push({mes: '', recibo: '', congregation: 'TOTAL GERAL', entries: '', dizimista: '', historico: '', valor: totalValue });
+    this.displayedColumnsIn = ['mes', 'congregation', 'dizimista']
 
-    this.dataSourceDespesa.data = this.dataDespesasFiltered; 
+    this.dataSourceReceita.data = this.dataReceitasFiltered;
+  }
+
+  despesasTotal(tipoDespesa: string): void {
+    this.file_name = `RELATÓRIO GERAL DE DESPESAS - ${tipoDespesa}`
+    let congName = '';
+    let month = null;
+    let totalValue = 0;
+
+    const despesasByTipo = this.dataDespesas.filter((el: any) => el.saida === tipoDespesa);
+
+    despesasByTipo.forEach((obj: any) => {
+      congName = obj.cong;
+      month = moment(obj.data_lan).format('MM');
+      console.log(month);
+      this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, tipo: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
+    });
+
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      let valor = parseFloat(obj.valor)
+      totalValue += valor
+    });
+
+    this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', outflow: '', tipo: '', obs: '', valor: totalValue });
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered;
   }
 
   handleToogle(item: string, event: MatCheckboxChange): void {
@@ -296,24 +348,30 @@ export class RelatoriosComponent implements OnInit {
     if (event.checked) {
       this.congSelected.push(item);
       if (this.congSelected.length !== 1) {
-        //this.getSumTotal(this.congSelected);
+        this.getSumTotal(this.congSelected);
       } else {
         console.log('Relatório Analítico Completo da Congregação');
-        this.dataReceitasByArray = this.dataReceitas.filter((el: any) => {
+        let receitasByCong = this.dataReceitas.filter((el: any) => {
           return this.congSelected.includes(el.cong);
         });
 
-        let despesasByCong =  this.dataDespesas.filter((el: any) => {
+        let despesasByCong = this.dataDespesas.filter((el: any) => {
           return this.congSelected.includes(el.cong);
         })
-        this.receitasByCong(this.dataReceitasByArray);
+        this.receitasByCong(receitasByCong);
         this.despesasByCong(despesasByCong);
+        // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
+        this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
+
+        // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
+        this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
       }
     } else {
       const index = this.congSelected.indexOf(item);
       if (index >= 0) {
         this.congSelected.splice(index, 1);
       }
+      this.getSumTotal(this.congSelected);
     }
   }
 
@@ -343,6 +401,12 @@ export class RelatoriosComponent implements OnInit {
         this.dataSourceReceita.data = [];
         this.filterAndSumByArea(this.congSelected);
       }
+      if (this.sumTotal) {
+        this.congregations.forEach(el => this.congSelected.push(el));
+        this.dataSourceDespesa.data = [];
+        this.dataSourceReceita.data = [];
+        this.despesasTotal(this.outflowCenter);
+      }
     } else {
       this.congSelected = [];
       this.dataSourceReceita.data = [];
@@ -353,42 +417,89 @@ export class RelatoriosComponent implements OnInit {
   }
 
   downloadPdf() {
-    console.log('Imprimindo o Relatório');
-    let prepare: any = [];
-     
-    this.dataReceitasFiltered.forEach((e: any) => {      
+    var docIn = new jsPDF({
+      orientation: "landscape",
+      unit: "cm",
+      format: 'a4'
+    });
+    
+    var docOut = new jsPDF({
+      orientation: "landscape",
+      unit: "cm",
+      format: 'a4'
+    });
+
+    let prepareIn: any = [];
+    let prepareOut: any = [];
+    // ['mes', 'congregation', 'dizimista']
+    // this.displayedColumns = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
+    // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
+
+    this.dataReceitasFiltered.forEach((e: any) => {
       let tempObj: any = [];
       const parsedValue = parseFloat(e.valor);
       const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      tempObj.push(moment(e.data_lan).format('MM'));
-      tempObj.push(e.recibo)
+      tempObj.push(e.mes);
+      tempObj.push(e.recibo);
       tempObj.push(e.congregation);
-      tempObj.push(e.entries);
+      tempObj.push(e.entrada);
       tempObj.push(e.dizimista);
       tempObj.push(e.obs);
       tempObj.push(formattedValue);
-      prepare.push(tempObj);
+      prepareIn.push(tempObj);
     });
 
-    
-
-    autoTable(this.doc, {
-      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO','ENTRADA','DIZIMISTA', 'HISTORICO', 'VALOR']],
-      body: prepare,
-      styles: { fontSize: 7 },
+    this.dataDespesasFiltered.forEach((e: any) => {
+      let tempObj: any = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.recibo);
+      tempObj.push(e.congregation);
+      tempObj.push(e.saida);
+      tempObj.push(e.dizimista);
+      tempObj.push(e.obs);
+      tempObj.push(formattedValue);
+      prepareOut.push(tempObj);
     });
 
-    this.doc.save('RelatórioAnalíticoTC.pdf');
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        docIn.setFontSize(12); // Adjust font size as needed
+        docIn.text('Relatório Analítico de Entradas', docIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      } else {
+      }
+    };
 
-    /*let dataReceitasTC = this.dataReceitas.filter((e: any) => e.cong === "TEMPLO CENTRAL");    
-        dataReceitasTC.forEach((e: any) => {
-          var tempObj = [];
-          const parsedValue = parseFloat(e.valor);
-          const formattedValue = parsedValue.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
-          tempObj.push(e.cong);
-          tempObj.push(new Date(e.data_lan).toISOString().slice(0,10));
-          tempObj.push(formattedValue);
-          prepare.push(tempObj);
-        }) */
+    const setHeaderPageConfigOut = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        docOut.setFontSize(12); // Adjust font size as needed
+        docOut.text('Relatório Analítico de Saídas', docOut.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      } else {
+      }
+    };
+
+    autoTable(docIn, {
+      // ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
+      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'ENTRADA', 'DIZIMISTA', 'HISTORICO', 'VALOR']],
+      body: prepareIn,
+      styles: { fontSize: 6 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
+    });
+
+    autoTable(docOut, {
+      // ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
+      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'SAÍDA', 'DIZIMISTA', 'HISTORICO', 'VALOR']],
+      body: prepareOut,
+      styles: { fontSize: 6 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigOut(data)
+    });
+
+    docIn.save(`RelatórioAnalicoDeEntrada.pdf`);
+    docOut.save(`RelatórioAnalicoDeSaida.pdf`);
   }
 }
