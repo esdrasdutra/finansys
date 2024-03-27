@@ -104,7 +104,7 @@ export class RelatoriosComponent implements OnInit {
 
   handleSumTotal() {
     this.sumTotal = !this.sumTotal;
-    console.log(this.sumTotal);
+    console.log('É pra somar tudo?', this.sumTotal);
     this.clicked += 1;
     if (this.clicked === 1) {
       //this.getSumTotal();
@@ -258,9 +258,7 @@ export class RelatoriosComponent implements OnInit {
       totalValue += valor
     });
 
-    //
-
-    this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entrada: '', dizimista: '', obs: '', valor: totalValue });
+    this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entries: '', dizimista: '', obs: '', valor: totalValue });
     console.log(this.dataReceitasFiltered);
 
     this.dataSourceReceita.data = this.dataReceitasFiltered;
@@ -320,12 +318,9 @@ export class RelatoriosComponent implements OnInit {
     let month = null;
     let totalValue = 0;
 
-    const despesasByTipo = this.dataDespesas.filter((el: any) => el.saida === tipoDespesa);
-
-    despesasByTipo.forEach((obj: any) => {
+    this.dataDespesas.forEach((obj: any) => {
       congName = obj.cong;
       month = moment(obj.data_lan).format('MM');
-      console.log(month);
       this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, tipo: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
     });
 
@@ -335,8 +330,14 @@ export class RelatoriosComponent implements OnInit {
     });
 
     this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', outflow: '', tipo: '', obs: '', valor: totalValue });
+    // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
+    this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
+
+    // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
+    this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
+    console.log(this.dataSourceDespesa.data);
   }
 
   handleToogle(item: string, event: MatCheckboxChange): void {
@@ -394,6 +395,7 @@ export class RelatoriosComponent implements OnInit {
 
   toggleAll(event: MatCheckboxChange) {
     if (event.checked) {
+      console.log('SELECIONEI TUDO, FAZ ALGUMA COISA...')
       this.congSelected = [];
       if (this.filterByArea) {
         this.areaMapping[this.option].forEach(el => this.congSelected.push(el));
@@ -405,6 +407,7 @@ export class RelatoriosComponent implements OnInit {
         this.congregations.forEach(el => this.congSelected.push(el));
         this.dataSourceDespesa.data = [];
         this.dataSourceReceita.data = [];
+        console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
         this.despesasTotal(this.outflowCenter);
       }
     } else {
@@ -422,7 +425,7 @@ export class RelatoriosComponent implements OnInit {
       unit: "cm",
       format: 'a4'
     });
-    
+
     var docOut = new jsPDF({
       orientation: "landscape",
       unit: "cm",
@@ -457,7 +460,7 @@ export class RelatoriosComponent implements OnInit {
       tempObj.push(e.recibo);
       tempObj.push(e.congregation);
       tempObj.push(e.saida);
-      tempObj.push(e.dizimista);
+      tempObj.push(e.tipo_doc);
       tempObj.push(e.obs);
       tempObj.push(formattedValue);
       prepareOut.push(tempObj);
@@ -492,7 +495,7 @@ export class RelatoriosComponent implements OnInit {
 
     autoTable(docOut, {
       // ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
-      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'SAÍDA', 'DIZIMISTA', 'HISTORICO', 'VALOR']],
+      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'SAÍDA', 'TIPO DOC.', 'HISTORICO', 'VALOR']],
       body: prepareOut,
       styles: { fontSize: 6 },
       margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
