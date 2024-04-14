@@ -64,7 +64,7 @@ export class LancamentoListComponent implements OnInit {
     this.commService.despesasList$.subscribe(
       {
         next: (data) => { 
-          this.dataSourceDespesas.data = data.filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+          this.dataSourceDespesas.data = data.filter((el: any) => moment(el.data_lan).month() === 2 || moment(el.data_lan).month() === 3);
         },
         error: (err) => console.log(err),
       }
@@ -73,7 +73,7 @@ export class LancamentoListComponent implements OnInit {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          this.dataSourceReceitas.data = data.filter((el: any) => moment(el.data_lan).month() === moment(today).month());
+          this.dataSourceReceitas.data = data.filter((el: any) => moment(el.data_lan).month() === 2 || moment(el.data_lan).month() === 3);
         },
         error: (err) => console.log(err),
       }

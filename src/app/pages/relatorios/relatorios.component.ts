@@ -42,6 +42,11 @@ export class RelatoriosComponent implements OnInit {
   displayedColumnsIn: string[] = []
   displayedColumnsOut: string[] = []
 
+  reportIn!: jsPDF;
+  reportOut!: jsPDF;
+  prepareIn: any = [];
+  prepareOut: any = [];
+
   congregations = Object.values(Congregation);
 
   outflows = Object.values(Outflows);
@@ -87,7 +92,7 @@ export class RelatoriosComponent implements OnInit {
     this.commService.despesasList$.subscribe(
       {
         next: (data) => {
-          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === 1)
+          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3)
         },
         error: (err) => console.log(err),
       }
@@ -96,7 +101,7 @@ export class RelatoriosComponent implements OnInit {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === 1);
+          this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3);
         },
         error: (err) => console.log(err),
       }
@@ -262,7 +267,6 @@ export class RelatoriosComponent implements OnInit {
     });
 
     this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entries: '', dizimista: '', obs: '', valor: totalValue });
-    console.log(this.dataReceitasFiltered);
 
     this.dataSourceReceita.data = this.dataReceitasFiltered;
   }
@@ -278,42 +282,113 @@ export class RelatoriosComponent implements OnInit {
       this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, tipo_doc: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
     });
 
-    
+
     this.file_name_out = `RELATÓRIO ANALÍTICO DE SAìDAS - ${congName}`
 
     this.dataDespesasFiltered.forEach((obj: any) => {
       let valor = parseFloat(obj.valor)
       totalValue += valor
     });
-    console.log(this.dataDespesasFiltered);
     this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
   }
 
   getDizimistas() {
-    let congName = '';
-    let month = null;
-    let totalValue = 0;
-    this.file_name_in = `RELATÓRIO GERAL DE RECEITAS - DÌZIMO OBREIROS`
-
+    const novaLista = [];
+    this.file_name_in = `RELATÓRIO GERAL - DÍZIMO OBREIROS`
     let dizimistasList = this.dataReceitas.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
-    dizimistasList.filter((el: any) => { moment(el.data_lan).month() === 1 })
+    const congregationMap: any = {};
 
-    dizimistasList.forEach((obj: any) => {
-      congName = obj.cong;
-      month = moment(obj.data_lan).format('MM');
-      console.log(month);
-      this.dataReceitasFiltered.push({ mes: month, congregation: congName, dizimista: obj.dizimista })
+    for (const area of Object.keys(this.areaMapping)) {
+      for (const congregation of this.areaMapping[area]) {
+        congregationMap[congregation] = congregationMap[congregation] || [];
+      }
+    }
+
+    for (const lancamento of dizimistasList) {
+      const congregacao = lancamento.cong;
+      const dizimista = congregationMap[congregacao].find(
+        (d: any) => d.nome === lancamento.dizimista
+      );
+
+      if (!dizimista) {
+        congregationMap[congregacao].push({
+          nome: lancamento.dizimista,
+          valorTotal: lancamento.valor,
+          recibos: [lancamento.recibo],
+        });
+      } else {
+        dizimista.valorTotal += lancamento.valor;
+        dizimista.recibos.push(lancamento.recibo);
+      }
+    }
+
+    for (const area of Object.keys(this.areaMapping)) {
+      const congregacoes = [];
+
+      for (const congregation of this.areaMapping[area]) {
+        congregacoes.push({
+          nome: congregation,
+          dizimistas: congregationMap[congregation].sort((a: any, b: any) => b.valorTotal - a.valorTotal),
+        });
+      }
+
+      novaLista.push({
+        area,
+        congregacoes,
+      });
+    }
+
+    for (const area of novaLista) {
+      for (const congregacao of area.congregacoes) {
+        for (const dizimista of congregacao.dizimistas) {
+          this.dataReceitasFiltered.push({
+            mes: '03',
+            dizimista: dizimista.nome,
+            congregation: congregacao.nome,
+          });
+        }
+      }
+    }
+
+    this.reportIn = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4'
+    })
+
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.congregation);
+      tempObj.push(e.dizimista);
+      this.prepareIn.push(tempObj);
     });
 
-    this.dataReceitasFiltered.forEach((obj: any) => {
-      let valor = parseFloat(obj.valor)
-      totalValue += valor
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.reportIn.setFontSize(12); // Adjust font size as needed
+        this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      }
+    };
+
+    autoTable(this.reportIn, {
+      head: [['MÊS', 'CONGREGAÇÃO', 'DIZIMISTA']],
+      body: this.prepareIn,
+      styles: { fontSize: 7 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
     });
+
+    this.reportIn.save(`${this.file_name_in}.pdf`);
 
     this.displayedColumnsIn = ['mes', 'congregation', 'dizimista']
 
     this.dataSourceReceita.data = this.dataReceitasFiltered;
+
   }
 
   despesasTotal(tipoDespesa: string): void {
@@ -325,23 +400,24 @@ export class RelatoriosComponent implements OnInit {
     this.dataDespesas.forEach((obj: any) => {
       congName = obj.cong;
       month = moment(obj.data_lan).format('MM');
-      this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, tipo: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
+      this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, tipo: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
     });
+
+    this.dataDespesasFiltered = this.dataDespesasFiltered.filter((el: any) => el.saida === tipoDespesa)
 
     this.dataDespesasFiltered.forEach((obj: any) => {
       let valor = parseFloat(obj.valor)
       totalValue += valor
     });
 
-    this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', outflow: '', tipo: '', obs: '', valor: totalValue });
-    // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
+    this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo: '', obs: '', valor: totalValue });
+    // mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
     this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
 
     // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
     this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
-    console.log(this.dataSourceDespesa.data);
   }
 
   handleToogle(item: string, event: MatCheckboxChange): void {
@@ -483,8 +559,8 @@ export class RelatoriosComponent implements OnInit {
       data.settings.margin.top = 0.5;
       if (data.pageNumber === 1) {
         docOut.setFontSize(12); // Adjust font size as needed
-        docOut.text(this.file_name_out, docOut.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
       } else {
+        docOut.text(this.file_name_out || '', docOut.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
       }
     };
 
