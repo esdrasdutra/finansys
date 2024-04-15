@@ -7,21 +7,6 @@ table
 
 table
   width: 100%
-/* ::ng-deep
-    .mat-mdc-tab-labels
-        border-bottom: 2px solid var(--bs-purple)
-
-    .mat-mdc-tab.mdc-tab.mdc-tab.mdc-tab--active
-        background-color: transparent
-        font-weight: 900
-        box-sizing: border-box
-        border-top: 2px solid var(--bs-purple)
-        border-left: 2px solid var(--bs-purple)
-        border-right: 2px solid var(--bs-purple)
-        ///import css-variables from 
-        border-bottom: 2px solid var(--bs-light)
-        height: 50px
- */
 
 #tab-container
     width: 100vw
@@ -40,8 +25,18 @@ table
     height: 32px
     position: fixed
     align-content: center
-    top: 90px
+    top: 80px
     z-index: 1000
+
+    .search-bar
+        display: grid
+    
+    .search-name
+        display: flex
+
+    .search-button
+        display: flex
+        justify-content: center
 
 .crud-buttons
     display: flex

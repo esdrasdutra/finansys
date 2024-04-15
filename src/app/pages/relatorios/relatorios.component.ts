@@ -342,11 +342,13 @@ export class RelatoriosComponent implements OnInit {
     for (const area of novaLista) {
       for (const congregacao of area.congregacoes) {
         for (const dizimista of congregacao.dizimistas) {
+          if (dizimista.nome) {
           this.dataReceitasFiltered.push({
             mes: '03',
             dizimista: dizimista.nome,
             congregation: congregacao.nome,
           });
+          }
         }
       }
     }
