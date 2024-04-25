@@ -13,6 +13,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { CurrencyPipe } from '@angular/common';
 import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 import { HomeModule } from './pages/home/home.module';
+import { DizimistasComponent } from './pages/relatorios/dizimistas/dizimistas.component';
 
 @NgModule({
   imports: [
@@ -32,6 +33,7 @@ import { HomeModule } from './pages/home/home.module';
     FornecedoresComponent,
     IconsComponent,
     ToolbarComponent,
+    DizimistasComponent,
 ],
   providers: [CurrencyPipe, HttpClientModule],
   bootstrap: [AppComponent]

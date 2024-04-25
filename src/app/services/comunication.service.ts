@@ -19,6 +19,9 @@ export class ComunicationService {
 
   private receitasBus$ = new BehaviorSubject<Lancamento[]>([]);
   receitasList$ = this.receitasBus$.asObservable();
+
+  private areaMappingBus$ = new BehaviorSubject<Lancamento[]>([]);
+  areaMapping$ = this.areaMappingBus$.asObservable();
   
   constructor() { }
 
@@ -34,5 +37,9 @@ export class ComunicationService {
   setReceitas(lancamentos: Lancamento[], component: string) {
     console.log(`SETTING RECEITAS FROM ${component}`);
     this.receitasBus$.next(lancamentos);
+  }
+
+  setAreaMapping(data: any) {
+    this.areaMappingBus$.next(data);
   }
 }
