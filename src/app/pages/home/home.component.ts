@@ -8,8 +8,20 @@ import { LancamentoService } from '../..//services/lancamentos/lancamento.servic
   providers: [LancamentoService]
 })
 export class HomeComponent {
+  inputValue: string = '';
+  filtros: string[] = ['Dt. Lançamento', 'Recibo','Valor', 'Tipo Documento', 'Nº Documento'];
+  meses = [
+    'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
+    'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
+  ];
+
   constructor() { }
 
   ngOnInit(): void {
+  }
+
+  onKey(event: any) {
+    this.inputValue = event.target.value;
+    console.log(this.inputValue);
   }
 }
