@@ -9,8 +9,6 @@ import moment from 'moment';
 import { ComunicationService } from 'src/app/services/comunication.service';
 import { Outflows } from 'src/app/enums/outflows.enum';
 
-
-
 @Component({
   selector: 'app-relatorios',
   templateUrl: './relatorios.component.html',
@@ -87,6 +85,7 @@ export class RelatoriosComponent implements OnInit {
   outflowCenter: string = '';
   file_name_out!: string;
   file_name_in!: string;
+  dirigentes: boolean = false;
 
   constructor(
     private commService: ComunicationService,
@@ -123,6 +122,15 @@ export class RelatoriosComponent implements OnInit {
     }
   }
 
+  handleDizimoDirigentes() {
+    this.dataSourceDespesa.data = [];
+    this.dataSourceReceita.data = [];
+    this.dataReceitasFiltered = [];
+    this.dataDespesasFiltered = [];
+    this.dirigentes = !this.dirigentes;
+    console.log('10% dos dirigentes?', this.dirigentes);
+
+  }
 
   handleCustoSelection(event: any) {
     this.outflowCenter = event.value
@@ -142,6 +150,8 @@ export class RelatoriosComponent implements OnInit {
   }
 
   getSumTotal(array: any): void {
+    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - TOTAL GERAL`
+
     this.receitasPerCong.length = 0;
     this.despesasPerCong.length = 0;
     let totalReceitas = 0;
@@ -164,7 +174,7 @@ export class RelatoriosComponent implements OnInit {
       cong.forEach((res: any) => {
         valueTemp += parseFloat(res.valor)
         congName = res.cong
-        month = res.data_lan
+        month = moment(res.data_lan).format('MM');
       });
       this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
     });
@@ -176,7 +186,7 @@ export class RelatoriosComponent implements OnInit {
       cong.forEach((res: any) => {
         valueTemp += parseFloat(res.valor)
         congName = res.cong
-        month = res.data_lan
+        month = moment(res.data_lan).format('MM');
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
@@ -191,6 +201,149 @@ export class RelatoriosComponent implements OnInit {
 
     this.dataReceitasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
     this.dataDespesasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas });
+
+    this.reportIn = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4'
+    });
+
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.congregation);
+      tempObj.push(formattedValue);
+      this.prepareIn.push(tempObj);
+    });
+
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.reportIn.setFontSize(12); // Adjust font size as needed
+        this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      }
+    };
+
+    autoTable(this.reportIn, {
+      head: [['MÊS', 'CONGREGAÇÃO', 'VALOR']],
+      body: this.prepareIn,
+      styles: { fontSize: 7 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
+    });
+
+    this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
+
+    // this.reportIn.save(`${this.file_name_in}.pdf`);
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered;
+    this.dataSourceReceita.data = this.dataReceitasFiltered;
+  }
+
+  getDizimoDirigentes(array: any): void {
+    this.dataSourceDespesa.data = [];
+    this.dataSourceReceita.data = [];
+    this.dataReceitasFiltered = [];
+    this.dataDespesasFiltered = [];
+
+    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`
+
+    this.receitasPerCong.length = 0;
+    this.despesasPerCong.length = 0;
+    let totalReceitas = 0;
+    let totalDespesas = 0;
+    // console.log(this.dataReceitas.filter((el: any) => el.entrada === 'ENTRADA OFERTA AVULSA'));
+
+    this.dataReceitas = this.dataReceitas.filter((el: any) => el.entrada !== 'ENTRADA OFERTA AVULSA');
+ 
+    array.forEach((cong: any) => {
+      this.receitasPerCong.push(
+        this.dataReceitas.filter((el: any) => el.cong === cong),
+      );
+
+      this.despesasPerCong.push(
+        this.dataDespesas.filter((el: any) => el.cong === cong)
+      );
+    });
+
+    this.despesasPerCong.forEach((cong: any) => {
+      let valueTemp = 0;
+      let congName = '';
+      let month = null;
+      cong.forEach((res: any) => {
+        valueTemp += parseFloat(res.valor)
+        congName = res.cong        
+        month = moment(res.data_lan).format('MM');
+      });
+      this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
+    });
+
+    this.receitasPerCong.forEach((cong: any) => {
+      let valueTemp = 0;
+      let ofertaAvulsaTotal = 0;
+      let congName = '';
+      let month = null;
+      cong.forEach((res: any) => {
+        valueTemp += Number.parseFloat(res.valor)
+        congName = res.cong
+        month = moment(res.data_lan).format('MM');
+        if (res.entrada === 'ENTRADA OFERTA AVULSA') {
+          ofertaAvulsaTotal = Number.parseFloat(res.valor);
+        }
+      })
+      this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
+      console.log(ofertaAvulsaTotal);
+    });
+
+    this.dataReceitasFiltered.forEach((obj: any) => {
+      totalReceitas += obj.valor
+    });
+
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      totalDespesas += obj.valor
+    });
+
+    this.dataReceitasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
+    this.dataDespesasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas });
+
+    this.reportIn = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4'
+    });
+
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.congregation);
+      tempObj.push(formattedValue);
+      this.prepareIn.push(tempObj);
+    });
+
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.reportIn.setFontSize(12); // Adjust font size as needed
+        this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      }
+    };
+
+    autoTable(this.reportIn, {
+      head: [['MÊS', 'CONGREGAÇÃO', 'VALOR']],
+      body: this.prepareIn,
+      styles: { fontSize: 7 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
+    });
+
+    this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
+
+    // this.reportIn.save(`${this.file_name_in}.pdf`);
+    console.log(this.dataReceitasFiltered);
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
     this.dataSourceReceita.data = this.dataReceitasFiltered;
@@ -208,7 +361,7 @@ export class RelatoriosComponent implements OnInit {
 
     area.forEach((cong: any) => {
       this.receitasPerCong.push(
-        this.dataReceitas.filter((el: any) =>{
+        this.dataReceitas.filter((el: any) => {
           return el.cong === cong
         }),
       );
@@ -307,15 +460,96 @@ export class RelatoriosComponent implements OnInit {
 
     this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ${congName}`
 
+    console.log( this.dataReceitasFiltered);
+
+    this.reportIn = new jsPDF({
+      orientation: "landscape",
+      unit: "cm",
+      format: 'a4'
+    });
+
+    //'mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor'
+
     this.dataReceitasFiltered.forEach((obj: any) => {
       let valor = parseFloat(obj.valor)
       totalValue += valor
     });
 
-    this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entries: '', dizimista: '', obs: '', valor: totalValue });
+    this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entrada: '', dizimista: '', obs: '', valor: totalValue });
 
     this.dataSourceReceita.data = this.dataReceitasFiltered;
+
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.recibo);
+      tempObj.push(e.congregation);
+      tempObj.push(e.entrada);
+      tempObj.push(e.dizimista);
+      tempObj.push(e.obs);
+      tempObj.push(formattedValue);
+      this.prepareIn.push(tempObj);
+    });
+
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.reportIn.setFontSize(12); // Adjust font size as needed
+        this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      }
+    };
+
+    autoTable(this.reportIn, {
+      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'ENTRADA', 'DIZIMISTA', 'OBS:.', 'VALOR']],
+      body: this.prepareIn,
+      styles: { fontSize: 7 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
+    });
+    // this.reportIn.save(`${this.file_name_in}.pdf`);
   }
+
+  despesasByCong(array: any): void {
+    let congName = '';
+    let month = null;
+    let totalValue = 0;
+
+    array.forEach((obj: any) => {
+      congName = obj.cong;
+      month = moment(obj.data_lan).format('MM');
+      this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, tipo_doc: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
+    });
+
+
+    this.file_name_out = `RELATÓRIO ANALÍTICO DE SAÍDAS - ${congName}`;
+
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      let valor = parseFloat(obj.valor)
+      totalValue += valor
+    });
+    this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
+
+    this.dataDespesasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.recibo);
+      tempObj.push(e.congregation);
+      tempObj.push(e.entrada);
+      tempObj.push(e.dizimista);
+      tempObj.push(e.obs);
+      tempObj.push(formattedValue);
+      this.prepareIn.push(tempObj);
+    });
+
+    //this.reportOut.save(`${this.file_name_out}.pdf`);
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered;
+  }
+
 
   getDizimistas() {
     const novaLista = [];
@@ -417,29 +651,6 @@ export class RelatoriosComponent implements OnInit {
 
   }
 
-  despesasByCong(array: any): void {
-    let congName = '';
-    let month = null;
-    let totalValue = 0;
-
-    array.forEach((obj: any) => {
-      congName = obj.cong;
-      month = moment(obj.data_lan).format('MM');
-      this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, tipo_doc: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
-    });
-
-
-    this.file_name_out = `RELATÓRIO ANALÍTICO DE SAìDAS - ${congName}`
-
-    this.dataDespesasFiltered.forEach((obj: any) => {
-      let valor = parseFloat(obj.valor)
-      totalValue += valor
-    });
-    this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
-    this.dataSourceDespesa.data = this.dataDespesasFiltered;
-  }
-
-
   despesasTotal(tipoDespesa: string): void {
     this.file_name_out = `RELATÓRIO GERAL DE DESPESAS - ${tipoDespesa}`
     let congName = '';
@@ -469,7 +680,7 @@ export class RelatoriosComponent implements OnInit {
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
   }
 
-  handleToogle(event: Event, index: number): void {    
+  handleToogle(event: Event, index: number): void {
     const checkbox = event.target as HTMLInputElement;
     const congregation = this.CONGREGATIONS[index];
 
@@ -493,6 +704,7 @@ export class RelatoriosComponent implements OnInit {
         })
         this.receitasByCong(receitasByCong);
         this.despesasByCong(despesasByCong);
+
         // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
         this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
 
@@ -501,12 +713,12 @@ export class RelatoriosComponent implements OnInit {
       }
       console.log(this.congSelected);
     } else {
-      const indexToRemove  = this.congSelected.indexOf(congregation);
-      if (indexToRemove !== -1) {
+      const indexToRemove = this.congSelected.indexOf(congregation);
+      if (indexToRemove >= 0) {
         this.congSelected.splice(indexToRemove, 1);
-    }
-      console.log(this.congSelected);
-      this.getSumTotal(this.congSelected);
+        console.log(this.congSelected);
+      }
+      //this.getSumTotal(this.congSelected);
     }
   }
 
@@ -517,8 +729,38 @@ export class RelatoriosComponent implements OnInit {
     this.dataSourceDespesa.data = [];
     this.dataSourceReceita.data = [];
     this.filterAndSumByArea(this.congSelected);
-
   }
+
+  toggleAll(event: MatCheckboxChange) {
+    if (event.checked) {
+      console.log('SELECIONEI TUDO, FAZ ALGUMA COISA...');
+      this.congSelected = [];
+
+      if (this.sumTotal) {
+        this.CONGREGATIONS.forEach(el => this.congSelected.push(el));
+        this.dataSourceDespesa.data = [];
+        this.dataSourceReceita.data = [];
+        console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
+        // this.getSumTotal(this.congSelected);
+
+        if (this.dirigentes) {
+          this.congSelected = [];
+          this.CONGREGATIONS.forEach(el => this.congSelected.push(el));
+          this.dataSourceDespesa.data = [];
+          this.dataSourceReceita.data = [];
+          console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
+          this.getDizimoDirigentes(this.congSelected);
+        }
+      }
+
+    } else {
+      this.congSelected = [];
+      this.dataSourceReceita.data = [];
+      this.dataReceitasFiltered.length = 0;
+      this.dataSourceDespesa.data = [];
+      this.dataDespesasFiltered.length = 0;
+    }
+  }  
 
   exists(item: string) {
     return this.congSelected.indexOf(item) > -1;
@@ -532,28 +774,7 @@ export class RelatoriosComponent implements OnInit {
     return this.congSelected.length === this.CONGREGATIONS.length;
   };
 
-  toggleAll(event: MatCheckboxChange) {
-    if (event.checked) {
-      console.log('SELECIONEI TUDO, FAZ ALGUMA COISA...');
-      this.congSelected = [];
-
-      if (this.sumTotal) {
-        this.CONGREGATIONS.forEach(el => this.congSelected.push(el));
-        this.dataSourceDespesa.data = [];
-        this.dataSourceReceita.data = [];
-        console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
-        this.despesasTotal(this.outflowCenter);
-      }
-    } else {
-      this.congSelected = [];
-      this.dataSourceReceita.data = [];
-      this.dataReceitasFiltered.length = 0;
-      this.dataSourceDespesa.data = [];
-      this.dataDespesasFiltered.length = 0;
-    }
-  }
-
   downloadPdf() {
-    this.reportIn.save(`${this.file_name_in}.pdf`)   
+    this.reportIn.save(`${this.file_name_in}.pdf`)
   }
 }
