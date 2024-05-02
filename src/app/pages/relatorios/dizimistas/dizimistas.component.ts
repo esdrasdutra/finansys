@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatCheckboxChange } from '@angular/material/checkbox';
-import { Congregation } from '../../enums/congregation.enum';
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -9,6 +8,7 @@ import moment from 'moment';
 import { ComunicationService } from 'src/app/services/comunication.service';
 import { Outflows } from 'src/app/enums/outflows.enum';
 import { Lancamento } from 'src/app/models/Lancamento';
+import { Congregation } from 'src/app/enums/congregation.enum';
 
 @Component({
   selector: 'app-dizimistas',
@@ -16,9 +16,28 @@ import { Lancamento } from 'src/app/models/Lancamento';
   styleUrls: ['./dizimistas.component.sass']
 })
 export class DizimistasComponent {
+  CONGREGATIONS = Object.values(Congregation);
+
+  AREAMAPPING: { [key: string]: Congregation[] } = {
+    'TC': [this.CONGREGATIONS[36]],
+    '1': [this.CONGREGATIONS[5], this.CONGREGATIONS[13], this.CONGREGATIONS[25], this.CONGREGATIONS[12], this.CONGREGATIONS[8]],
+    '2': [this.CONGREGATIONS[19], this.CONGREGATIONS[23], this.CONGREGATIONS[18]],
+    '3': [this.CONGREGATIONS[30], this.CONGREGATIONS[4], this.CONGREGATIONS[24], this.CONGREGATIONS[21]],
+    '4': [this.CONGREGATIONS[27], this.CONGREGATIONS[28], this.CONGREGATIONS[3], this.CONGREGATIONS[26], this.CONGREGATIONS[1]],
+    '5': [this.CONGREGATIONS[17], this.CONGREGATIONS[2], this.CONGREGATIONS[16], this.CONGREGATIONS[15]],
+    '6': [this.CONGREGATIONS[9], this.CONGREGATIONS[20], this.CONGREGATIONS[22], this.CONGREGATIONS[14], this.CONGREGATIONS[31], this.CONGREGATIONS[35]],
+    '7': [this.CONGREGATIONS[0], this.CONGREGATIONS[29], this.CONGREGATIONS[33], this.CONGREGATIONS[11], this.CONGREGATIONS[7]],
+    '8': [this.CONGREGATIONS[32], this.CONGREGATIONS[6], this.CONGREGATIONS[10], this.CONGREGATIONS[34]],
+  }
+  
   file_name_in = '';
+  reportIn: any;
   dataDespesas: Lancamento[] = [];
   dataReceitas: Lancamento[] = [];
+  dataReceitasFiltered: any;
+  prepareIn: any;
+  displayedColumnsIn: string[] = [''];
+  dataSourceReceita: any;
   constructor(
     private commService: ComunicationService,
   ) { }
@@ -49,8 +68,8 @@ export class DizimistasComponent {
     let dizimistasList = this.dataReceitas.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
     const congregationMap: any = {};
 
-    for (const area of Object.keys(this.areaMapping)) {
-      for (const congregation of this.areaMapping[area]) {
+    for (const area of Object.keys(this.AREAMAPPING)) {
+      for (const congregation of this.AREAMAPPING[area]) {
         congregationMap[congregation] = congregationMap[congregation] || [];
       }
     }
@@ -73,10 +92,10 @@ export class DizimistasComponent {
       }
     }
 
-    for (const area of Object.keys(this.areaMapping)) {
+    for (const area of Object.keys(this.AREAMAPPING)) {
       const congregacoes = [];
 
-      for (const congregation of this.areaMapping[area]) {
+      for (const congregation of this.AREAMAPPING[area]) {
         congregacoes.push({
           nome: congregation,
           dizimistas: congregationMap[congregation].sort((a: any, b: any) => b.valorTotal - a.valorTotal),

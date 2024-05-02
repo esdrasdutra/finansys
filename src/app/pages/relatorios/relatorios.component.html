@@ -4,7 +4,7 @@
     <button type="button" (click)="getDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
     <select name="saidas" id="custoOption" (change)="handleCustoSelection($event.target)">
         <option *ngFor="let outflow of outflows" [value]="outflow">{{ outflow }}</option>
-    </select>    
+    </select>
 
     <ng-container *ngIf="sumTotal">
         <fieldset class="demo-fieldset">
@@ -14,7 +14,7 @@
                     Selecionar Tudo
                 </mat-checkbox>
             </div>
-            <div class="demo-select-all-checkboxes" *ngFor="let cong of congregations">
+            <div class="demo-select-all-checkboxes" *ngFor="let cong of CONGREGATIONS">
                 <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? handleToogle(cong, $event) : null"
                     [checked]="exists(cong)">
                     {{ cong }}
@@ -35,7 +35,7 @@
                     <option *ngFor="let area of areas" [value]="area">{{ area }}</option>
                 </select>
             </div>
-            <div class="demo-select-all-checkboxes" *ngFor="let area of areaMapping[option]">
+            <div class="demo-select-all-checkboxes" *ngFor="let area of AREAMAPPING[option]">
                 <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? handleToogle(area, $event) : null"
                     [checked]="exists(area)">
                     {{ area }}

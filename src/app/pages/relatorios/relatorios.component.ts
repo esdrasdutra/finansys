@@ -9,12 +9,27 @@ import moment from 'moment';
 import { ComunicationService } from 'src/app/services/comunication.service';
 import { Outflows } from 'src/app/enums/outflows.enum';
 
+
+
 @Component({
   selector: 'app-relatorios',
   templateUrl: './relatorios.component.html',
   styleUrls: ['./relatorios.component.sass']
 })
 export class RelatoriosComponent implements OnInit {
+  CONGREGATIONS = Object.values(Congregation);
+
+  AREAMAPPING: { [key: string]: Congregation[] } = {
+    'TC': [this.CONGREGATIONS[36]],
+    '1': [this.CONGREGATIONS[5], this.CONGREGATIONS[13], this.CONGREGATIONS[25], this.CONGREGATIONS[12], this.CONGREGATIONS[8]],
+    '2': [this.CONGREGATIONS[19], this.CONGREGATIONS[23], this.CONGREGATIONS[18]],
+    '3': [this.CONGREGATIONS[30], this.CONGREGATIONS[4], this.CONGREGATIONS[24], this.CONGREGATIONS[21]],
+    '4': [this.CONGREGATIONS[27], this.CONGREGATIONS[28], this.CONGREGATIONS[3], this.CONGREGATIONS[26], this.CONGREGATIONS[1]],
+    '5': [this.CONGREGATIONS[17], this.CONGREGATIONS[2], this.CONGREGATIONS[16], this.CONGREGATIONS[15]],
+    '6': [this.CONGREGATIONS[9], this.CONGREGATIONS[20], this.CONGREGATIONS[22], this.CONGREGATIONS[14], this.CONGREGATIONS[31], this.CONGREGATIONS[35]],
+    '7': [this.CONGREGATIONS[0], this.CONGREGATIONS[29], this.CONGREGATIONS[33], this.CONGREGATIONS[11], this.CONGREGATIONS[7]],
+    '8': [this.CONGREGATIONS[32], this.CONGREGATIONS[6], this.CONGREGATIONS[10], this.CONGREGATIONS[34]],
+  }
 
   columnMapping: { [key: string]: string } = {
     'recibo': 'RECIBO',
@@ -47,21 +62,7 @@ export class RelatoriosComponent implements OnInit {
   prepareIn: any = [];
   prepareOut: any = [];
 
-  congregations = Object.values(Congregation);
-
   outflows = Object.values(Outflows);
-
-  areaMapping: { [key: string]: Congregation[] } = {
-    'TC': [this.congregations[36]],
-    '1': [this.congregations[5], this.congregations[13], this.congregations[25], this.congregations[12], this.congregations[8]],
-    '2': [this.congregations[19], this.congregations[23], this.congregations[18]],
-    '3': [this.congregations[30], this.congregations[4], this.congregations[24], this.congregations[21]],
-    '4': [this.congregations[27], this.congregations[28], this.congregations[3], this.congregations[26], this.congregations[1]],
-    '5': [this.congregations[17], this.congregations[2], this.congregations[16], this.congregations[15]],
-    '6': [this.congregations[9], this.congregations[20], this.congregations[22], this.congregations[14], this.congregations[31], this.congregations[35]],
-    '7': [this.congregations[0], this.congregations[29], this.congregations[33], this.congregations[11], this.congregations[7]],
-    '8': [this.congregations[32], this.congregations[6], this.congregations[10], this.congregations[34]],
-  }
 
   areas = ['TC', '1', '2', '3', '4', '5', '6', '7', '8']
 
@@ -89,8 +90,8 @@ export class RelatoriosComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.commService.setAreaMapping(this.areaMapping);
-    
+    this.commService.setAreaMapping(this.AREAMAPPING);
+
     this.commService.despesasList$.subscribe(
       {
         next: (data) => {
@@ -273,6 +274,106 @@ export class RelatoriosComponent implements OnInit {
     this.dataSourceReceita.data = this.dataReceitasFiltered;
   }
 
+  getDizimistas() {
+    const novaLista = [];
+    this.file_name_in = `RELATÓRIO GERAL - DÍZIMO OBREIROS`
+    let dizimistasList = this.dataReceitas.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
+    const congregationMap: any = {};
+
+    for (const area of Object.keys(this.AREAMAPPING)) {
+      for (const congregation of this.AREAMAPPING[area]) {
+        congregationMap[congregation] = congregationMap[congregation] || [];
+      }
+    }
+
+    for (const lancamento of dizimistasList) {
+      const congregacao = lancamento.cong;
+      const dizimista = congregationMap[congregacao].find(
+        (d: any) => d.nome === lancamento.dizimista
+      );
+
+      if (!dizimista) {
+        congregationMap[congregacao].push({
+          nome: lancamento.dizimista,
+          valorTotal: lancamento.valor,
+          recibos: [lancamento.recibo],
+        });
+      } else {
+        dizimista.valorTotal += lancamento.valor;
+        dizimista.recibos.push(lancamento.recibo);
+      }
+    }
+
+    for (const area of Object.keys(this.AREAMAPPING)) {
+      const congregacoes = [];
+
+      for (const congregation of this.AREAMAPPING[area]) {
+        congregacoes.push({
+          nome: congregation,
+          dizimistas: congregationMap[congregation].sort((a: any, b: any) => b.valorTotal - a.valorTotal),
+        });
+      }
+
+      novaLista.push({
+        area,
+        congregacoes,
+      });
+    }
+
+    for (const area of novaLista) {
+      for (const congregacao of area.congregacoes) {
+        for (const dizimista of congregacao.dizimistas) {
+          if (dizimista.nome) {
+            this.dataReceitasFiltered.push({
+              mes: '03',
+              dizimista: dizimista.nome,
+              congregation: congregacao.nome,
+            });
+          }
+        }
+      }
+    }
+
+    this.reportIn = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4'
+    })
+
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.congregation);
+      tempObj.push(e.dizimista);
+      this.prepareIn.push(tempObj);
+    });
+
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.reportIn.setFontSize(12); // Adjust font size as needed
+        this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      }
+    };
+
+    autoTable(this.reportIn, {
+      head: [['MÊS', 'CONGREGAÇÃO', 'DIZIMISTA']],
+      body: this.prepareIn,
+      styles: { fontSize: 7 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
+    });
+
+    this.reportIn.save(`${this.file_name_in}.pdf`);
+
+    this.displayedColumnsIn = ['mes', 'congregation', 'dizimista']
+
+    this.dataSourceReceita.data = this.dataReceitasFiltered;
+
+  }
+
   despesasByCong(array: any): void {
     let congName = '';
     let month = null;
@@ -375,7 +476,7 @@ export class RelatoriosComponent implements OnInit {
   };
 
   isChecked() {
-    return this.congSelected.length === this.congregations.length;
+    return this.congSelected.length === this.CONGREGATIONS.length;
   };
 
   toggleAll(event: MatCheckboxChange) {
@@ -383,13 +484,13 @@ export class RelatoriosComponent implements OnInit {
       console.log('SELECIONEI TUDO, FAZ ALGUMA COISA...')
       this.congSelected = [];
       if (this.filterByArea) {
-        this.areaMapping[this.option].forEach(el => this.congSelected.push(el));
+        this.AREAMAPPING[this.option].forEach(el => this.congSelected.push(el));
         this.dataSourceDespesa.data = [];
         this.dataSourceReceita.data = [];
         this.filterAndSumByArea(this.congSelected);
       }
       if (this.sumTotal) {
-        this.congregations.forEach(el => this.congSelected.push(el));
+        this.CONGREGATIONS.forEach(el => this.congSelected.push(el));
         this.dataSourceDespesa.data = [];
         this.dataSourceReceita.data = [];
         console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
