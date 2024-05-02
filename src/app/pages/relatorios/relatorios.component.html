@@ -14,35 +14,26 @@
                     Selecionar Tudo
                 </mat-checkbox>
             </div>
-            <div class="demo-select-all-checkboxes" *ngFor="let cong of CONGREGATIONS">
-                <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? handleToogle(cong, $event) : null"
-                    [checked]="exists(cong)">
-                    {{ cong }}
-                </mat-checkbox>
+
+            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group"
+                *ngFor="let cong of CONGREGATIONS; index as i">
+                <input type="checkbox" class="btn-check" id="{{ 'btncheck-' + i}}" autocomplete="off"
+                    (click)="handleToogle($event, i)">
+                <label class="btn btn-primary" for="{{ 'btncheck-' + i}}">{{ cong }}</label>
             </div>
-        </fieldset>        
+        </fieldset>
     </ng-container>
 
     <ng-container *ngIf="filterByArea">
         <fieldset class="demo-fieldset">
-            <div>
-                <mat-checkbox aria-label="SELECIONAR todas" [checked]="isChecked()" [indeterminate]="isIndeterminate()"
-                    (change)="$event ? toggleAll($event) : null">
-                    Selecionar Tudo
-                </mat-checkbox>
-                
+            <div> SELECIONAR ÁREA:
                 <select name="option" id="areaOption" (change)="handleAreaSelection($event.target)">
                     <option *ngFor="let area of areas" [value]="area">{{ area }}</option>
                 </select>
             </div>
-            <div class="demo-select-all-checkboxes" *ngFor="let area of AREAMAPPING[option]">
-                <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? handleToogle(area, $event) : null"
-                    [checked]="exists(area)">
-                    {{ area }}
-                </mat-checkbox>
-            </div>
         </fieldset>
     </ng-container>
+
 
     <button type="button" (click)="downloadPdf()">IMPRIMIR RELATORIO</button>
     <header>RELATÓRIO ANALÍTICO</header>
@@ -65,7 +56,8 @@
                                 {{ element[item] }}
                             </ng-container>
 
-                            <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
+                            <ng-container
+                                *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
                                 {{ element[item] }}
                             </ng-container>
 
@@ -97,7 +89,8 @@
                                 {{ element[item] }}
                             </ng-container>
 
-                            <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
+                            <ng-container
+                                *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven' && item !== 'mes'">
                                 {{ element[item] }}
                             </ng-container>
 

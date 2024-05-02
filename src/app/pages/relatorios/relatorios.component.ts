@@ -194,6 +194,8 @@ export class RelatoriosComponent implements OnInit {
   }
 
   filterAndSumByArea(area: any): void {
+    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ÁREA ${this.option}`
+
     this.receitasPerCong.length = 0;
     this.despesasPerCong.length = 0;
     let totalDespesas = 0;
@@ -203,7 +205,9 @@ export class RelatoriosComponent implements OnInit {
 
     area.forEach((cong: any) => {
       this.receitasPerCong.push(
-        this.dataReceitas.filter((el: any) => el.cong === cong),
+        this.dataReceitas.filter((el: any) =>{
+          return el.cong === cong
+        }),
       );
 
       this.despesasPerCong.push(
@@ -218,7 +222,7 @@ export class RelatoriosComponent implements OnInit {
       cong.forEach((res: any) => {
         valueTemp += parseFloat(res.valor)
         congName = res.cong
-        month = res.data_lan
+        month = moment(res.data_lan).format('MM');
       });
       this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
     });
@@ -230,7 +234,7 @@ export class RelatoriosComponent implements OnInit {
       cong.forEach((res: any) => {
         valueTemp += parseFloat(res.valor)
         congName = res.cong
-        month = res.data_lan
+        month = moment(res.data_lan).format('MM');
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
@@ -245,6 +249,41 @@ export class RelatoriosComponent implements OnInit {
 
     this.dataReceitasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
     this.dataDespesasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas });
+
+    this.reportIn = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4'
+    })
+
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.congregation);
+      tempObj.push(formattedValue);
+      this.prepareIn.push(tempObj);
+    });
+
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.reportIn.setFontSize(12); // Adjust font size as needed
+        this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      }
+    };
+
+    autoTable(this.reportIn, {
+      head: [['MÊS', 'CONGREGAÇÃO', 'VALOR']],
+      body: this.prepareIn,
+      styles: { fontSize: 7 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
+    });
+
+    this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
+    this.displayedColumnsOut = ['mes', 'congregation', 'valor'];
 
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
     this.dataSourceReceita.data = this.dataReceitasFiltered;
@@ -426,14 +465,17 @@ export class RelatoriosComponent implements OnInit {
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
   }
 
-  handleToogle(item: string, event: MatCheckboxChange): void {
+  handleToogle(event: Event, index: number): void {    
+    const checkbox = event.target as HTMLInputElement;
+    const congregation = this.CONGREGATIONS[index];
+
     this.receitasPerCong.length = 0;
     this.despesasPerCong.length = 0;
     this.dataReceitasFiltered.length = 0;
     this.dataDespesasFiltered.length = 0;
 
-    if (event.checked) {
-      this.congSelected.push(item);
+    if (checkbox.checked) {
+      this.congSelected.push(congregation);
       if (this.congSelected.length !== 1) {
         this.getSumTotal(this.congSelected);
       } else {
@@ -453,18 +495,25 @@ export class RelatoriosComponent implements OnInit {
         // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
         this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
       }
+      console.log(this.congSelected);
     } else {
-      const index = this.congSelected.indexOf(item);
-      if (index >= 0) {
-        this.congSelected.splice(index, 1);
-      }
+      const indexToRemove  = this.congSelected.indexOf(congregation);
+      if (indexToRemove !== -1) {
+        this.congSelected.splice(indexToRemove, 1);
+    }
+      console.log(this.congSelected);
       this.getSumTotal(this.congSelected);
     }
   }
 
   handleAreaSelection(event: any): void {
+    this.congSelected = [];
     this.option = event.value;
-    console.log(this.option);
+    this.AREAMAPPING[this.option].forEach(el => this.congSelected.push(el));
+    this.dataSourceDespesa.data = [];
+    this.dataSourceReceita.data = [];
+    this.filterAndSumByArea(this.congSelected);
+
   }
 
   exists(item: string) {
@@ -481,14 +530,9 @@ export class RelatoriosComponent implements OnInit {
 
   toggleAll(event: MatCheckboxChange) {
     if (event.checked) {
-      console.log('SELECIONEI TUDO, FAZ ALGUMA COISA...')
+      console.log('SELECIONEI TUDO, FAZ ALGUMA COISA...');
       this.congSelected = [];
-      if (this.filterByArea) {
-        this.AREAMAPPING[this.option].forEach(el => this.congSelected.push(el));
-        this.dataSourceDespesa.data = [];
-        this.dataSourceReceita.data = [];
-        this.filterAndSumByArea(this.congSelected);
-      }
+
       if (this.sumTotal) {
         this.CONGREGATIONS.forEach(el => this.congSelected.push(el));
         this.dataSourceDespesa.data = [];
@@ -506,89 +550,6 @@ export class RelatoriosComponent implements OnInit {
   }
 
   downloadPdf() {
-    var docIn = new jsPDF({
-      orientation: "landscape",
-      unit: "cm",
-      format: 'a4'
-    });
-
-    var docOut = new jsPDF({
-      orientation: "landscape",
-      unit: "cm",
-      format: 'a4'
-    });
-
-    let prepareIn: any = [];
-    let prepareOut: any = [];
-    // ['mes', 'congregation', 'dizimista']
-    // this.displayedColumns = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
-    // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
-
-    this.dataReceitasFiltered.forEach((e: any) => {
-      let tempObj: any = [];
-      const parsedValue = parseFloat(e.valor);
-      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      tempObj.push(e.mes);
-      tempObj.push(e.recibo);
-      tempObj.push(e.congregation);
-      tempObj.push(e.entrada);
-      tempObj.push(e.dizimista);
-      tempObj.push(e.obs);
-      tempObj.push(formattedValue);
-      prepareIn.push(tempObj);
-    });
-
-    this.dataDespesasFiltered.forEach((e: any) => {
-      let tempObj: any = [];
-      const parsedValue = parseFloat(e.valor);
-      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      tempObj.push(e.mes);
-      tempObj.push(e.recibo);
-      tempObj.push(e.congregation);
-      tempObj.push(e.saida);
-      tempObj.push(e.tipo_doc);
-      tempObj.push(e.obs);
-      tempObj.push(formattedValue);
-      prepareOut.push(tempObj);
-    });
-
-    const setHeaderPageConfigIn = (data: any) => {
-      data.settings.margin.top = 0.5;
-      if (data.pageNumber === 1) {
-        docIn.setFontSize(12); // Adjust font size as needed
-        docIn.text(this.file_name_in, docIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
-      } else {
-      }
-    };
-
-    const setHeaderPageConfigOut = (data: any) => {
-      data.settings.margin.top = 0.5;
-      if (data.pageNumber === 1) {
-        docOut.setFontSize(12); // Adjust font size as needed
-      } else {
-        docOut.text(this.file_name_out || '', docOut.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
-      }
-    };
-
-    autoTable(docIn, {
-      // ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
-      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'ENTRADA', 'DIZIMISTA', 'HISTORICO', 'VALOR']],
-      body: prepareIn,
-      styles: { fontSize: 6 },
-      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
-      willDrawPage: (data) => setHeaderPageConfigIn(data)
-    });
-
-    autoTable(docOut, {
-      // ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
-      head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'SAÍDA', 'TIPO DOC.', 'HISTORICO', 'VALOR']],
-      body: prepareOut,
-      styles: { fontSize: 6 },
-      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
-      willDrawPage: (data) => setHeaderPageConfigOut(data)
-    });
-
-    docIn.save(`${this.file_name_in}.pdf`);
-    docOut.save(`${this.file_name_out}.pdf`);
+    this.reportIn.save(`${this.file_name_in}.pdf`)   
   }
 }
