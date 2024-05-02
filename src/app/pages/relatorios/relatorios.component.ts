@@ -72,6 +72,9 @@ export class RelatoriosComponent implements OnInit {
   option: number = 0;
   clicked: number = 0;
 
+  currentMonth = moment().month();
+  prevMonth = moment().add(-1, 'months').month();
+
   despesasPerCong: any = [];
   receitasPerCong: any = [];
 
@@ -95,7 +98,7 @@ export class RelatoriosComponent implements OnInit {
     this.commService.despesasList$.subscribe(
       {
         next: (data) => {
-          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3)
+          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth) //|| moment(el.data_lan).month() === 3)
         },
         error: (err) => console.log(err),
       }
@@ -104,7 +107,7 @@ export class RelatoriosComponent implements OnInit {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3);
+          this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth) //|| moment(el.data_lan).month() === 3);
         },
         error: (err) => console.log(err),
       }
@@ -222,6 +225,7 @@ export class RelatoriosComponent implements OnInit {
       cong.forEach((res: any) => {
         valueTemp += parseFloat(res.valor)
         congName = res.cong
+        console.log(res.data_lan);
         month = moment(res.data_lan).format('MM');
       });
       this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
