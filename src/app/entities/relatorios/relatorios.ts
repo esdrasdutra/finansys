@@ -2,8 +2,6 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import moment from "moment";
 import { Congregation } from "src/app/enums/congregation.enum";
-import { Lancamento } from "src/app/models/Lancamento";
-import { ComunicationService } from "src/app/services/comunication.service";
 
 export const CONGREGATIONS = Object.values(Congregation);
 
@@ -47,6 +45,7 @@ export class RelatorioAnalitico {
   prepare: any = [];
   dataFiltered: any = [];
   novaLista: any = [];
+  receitasPerCong: any = [];
 
   getDizimistas(data: any): void {
     this.file_name = `RELATÓRIO GERAL - DÍZIMO OBREIROS`
@@ -159,9 +158,16 @@ export class RelatorioAnalitico {
     this.file_name = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`;
 
     data = data.filter((el: any) => el.entrada !== 'ENTRADA OFERTA AVULSA' && el.cong !== 'TEMPLO CENTRAL');
-    console.log(data);
 
-    data?.forEach((cong: any) => {
+    CONGREGATIONS.forEach((cong: any) => {
+      console.log(cong);
+      this.receitasPerCong.push(
+        data.filter((el: any) => el.cong === cong),
+      );
+    });
+
+
+    this.receitasPerCong?.forEach((cong: any) => {
       let valueTemp = 0;
       let ofertaAvulsaTotal = 0;
       let congName = '';
