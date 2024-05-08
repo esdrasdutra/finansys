@@ -43,6 +43,10 @@ export class LancamentoListComponent implements OnInit {
   dataDespesas: any = [];
   dataReceitas: any = [];
 
+  currentMonth = moment();
+  prevMonth = moment().add(-1, 'months');
+
+
   selectedRowIndex = -1;
 
   displayedColumnsLancamento = [
@@ -59,12 +63,11 @@ export class LancamentoListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    let today = Date.now()
-
+    console.log('ESSE MES', this.currentMonth.month(), 'MES PASSADO', this.prevMonth.month())
     this.commService.despesasList$.subscribe(
       {
         next: (data) => { 
-          this.dataSourceDespesas.data = data.filter((el: any) => moment(el.data_lan).month() === 2 || moment(el.data_lan).month() === 3);
+          this.dataSourceDespesas.data = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth.month() || moment(el.data_lan).month() === this.currentMonth.month());
         },
         error: (err) => console.log(err),
       }
@@ -73,7 +76,7 @@ export class LancamentoListComponent implements OnInit {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          this.dataSourceReceitas.data = data.filter((el: any) => moment(el.data_lan).month() === 2 || moment(el.data_lan).month() === 3);
+          this.dataSourceReceitas.data = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth.month() || moment(el.data_lan).month() === this.currentMonth.month());
         },
         error: (err) => console.log(err),
       }
