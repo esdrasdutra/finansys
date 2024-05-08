@@ -5,7 +5,6 @@ import { ListLancamentoResponse } from '../response/ListLancamentoResponse';
 import { Lancamento } from '../..//models/Lancamento';
 import { AddLancamentoResponse } from '../response/AddLancamentoResponse';
 import { RemoveLancamentoResponse } from '../response/RemoveLancamentoResponse';
-import { LancamentosCacheService } from '../lancamentos-cache.service';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +20,6 @@ export class LancamentoService {
 
   constructor(
     private requestService: RequestService,
-    private lancamentosCacheService: LancamentosCacheService,
   ) { }
 
   setLancamento(lancamento: any) {

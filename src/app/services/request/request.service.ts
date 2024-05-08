@@ -34,7 +34,6 @@ export class RequestService {
   }
 
   delete<Response>(url: any): Observable<Response>{
-    console.log(url);
     return this.http.delete<Response>(url);
   }
 }

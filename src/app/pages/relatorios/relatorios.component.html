@@ -1,7 +1,7 @@
 <div class="custom-container">
     <button type="button" (click)="handleSumTotal()">Relatório de Despesas / Receitas das Congregações</button>
     <button type="button" (click)="handleSumByArea()">Relatório de Despesas / Receitas por Área</button>
-    <button type="button" (click)="getDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
+    <button type="button" (click)="handleDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
     <button type="button" (click)="handleDizimoDirigentes()"> 10% DIRIGENTES</button>
     <select name="saidas" id="custoOption" (change)="handleCustoSelection($event.target)">
         <option *ngFor="let outflow of outflows" [value]="outflow">{{ outflow }}</option>
@@ -17,7 +17,7 @@
             </div>
 
             <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group"
-                *ngFor="let cong of CONGREGATIONS; index as i">
+                *ngFor="let cong of congregations; index as i">
                 <input type="checkbox" class="btn-check" id="{{ 'btncheck-' + i}}" autocomplete="off"
                     (click)="handleToogle($event, i)">
                 <label class="btn btn-primary" for="{{ 'btncheck-' + i}}">{{ cong }}</label>
