@@ -9,6 +9,7 @@ import { ComunicationService } from 'src/app/services/comunication.service';
 import { Outflows } from 'src/app/enums/outflows.enum';
 import { AREAMAPPING, AREAS, COLUMNMAPPING, CONGREGATIONS} from 'src/app/entities/relatorios/relatorios';
 import { RelatorioAnalitico } from 'src/app/entities/relatorios/relatorios';
+import { Congregation } from 'src/app/enums/congregation.enum';
 
 @Component({
   selector: 'app-relatorios',
@@ -549,9 +550,11 @@ export class RelatoriosComponent implements OnInit {
     this.dataSourceDespesa.data = this.dataDespesasFiltered;
   }
 
-  handleToogle(event: Event, index: number): void {
+  handleToggle(event: Event, index: number): void {
     const checkbox = event.target as HTMLInputElement;
     const congregation = CONGREGATIONS[index];
+
+    console.log(index, checkbox);
 
     this.receitasPerCong.length = 0;
     this.despesasPerCong.length = 0;
@@ -600,8 +603,10 @@ export class RelatoriosComponent implements OnInit {
     this.filterAndSumByArea(this.congSelected);
   }
 
-  toggleAll(event: MatCheckboxChange) {
-    if (event.checked) {
+  toggleAll(event: Event) {
+    const checkbox = event.target as HTMLInputElement;
+
+    if (checkbox.checked) {
       console.log('SELECIONEI TUDO, FAZ ALGUMA COISA...');
       this.congSelected = [];
 

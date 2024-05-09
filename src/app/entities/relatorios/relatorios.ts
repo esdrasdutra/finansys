@@ -19,6 +19,12 @@ export const AREAMAPPING: { [key: string]: Congregation[] } = {
   '8': [CONGREGATIONS[32], CONGREGATIONS[6], CONGREGATIONS[10], CONGREGATIONS[34]],
 }
 
+export const FILTROS: string[] = ['Dt. Lançamento', 'Recibo','Valor', 'Tipo Documento', 'Nº Documento'];
+export const MESES = [
+  'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
+  'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
+];
+
 export const COLUMNMAPPING: { [key: string]: string } = {
   'recibo': 'RECIBO',
   'data_lan': 'LANÇAMENTO',
@@ -165,7 +171,6 @@ export class RelatorioAnalitico {
         data.filter((el: any) => el.cong === cong),
       );
     });
-
 
     this.receitasPerCong?.forEach((cong: any) => {
       let valueTemp = 0;

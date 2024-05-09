@@ -28,6 +28,8 @@ import { registerLocaleData } from '@angular/common';
 import localePtBr from '@angular/common/locales/pt';
 import { PaginatorComponent } from '../..//components/paginator/paginator.component';
 import { RelatoriosComponent } from '../..//pages/relatorios/relatorios.component';
+import { PorcentagemDirigentesComponent } from 'src/app/pages/relatorios/porcentagem-dirigentes/porcentagem-dirigentes.component';
+import { RouterModule } from '@angular/router';
 
 registerLocaleData(localePtBr);
 
@@ -43,6 +45,7 @@ registerLocaleData(localePtBr);
         DashboardComponent,
         RelatoriosComponent,
         PaginatorComponent,
+        PorcentagemDirigentesComponent,
     ],
     exports: [
         HomeComponent,
@@ -61,6 +64,7 @@ registerLocaleData(localePtBr);
         { provide: LOCALE_ID, useValue: 'pt-BR'}
     ],
     imports: [
+        RouterModule,
         CommonModule,
         MatTabsModule,
         MatCardModule,

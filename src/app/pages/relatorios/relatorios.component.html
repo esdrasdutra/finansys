@@ -8,21 +8,17 @@
     </select>
 
     <ng-container *ngIf="sumTotal">
-        <fieldset class="demo-fieldset">
+        <div aria-label="Basic checkbox toggle button group">
             <div>
-                <mat-checkbox aria-label="SELECIONAR todas" [checked]="isChecked()" [indeterminate]="isIndeterminate()"
-                    (change)="$event ? toggleAll($event) : null">
-                    Selecionar Tudo
-                </mat-checkbox>
+                <input type="checkbox" class="btn-check" id="btnToggle" autocomplete="off" (click)="toggleAll($event)">
+                <label class="btn btn-primary" for="btnToggle">SELECIONAR TODOS</label>
             </div>
-
-            <div class="btn-group" role="group" aria-label="Basic checkbox toggle button group"
-                *ngFor="let cong of congregations; index as i">
+            <div class="btn-group" role="group" *ngFor="let cong of congregations; index as i">
                 <input type="checkbox" class="btn-check" id="{{ 'btncheck-' + i}}" autocomplete="off"
-                    (click)="handleToogle($event, i)">
+                    (click)="handleToggle($event, i)" [checked]="isChecked()">
                 <label class="btn btn-primary" for="{{ 'btncheck-' + i}}">{{ cong }}</label>
             </div>
-        </fieldset>
+        </div>
     </ng-container>
 
     <ng-container *ngIf="filterByArea">
@@ -35,9 +31,7 @@
         </fieldset>
     </ng-container>
 
-
     <button type="button" (click)="downloadPdf()">IMPRIMIR RELATORIO</button>
-    <header>RELATÓRIO ANALÍTICO</header>
     <mat-tab-group mat-tab-align="start" animationDuration="0ms">
         <mat-tab label="DESPESAS" class="despesas-tab">
             <section class="mat-elevation-z8" tabindex="0">

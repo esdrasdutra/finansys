@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
+import { FILTROS, MESES } from 'src/app/entities/relatorios/relatorios';
 
 @Component({
   selector: 'app-Home',
@@ -9,11 +10,8 @@ import { LancamentoService } from '../..//services/lancamentos/lancamento.servic
 })
 export class HomeComponent {
   inputValue: string = '';
-  filtros: string[] = ['Dt. Lançamento', 'Recibo','Valor', 'Tipo Documento', 'Nº Documento'];
-  meses = [
-    'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
-    'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
-  ];
+  filtros = FILTROS;
+  meses = MESES;
 
   constructor() { }
 

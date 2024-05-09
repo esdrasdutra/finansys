@@ -1,0 +1,18 @@
+<section id="filter-container">
+    <div class="search-bar">
+        <div class="search-name">
+            <div class="input-group">
+                <mat-icon aria-hidden="false" aria-label="Filter Icon" fontIcon="filter_alt"></mat-icon>
+                <select id="input-group-filter">
+                    <option *ngFor="let filtro of filtros" [value]="filtro">{{ filtro }}</option>
+                </select>
+                <mat-icon aria-hidden="false" aria-label="Search Icon" fontIcon="filter_list"></mat-icon>
+                <select id="input-group-filter">
+                    <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
+                </select>
+
+                <input type="text" (keyup)="onKey($event)">
+            </div>
+        </div>
+    </div>
+</section>
