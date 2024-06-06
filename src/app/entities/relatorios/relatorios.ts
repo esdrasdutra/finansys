@@ -161,14 +161,22 @@ export class RelatorioAnalitico {
 
   getDizimoDirigentes(data: any): void {
     let totalReceitas = 0;
+    let totalAvulsas = 0
     this.file_name = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`;
+    let ofertaAvulsaTotalExclude = data.filter((el: any) => el.entrada == 'ENTRADA OFERTA AVULSA');
+  
+    ofertaAvulsaTotalExclude.forEach((obj: any) => {
+      console.log(`CONG: ${obj.cong} / VALOR: ${obj.valor}`);
+      totalAvulsas += Number.parseFloat(obj.valor);
+    });
 
-    data = data.filter((el: any) => el.entrada !== 'ENTRADA OFERTA AVULSA' && el.cong !== 'TEMPLO CENTRAL');
+    console.log(ofertaAvulsaTotalExclude);
+
+    data = data.filter((el: any) => el.entrada != 'ENTRADA OFERTA AVULSA');
 
     CONGREGATIONS.forEach((cong: any) => {
-      console.log(cong);
       this.receitasPerCong.push(
-        data.filter((el: any) => el.cong === cong),
+        data.filter((el: any) => el.cong === cong && el.cong !== 'TEMPLO CENTRAL'),
       );
     });
 
@@ -186,7 +194,7 @@ export class RelatorioAnalitico {
     })
 
     this.dataFiltered.forEach((obj: any) => {
-      totalReceitas += obj.valor
+      totalReceitas += Number.parseFloat(obj.valor)
     });
 
     this.dataFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
@@ -223,8 +231,7 @@ export class RelatorioAnalitico {
       willDrawPage: (data) => setHeaderPageConfigIn(data)
     });
 
-    // this.report.save(`${this.file_name}.pdf`);
-    console.log(this.dataFiltered);
+    //this.report.save(`${this.file_name}.pdf`);
+    return this.dataFiltered;
   }
-
 }
