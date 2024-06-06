@@ -1,4 +1,4 @@
-<section id="filter-container">
+<section id="filter-container" class="dirigente-percent">
     <div class="search-bar">
         <div class="search-name">
             <div class="input-group">
@@ -10,9 +10,77 @@
                 <select id="input-group-filter">
                     <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
                 </select>
-
                 <input type="text" (keyup)="onKey($event)">
             </div>
+        </div>
+    </div>
+</section>
+<section id="content" class="dirigente-percent">
+    <div class="title">
+        <h1>10% DOS DIRIGENTES</h1>
+    </div>
+    <div class="table">
+        <div>
+            <table mat-table *ngIf="dataSource" [dataSource]="dataSource">
+                <ng-container *ngFor="let item of displayedColumns" [matColumnDef]="item">
+                    <th mat-header-cell class="f-sm" *matHeaderCellDef>
+                        <div *ngIf="item === 'valor';then isValue else notValue"></div>
+                        <ng-template #isValue>
+                            <div class="valor-despesa">
+                                (R$) {{ columnMapping[item] }}
+                            </div>
+                        </ng-template>
+                        <ng-template #notValue> {{ columnMapping[item] }} </ng-template>
+                    </th>
+                    <td mat-cell class="f-sm" *matCellDef="let element">
+                        <ng-container *ngIf="item === 'valor'">
+                            <div class="valor-despesa">{{ element[item] | currency: 'BRL' }}</div>
+                        </ng-container>
+    
+                        <ng-container *ngIf="item === 'data_lan' || item === 'data_ven'">
+                            {{ element[item] | date:'dd/MM' : 'pt-BR' }}
+                        </ng-container>
+    
+                        <ng-container *ngIf="item !== 'valor' && item !== 'data_lan' && item !== 'data_ven'">
+                            {{ element[item] }}
+                        </ng-container>
+                    </td>
+                </ng-container>
+                <tr class="f-sm" mat-header-row *matHeaderRowDef="displayedColumns, sticky: true"></tr>
+            </table>
+        </div>
+
+        <div>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">First</th>
+                    <th scope="col">Last</th>
+                    <th scope="col">Handle</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">1</th>
+                    <td>Mark</td>
+                    <td>Otto</td>
+                    <td>@mdo</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">2</th>
+                    <td>Jacob</td>
+                    <td>Thornton</td>
+                    <td>@fat</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">3</th>
+                    <td>Larry</td>
+                    <td>the Bird</td>
+                    <td>@twitter</td>
+                  </tr>
+                </tbody>
+              </table>
         </div>
     </div>
 </section>
