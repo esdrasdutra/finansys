@@ -7,6 +7,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+
+
 import { LancamentoListComponent } from '../../components/lancamento-list/lancamento-list.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
@@ -30,6 +34,7 @@ import { PaginatorComponent } from '../..//components/paginator/paginator.compon
 import { RelatoriosComponent } from '../..//pages/relatorios/relatorios.component';
 import { PorcentagemDirigentesComponent } from 'src/app/pages/relatorios/porcentagem-dirigentes/porcentagem-dirigentes.component';
 import { RouterModule } from '@angular/router';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 
 registerLocaleData(localePtBr);
 
@@ -58,6 +63,8 @@ registerLocaleData(localePtBr);
         RelatoriosComponent,
         PaginatorComponent,
         MatCheckboxModule,
+        MatNativeDateModule,
+
     ],
     providers: [
         provideNgxMask(),
@@ -81,6 +88,8 @@ registerLocaleData(localePtBr);
         NgxMaskPipe,
         DatepickerViewsSelectionExampleComponent,
         MatPaginatorModule,
+        MatDatepickerModule,        
+        MatSelectModule,
     ]
 })
 export class HomeModule { }

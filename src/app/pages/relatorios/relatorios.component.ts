@@ -1,16 +1,29 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatCheckboxChange } from '@angular/material/checkbox';
 
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import moment from 'moment';
+
 import { ComunicationService } from 'src/app/services/comunication.service';
 import { Outflows } from 'src/app/enums/outflows.enum';
 import { AREAMAPPING, AREAS, COLUMNMAPPING, CONGREGATIONS} from 'src/app/entities/relatorios/relatorios';
 import { RelatorioAnalitico } from 'src/app/entities/relatorios/relatorios';
-import { Congregation } from 'src/app/enums/congregation.enum';
+import { FormControl } from '@angular/forms';
+import { Moment } from 'moment';
+import { MatDatepicker } from '@angular/material/datepicker';
+import moment from 'moment';
 
+const MY_FORMATS = {
+  parse: {
+    dateInput: 'MM/YYYY',
+  },
+  display: {
+    dateInput: 'MM/YYYY',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 @Component({
   selector: 'app-relatorios',
   templateUrl: './relatorios.component.html',
@@ -21,7 +34,6 @@ export class RelatoriosComponent implements OnInit {
   congregations = CONGREGATIONS;
   columnMapping = COLUMNMAPPING;
   areas = AREAS;
-
   
   relatorio = new RelatorioAnalitico();
   dataSourceDespesa = new MatTableDataSource();
@@ -86,6 +98,10 @@ export class RelatoriosComponent implements OnInit {
 
   handleDizimistas() {
     this.relatorio.getDizimistas(this.dataReceitas);
+  }
+
+  handlePeriodo() {
+    this.relatorio.getRelatorioPorPeriodo();
   }
 
   handleSumTotal() {
@@ -661,7 +677,7 @@ export class RelatoriosComponent implements OnInit {
       this.dataSourceDespesa.data = [];
       this.dataDespesasFiltered.length = 0;
     }
-  }  
+  }
 
   exists(item: string) {
     return this.congSelected.indexOf(item) > -1;

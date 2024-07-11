@@ -1,7 +1,10 @@
+import { inject } from "@angular/core";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import moment from "moment";
 import { Congregation } from "src/app/enums/congregation.enum";
+import { Lancamento } from "src/app/models/Lancamento";
+import { ComunicationService } from "src/app/services/comunication.service";
 
 export const CONGREGATIONS = Object.values(Congregation);
 
@@ -20,6 +23,7 @@ export const AREAMAPPING: { [key: string]: Congregation[] } = {
 }
 
 export const FILTROS: string[] = ['Dt. Lançamento', 'Recibo','Valor', 'Tipo Documento', 'Nº Documento'];
+
 export const MESES = [
   'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
   'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
@@ -46,6 +50,15 @@ export const COLUMNMAPPING: { [key: string]: string } = {
 };
 
 export class RelatorioAnalitico {
+  private commService: ComunicationService;
+  dataReceitasFiltered: any = [];
+
+  constructor() {
+    this.commService = inject(ComunicationService);
+  }
+  
+  dataReceitas: any = [];
+  
   file_name!: string;
   report = new jsPDF();
   prepare: any = [];
@@ -57,7 +70,6 @@ export class RelatorioAnalitico {
     this.file_name = `RELATÓRIO GERAL - DÍZIMO OBREIROS`
 
     let dizimistasList = data.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
-    // console.log(dizimistasList);
 
     let congregationMap: any = [];
 
@@ -234,4 +246,50 @@ export class RelatorioAnalitico {
     //this.report.save(`${this.file_name}.pdf`);
     return this.dataFiltered;
   }
+
+  getRelatorioPorPeriodo() {
+    this.file_name = `RELATÓRIO DE ENTRADAS - POR PERÍODO`;
+    
+    this.commService.receitasList$.subscribe(
+      {
+        next: (data) => {
+          this.dataReceitas = data;
+        },
+        error: (err) => console.log(err),
+      }
+    )
+
+    const startDate = moment(new Date(2024, 1, 1));
+    const endDate = moment(new Date(2024, 5, 30));
+    
+    const receitasSemestre = this.dataReceitas.filter((lanc: Lancamento) => {
+      const lancMoment = moment(lanc.data_lan);
+      return lancMoment.isBetween(startDate, endDate, 'days', '[]')
+    });
+
+    CONGREGATIONS.forEach((cong: string)=> {
+      this.receitasPerCong.push(
+        receitasSemestre.filter((el: Lancamento) => {
+          return el.cong === cong
+        }),
+      );
+    })
+
+    this.receitasPerCong.forEach((cong: any) => {
+      let valueTemp = 0;
+      let congName = '';
+      let month = null;
+      cong.forEach((res: any) => {
+        valueTemp += parseFloat(res.valor)
+        congName = res.cong
+        month = moment(res.data_lan).format('MM');
+      })
+      this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
+    });
+
+    console.log(this.dataReceitasFiltered);
+
+    return 0 ;
+  }
+
 }

@@ -2,6 +2,7 @@
     <button type="button" (click)="handleSumTotal()">Relatório de Despesas / Receitas das Congregações</button>
     <button type="button" (click)="handleSumByArea()">Relatório de Despesas / Receitas por Área</button>
     <button type="button" (click)="handleDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
+    <button type="button" (click)="handlePeriodo()"> Relatório de Entradas por Período</button>
     <button type="button" (click)="handleDizimoDirigentes()"> 10% DIRIGENTES</button>
     <select name="saidas" id="custoOption" (change)="handleCustoSelection($event.target)">
         <option *ngFor="let outflow of outflows" [value]="outflow">{{ outflow }}</option>
