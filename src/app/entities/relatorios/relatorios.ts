@@ -171,24 +171,14 @@ export class RelatorioAnalitico {
     // const displayedColumns = ['mes', 'congregation', 'dizimista']
   }
 
-  getDizimoDirigentes(data: any): void {
+  getDizimoDirigentes(data: any): Lancamento[] {
     let totalReceitas = 0;
     let totalAvulsas = 0
     this.file_name = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`;
-    let ofertaAvulsaTotalExclude = data.filter((el: any) => el.entrada == 'ENTRADA OFERTA AVULSA');
-  
-    ofertaAvulsaTotalExclude.forEach((obj: any) => {
-      console.log(`CONG: ${obj.cong} / VALOR: ${obj.valor}`);
-      totalAvulsas += Number.parseFloat(obj.valor);
-    });
-
-    console.log(ofertaAvulsaTotalExclude);
-
-    data = data.filter((el: any) => el.entrada != 'ENTRADA OFERTA AVULSA');
-
+    
     CONGREGATIONS.forEach((cong: any) => {
       this.receitasPerCong.push(
-        data.filter((el: any) => el.cong === cong && el.cong !== 'TEMPLO CENTRAL'),
+        data.filter((el: any) => el.cong === cong),
       );
     });
 
@@ -202,14 +192,14 @@ export class RelatorioAnalitico {
         congName = res.cong
         month = moment(res.data_lan).format('MM');
       });
-      this.dataFiltered.push({ congregation: congName, mes: month, valor: valueTemp });
+      this.dataFiltered.push({ congregation: congName, valor: valueTemp });
     })
 
     this.dataFiltered.forEach((obj: any) => {
       totalReceitas += Number.parseFloat(obj.valor)
     });
 
-    this.dataFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
+    this.dataFiltered.push({ congregation: 'TOTAL GERAL', valor: totalReceitas });
 
     this.report = new jsPDF({
       orientation: "portrait",
@@ -221,7 +211,6 @@ export class RelatorioAnalitico {
       let tempObj = [];
       const parsedValue = parseFloat(e.valor);
       const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      tempObj.push(e.mes);
       tempObj.push(e.congregation);
       tempObj.push(formattedValue);
       this.prepare.push(tempObj);
@@ -236,7 +225,7 @@ export class RelatorioAnalitico {
     };
 
     autoTable(this.report, {
-      head: [['MÊS', 'CONGREGAÇÃO', 'VALOR']],
+      head: [[ 'CONGREGAÇÃO', 'VALOR']],
       body: this.prepare,
       styles: { fontSize: 7 },
       margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
@@ -282,10 +271,7 @@ export class RelatorioAnalitico {
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
-
-    console.log(this.dataReceitasFiltered);
-
-    return 0 ;
+    return this.dataReceitasFiltered ;
   }
 
 }
