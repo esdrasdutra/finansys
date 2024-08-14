@@ -22,7 +22,7 @@ export const AREAMAPPING: { [key: string]: Congregation[] } = {
   '8': [CONGREGATIONS[32], CONGREGATIONS[6], CONGREGATIONS[10], CONGREGATIONS[34]],
 }
 
-export const FILTROS: string[] = ['Dt. Lançamento', 'Recibo','Valor', 'Tipo Documento', 'Nº Documento'];
+export const FILTROS: string[] = ['Mês', 'Recibo','Valor', 'Tipo Documento', 'Nº Documento'];
 
 export const MESES = [
   'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
@@ -261,16 +261,12 @@ export class RelatorioAnalitico {
 
     const startDate = moment(new Date(2024, 1, 1));
     const endDate = moment(new Date(2024, 5, 30));
-    
-    const receitasSemestre = this.dataReceitas.filter((lanc: Lancamento) => {
-      const lancMoment = moment(lanc.data_lan);
-      return lancMoment.isBetween(startDate, endDate, 'days', '[]')
-    });
 
     CONGREGATIONS.forEach((cong: string)=> {
       this.receitasPerCong.push(
-        receitasSemestre.filter((el: Lancamento) => {
-          return el.cong === cong
+        this.dataReceitas.filter((el: Lancamento) => {
+          const lancMoment = moment(el.data_lan);
+          return el.cong === cong && lancMoment.isBetween(startDate, endDate, 'days', '[]')
         }),
       );
     })
