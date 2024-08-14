@@ -24,8 +24,8 @@ export class RelatoriosComponent implements OnInit {
   meses = MESES;
   
   relatorio = new RelatorioAnalitico();
-  dataSourceDespesa!: MatTableDataSource<any>;
-  dataSourceReceita!: MatTableDataSource<any>;
+  dataSourceDespesa!: MatTableDataSource<Lancamento[]>;
+  dataSourceReceita!: MatTableDataSource<Lancamento[]>;
 
   displayedColumnsIn: string[] = []
   displayedColumnsOut: string[] = []
@@ -438,22 +438,19 @@ export class RelatoriosComponent implements OnInit {
     this.dataSourceReceita.data = this.dataReceitasFiltered;
   }
 
-  receitasByCong(array: any, mes: string): void {
+  receitasByCong(array: Lancamento[]): void {
     this.sanitizeTables();
-
-    let data = array.filter((obj: Lancamento) => this.meses[moment(obj.data_lan).month()] === mes)
-
     let congName = '';
     let month = '';
     let totalValue = 0;
 
-    data.forEach((obj: any) => {
+    array.forEach((obj: Lancamento) => {
       congName = obj.cong;
       month = moment(obj.data_lan).format('MM');
       this.dataReceitasFiltered.push({mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor});
     });
 
-    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ${congName} / ${mes}`;
+    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ${congName} / ${month}`;
 
     this.dataReceitasFiltered.forEach((obj: any) => {
       let valor = Number.parseFloat(obj.valor)
@@ -464,7 +461,7 @@ export class RelatoriosComponent implements OnInit {
     // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
     this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
 
-    this.dataSourceReceita.data = this.dataReceitasFiltered;
+    this.dataSourceReceita = new MatTableDataSource<Lancamento[]>(this.dataReceitasFiltered);
 
     this.reportIn = new jsPDF({
       orientation: "landscape",
@@ -503,7 +500,7 @@ export class RelatoriosComponent implements OnInit {
       margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
       willDrawPage: (data) => setHeaderPageConfigIn(data)
     });
-    this.reportIn.save(`${this.file_name_in}.pdf`);
+    //this.reportIn.save(`${this.file_name_in}.pdf`);
   }
 
   despesasByCong(array: any): void {
@@ -621,6 +618,7 @@ export class RelatoriosComponent implements OnInit {
   }
 
   handleToggle(event: Event, index: number): void {
+
     const checkbox = event.target as HTMLInputElement;
     const congregation = CONGREGATIONS[index];
     let receitaPorCong: Lancamento[] = []
@@ -653,7 +651,7 @@ export class RelatoriosComponent implements OnInit {
           return this.congSelected.includes(el.cong);
         });
         
-        this.receitasByCong(receitasByCong, this.meses[index]);        
+        this.receitasByCong(receitasByCong);        
         this.despesasByCong(despesasByCong);
 
         // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor

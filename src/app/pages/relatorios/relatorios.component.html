@@ -88,7 +88,7 @@
 
         <mat-tab label="RECEITAS" class="receitas-tab" id="#mat-table-receitas">
             <section class="mat-elevation-z8" tabindex="0">
-                <table mat-table [dataSource]="dataSourceReceita">
+                <table mat-table [dataSource]="dataSourceDespesa">
                     <ng-container *ngFor="let item of displayedColumnsIn" [matColumnDef]="item">
                         <th mat-header-cell class="f-sm" *matHeaderCellDef>
                             <div *ngIf="item === 'valor'; then isValue else notValue"></div>
