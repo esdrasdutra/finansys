@@ -24,8 +24,8 @@ export class RelatoriosComponent implements OnInit {
   meses = MESES;
   
   relatorio = new RelatorioAnalitico();
-  dataSourceDespesa!: MatTableDataSource<Lancamento[]>;
-  dataSourceReceita!: MatTableDataSource<Lancamento[]>;
+  dataSourceDespesa!: [];
+  dataSourceReceita!: [];
 
   displayedColumnsIn: string[] = []
   displayedColumnsOut: string[] = []
@@ -39,6 +39,8 @@ export class RelatoriosComponent implements OnInit {
 
   dataReceitas: any = [];
   dataDespesas: any = [];
+
+  newDataReceitas: any = [];
 
   option: number = 0;
   clicked: number = 0;
@@ -59,7 +61,7 @@ export class RelatoriosComponent implements OnInit {
   file_name_out!: string;
   file_name_in!: string;
   dirigentes: boolean = false;
-  selectedMonth: any;
+  selectedMonth!: string;
 
   constructor(
     private commService: ComunicationService,
@@ -86,8 +88,8 @@ export class RelatoriosComponent implements OnInit {
   }
 
   sanitizeTables(){    
-    this.dataSourceReceita = new MatTableDataSource<Lancamento[]>;
-    this.dataSourceDespesa = new MatTableDataSource<Lancamento[]>;    
+    this.dataSourceReceita = [];
+    this.dataSourceDespesa = [];    
     this.dataReceitasFiltered = [];
     this.dataDespesasFiltered = [];
     this.receitasPerCong.length = 0;
@@ -238,8 +240,8 @@ export class RelatoriosComponent implements OnInit {
     });
 
     this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
-    this.dataSourceDespesa.data = this.dataDespesasFiltered;
-    this.dataSourceReceita.data = this.dataReceitasFiltered;
+    this.dataSourceDespesa = this.dataDespesasFiltered;
+    this.dataSourceReceita = this.dataReceitasFiltered;
   }
 
   getDizimoDirigentes(array: any): void {
@@ -340,8 +342,8 @@ export class RelatoriosComponent implements OnInit {
     // this.reportIn.save(`${this.file_name_in}.pdf`);
     console.log(this.dataReceitasFiltered);
 
-    this.dataSourceDespesa.data = this.dataDespesasFiltered;
-    this.dataSourceReceita.data = this.dataReceitasFiltered;
+    this.dataSourceDespesa = this.dataDespesasFiltered;
+    this.dataSourceReceita = this.dataReceitasFiltered;
   }
 
   filterAndSumByArea(array: any): void {
@@ -434,34 +436,36 @@ export class RelatoriosComponent implements OnInit {
     this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
     this.displayedColumnsOut = ['mes', 'congregation', 'valor'];
 
-    this.dataSourceDespesa.data = this.dataDespesasFiltered;
-    this.dataSourceReceita.data = this.dataReceitasFiltered;
+    this.dataSourceDespesa = this.dataDespesasFiltered;
+    this.dataSourceReceita = this.dataReceitasFiltered;
   }
 
-  receitasByCong(array: Lancamento[]): void {
+  receitasByCong(array: any): void {
     this.sanitizeTables();
     let congName = '';
     let month = '';
     let totalValue = 0;
 
-    array.forEach((obj: Lancamento) => {
+    console.log('ReceitasByCongFunction: ', array);
+
+    this.newDataReceitas = array.map((obj: any) => {
       congName = obj.cong;
       month = moment(obj.data_lan).format('MM');
-      this.dataReceitasFiltered.push({mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor});
+      return {mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor};
     });
 
     this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ${congName} / ${month}`;
 
-    this.dataReceitasFiltered.forEach((obj: any) => {
+    this.newDataReceitas.forEach((obj: any) => {
       let valor = Number.parseFloat(obj.valor)
       totalValue += valor
     });
 
-    this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entrada: '', dizimista: '', obs: '', valor: totalValue });
-    // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
-    this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
+    this.newDataReceitas.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entrada: '', dizimista: '', obs: '', valor: totalValue });
+    
+    console.log('newDataReceitas ReceitasFunction', this.newDataReceitas);
 
-    this.dataSourceReceita = new MatTableDataSource<Lancamento[]>(this.dataReceitasFiltered);
+    //this.dataSourceReceita = this.dataReceitasFiltered;
 
     this.reportIn = new jsPDF({
       orientation: "landscape",
@@ -469,7 +473,7 @@ export class RelatoriosComponent implements OnInit {
       format: 'a4'
     });
 
-    this.dataReceitasFiltered.forEach((e: any) => {
+    this.newDataReceitas.forEach((e: any) => {
       let tempObj = [];
       const parsedValue = parseFloat(e.valor);
       const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });      
@@ -479,9 +483,7 @@ export class RelatoriosComponent implements OnInit {
       tempObj.push(e.entrada);
       tempObj.push(e.dizimista);
       tempObj.push(e.obs);
-      tempObj.push(formattedValue);
-      console.log(parsedValue);
-      console.log(formattedValue);      
+      tempObj.push(formattedValue);    
       this.prepareIn.push(tempObj);
     });   
 
@@ -540,7 +542,7 @@ export class RelatoriosComponent implements OnInit {
     });
 
     //this.reportOut.save(`${this.file_name_out}.pdf`);
-    this.dataSourceDespesa = new MatTableDataSource<Lancamento[]>(this.dataDespesasFiltered);
+    this.dataSourceDespesa = this.dataDespesasFiltered;
     
     //console.log('DATASOURCE DESPESA: ',this.dataSourceDespesa.data);
   }
@@ -575,7 +577,7 @@ export class RelatoriosComponent implements OnInit {
     // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
     this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
 
-    this.dataSourceDespesa.data = this.dataDespesasFiltered;
+    this.dataSourceDespesa = this.dataDespesasFiltered;
 
     this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
 
@@ -621,47 +623,40 @@ export class RelatoriosComponent implements OnInit {
 
     const checkbox = event.target as HTMLInputElement;
     const congregation = CONGREGATIONS[index];
-    let receitaPorCong: Lancamento[] = []
 
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          receitaPorCong = data
+          this.newDataReceitas = data.filter((el: any) => this.meses[moment(el.data_lan).month()] === this.selectedMonth);
         },
         error: (err) => console.log(err),
       }
     );
 
-   receitaPorCong = receitaPorCong.filter((el: any) => {
-      return this.meses[moment(el.data_lan).month()] === this.selectedMonth
-    });
+    console.log('ToggleFunction: ', this.newDataReceitas, this.selectedMonth);
 
     if (checkbox.checked) {
-      console.log(this.congSelected.length);
       this.congSelected.push(congregation);
       if (this.congSelected.length > 1) {
         this.getSumTotal(this.congSelected);
       }
       if (this.congSelected.length === 1) {
-        let receitasByCong = receitaPorCong.filter((el: Lancamento) => {
-          return this.congSelected.includes(el.cong);
-        });
+        this.newDataReceitas = this.newDataReceitas.filter((el: Lancamento) => this.congSelected.includes(el.cong));
+        let dataDesByCong = this.dataDespesas.filter((el: Lancamento) => this.congSelected.includes(el.cong));
+        console.log('ToggleFunction FilterByCong: ', this.newDataReceitas);
 
-        let despesasByCong = receitaPorCong.filter((el: Lancamento) => {
-          return this.congSelected.includes(el.cong);
-        });
-        
-        this.receitasByCong(receitasByCong);        
-        this.despesasByCong(despesasByCong);
+        this.receitasByCong(this.newDataReceitas);        
+        this.despesasByCong(dataDesByCong);
 
         // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
         this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
 
+        // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
+        this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
+
       }
     } else {
-      console.log(this.congSelected.length);
       const indexToRemove = this.congSelected.indexOf(congregation);
-      console.log('Index to Remove', indexToRemove)
       if (indexToRemove >= 0) {
         this.congSelected.splice(indexToRemove, 1);
         console.log('CHECKBOX NOT CHECKED, REMOVE CONG');
@@ -673,8 +668,8 @@ export class RelatoriosComponent implements OnInit {
     this.congSelected = [];
     this.option = event.value;
     AREAMAPPING[this.option].forEach((el: any) => this.congSelected.push(el));
-    this.dataSourceDespesa.data = [];
-    this.dataSourceReceita.data = [];
+    this.dataSourceDespesa = [];
+    this.dataSourceReceita = [];
     this.filterAndSumByArea(this.congSelected);
   }
 
@@ -687,27 +682,23 @@ export class RelatoriosComponent implements OnInit {
 
       if (this.sumTotal) {
         CONGREGATIONS.forEach((el: any) => this.congSelected.push(el));
-        this.dataSourceDespesa.data = [];
-        this.dataSourceReceita.data = [];
+        this.dataSourceDespesa = [];
+        this.dataSourceReceita = [];
         console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
         this.getSumTotal(this.congSelected);
 
         if (this.dirigentes) {
           this.congSelected = [];
           CONGREGATIONS.forEach((el: any) => this.congSelected.push(el));
-          this.dataSourceDespesa.data = [];
-          this.dataSourceReceita.data = [];
+          this.dataSourceDespesa = [];
+          this.dataSourceReceita = [];
           console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
           this.handleDizimoDirigentes()
         }
       }
 
     } else {
-      this.congSelected = [];
-      this.dataSourceReceita.data = [];
-      this.dataReceitasFiltered.length = 0;
-      this.dataSourceDespesa.data = [];
-      this.dataDespesasFiltered.length = 0;
+      this.sanitizeTables();
     }
   }
 

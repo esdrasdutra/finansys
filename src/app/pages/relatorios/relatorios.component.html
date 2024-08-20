@@ -1,13 +1,4 @@
-<div class="custom-container">
-    <button type="button" (click)="handleSumTotal()">Relatório de Despesas / Receitas das Congregações</button>
-    <button type="button" (click)="handleSumByArea()">Relatório de Despesas / Receitas por Área</button>
-    <button type="button" (click)="handleDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
-    <button type="button" (click)="handlePeriodo()"> Relatório de Entradas por Período</button>
-    <button type="button" (click)="handleDizimoDirigentes()"> 10% DIRIGENTES</button>
-    <select name="saidas" id="custoOption" (change)="handleCustoSelection($event.target)">
-        <option *ngFor="let outflow of outflows" [value]="outflow">{{ outflow }}</option>
-    </select>
-
+<div class="custom-container">    
     <section id="filter-container" class="dirigente-percent">
         <div class="search-bar">
             <div class="search-name">
@@ -26,6 +17,16 @@
 
         </div>
     </section>
+    <br>
+    <button type="button" (click)="handleSumTotal()">Relatório de Despesas / Receitas das Congregações</button>
+    <button type="button" (click)="handleSumByArea()">Relatório de Despesas / Receitas por Área</button>
+    <button type="button" (click)="handleDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
+    <button type="button" (click)="handlePeriodo()"> Relatório de Entradas por Período</button>
+    <button type="button" (click)="handleDizimoDirigentes()"> 10% DIRIGENTES</button>
+    <select name="saidas" id="custoOption" (change)="handleCustoSelection($event.target)">
+        <option *ngFor="let outflow of outflows" [value]="outflow">{{ outflow }}</option>
+    </select>
+
 
     <ng-container *ngIf="sumTotal">
         <div aria-label="Basic checkbox toggle button group">
@@ -88,7 +89,7 @@
 
         <mat-tab label="RECEITAS" class="receitas-tab" id="#mat-table-receitas">
             <section class="mat-elevation-z8" tabindex="0">
-                <table mat-table [dataSource]="dataSourceDespesa">
+                <table mat-table [dataSource]="newDataReceitas">
                     <ng-container *ngFor="let item of displayedColumnsIn" [matColumnDef]="item">
                         <th mat-header-cell class="f-sm" *matHeaderCellDef>
                             <div *ngIf="item === 'valor'; then isValue else notValue"></div>
