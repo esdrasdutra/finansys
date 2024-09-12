@@ -1,27 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
 import { ComunicationService } from 'src/app/services/comunication.service';
 import { Outflows } from 'src/app/enums/outflows.enum';
-import { AREAMAPPING, AREAS, COLUMNMAPPING, CONGREGATIONS} from 'src/app/entities/relatorios/relatorios';
+import { AREAMAPPING, AREAS, COLUMNMAPPING, CONGREGATIONS, FILTROS, MESES} from 'src/app/entities/relatorios/relatorios';
 import { RelatorioAnalitico } from 'src/app/entities/relatorios/relatorios';
 import moment from 'moment';
 import { Lancamento } from 'src/app/models/Lancamento';
 
-const MY_FORMATS = {
-  parse: {
-    dateInput: 'MM/YYYY',
-  },
-  display: {
-    dateInput: 'MM/YYYY',
-    monthYearLabel: 'MMM YYYY',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY',
-  },
-};
 @Component({
   selector: 'app-relatorios',
   templateUrl: './relatorios.component.html',
@@ -32,10 +19,12 @@ export class RelatoriosComponent implements OnInit {
   congregations = CONGREGATIONS;
   columnMapping = COLUMNMAPPING;
   areas = AREAS;
+  filtros = FILTROS;
+  meses = MESES;
   
   relatorio = new RelatorioAnalitico();
-  dataSourceDespesa = new MatTableDataSource();
-  dataSourceReceita = new MatTableDataSource();
+  dataSourceDespesa!: MatTableDataSource<any>;
+  dataSourceReceita!: MatTableDataSource<any>;
 
   displayedColumnsIn: string[] = []
   displayedColumnsOut: string[] = []
@@ -47,8 +36,8 @@ export class RelatoriosComponent implements OnInit {
 
   outflows = Object.values(Outflows);
 
-  dataReceitas: Lancamento[] = [];
-  dataDespesas: Lancamento[] = [];
+  dataReceitas: any = [];
+  dataDespesas: any = [];
 
   option: number = 0;
   clicked: number = 0;
@@ -56,8 +45,8 @@ export class RelatoriosComponent implements OnInit {
   currentMonth = moment().month();
   prevMonth = moment().add(-1, 'months').month();
 
-  despesasPerCong: any = [];
-  receitasPerCong: any = [];
+  despesasPerCong: Lancamento[] = [];
+  receitasPerCong: Lancamento[] = [];
 
   dataDespesasFiltered: any = [];
   dataReceitasFiltered: any = [];
@@ -71,6 +60,7 @@ export class RelatoriosComponent implements OnInit {
   file_name_out!: string;
   file_name_in!: string;
   dirigentes: boolean = false;
+  selectedMonth: any;
 
   constructor(
     private commService: ComunicationService,
@@ -95,31 +85,54 @@ export class RelatoriosComponent implements OnInit {
       }
     )
   }
-
-  handleDizimistas() {
-    console.log(this.congSelected);
-
-    this.relatorio.getDizimistasPorCongregacao(this.congSelected);
-  }
-
-  handlePeriodo() {
-    this.relatorio.getRelatorioPorPeriodo();
-  }
-
-  handleSumTotal() {
-    this.sumTotal = !this.sumTotal;
-    console.log('É pra somar tudo?', this.sumTotal);
-  }
-
   sanitizeTables(){    
-    this.dataSourceDespesa.data = [];
-    this.dataSourceReceita.data = [];
+    this.dataSourceReceita = new MatTableDataSource<Lancamento[]>;
+    this.dataSourceDespesa = new MatTableDataSource<Lancamento[]>;    
     this.dataReceitasFiltered = [];
     this.dataDespesasFiltered = [];
     this.receitasPerCong.length = 0;
     this.despesasPerCong.length = 0;
     this.prepareIn = [];
     this.prepareOut = [];
+  }
+
+  handleDizimistas() {
+    this.relatorio.getDizimistas(this.dataReceitas);
+  }
+
+  handlePeriodo() {
+    this.sanitizeTables();
+    const results = this.relatorio.getRelatorioPorPeriodo();
+
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4'
+    });
+
+    let startY = 1;
+    let currentArea = '';
+
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 1;
+      if (data.pageNumber === 1) {
+        doc.setFontSize(10);
+        doc.text('RELATÓRIO SEMESTRAL DE ENTRADAS', doc.internal.pageSize.getWidth() / 2, 1, { align: 'center' });
+      }
+    };
+
+      // Gerar o PDF como um Data URL
+  const pdfData = doc.output('dataurlstring');
+
+  // Abrir o PDF em uma nova aba
+  window.open(pdfData, '_blank');
+
+    //doc.save('RELATÓRIO SEMESTRAL DE ENTRADAS.pdf');
+
+  }
+
+  handleSumTotal() {
+    this.sumTotal = !this.sumTotal;
   }
 
   handleDizimoDirigentes() {
@@ -229,18 +242,118 @@ export class RelatoriosComponent implements OnInit {
     this.dataSourceReceita.data = this.dataReceitasFiltered;
   }
 
-  filterAndSumByArea(area: any): void {
+  getDizimoDirigentes(array: any): void {
+    this.sanitizeTables();
+
+    let totalReceitas = 0;
+    let totalDespesas = 0;
+    
+    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`
+    // console.log(this.dataReceitas.filter((el: any) => el.entrada === 'ENTRADA OFERTA AVULSA'));
+
+    this.dataReceitas = this.dataReceitas.filter((el: any) => el.entrada !== 'ENTRADA OFERTA AVULSA');
+ 
+    array.forEach((cong: any) => {
+      this.receitasPerCong.push(
+        this.dataReceitas.filter((el: any) => el.cong === cong),
+      );
+
+      this.despesasPerCong.push(
+        this.dataDespesas.filter((el: any) => el.cong === cong)
+      );
+    });
+
+    this.despesasPerCong.forEach((cong: any) => {
+      let valueTemp = 0;
+      let congName = '';
+      let month = null;
+      cong.forEach((res: any) => {
+        valueTemp += parseFloat(res.valor)
+        congName = res.cong        
+        month = moment(res.data_lan).format('MM');
+      });
+      this.dataDespesasFiltered.push({ congregation: congName, mes: month, valor: valueTemp, })
+    });
+
+    this.receitasPerCong.forEach((cong: any) => {
+      let valueTemp = 0;
+      let ofertaAvulsaTotal = 0;
+      let congName = '';
+      let month = null;
+      cong.forEach((res: any) => {
+        valueTemp += Number.parseFloat(res.valor)
+        congName = res.cong
+        month = moment(res.data_lan).format('MM');
+        if (res.entrada === 'ENTRADA OFERTA AVULSA') {
+          ofertaAvulsaTotal = Number.parseFloat(res.valor);
+        }
+      })
+      this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
+      console.log(ofertaAvulsaTotal);
+    });
+
+    this.dataReceitasFiltered.forEach((obj: any) => {
+      totalReceitas += obj.valor
+    });
+
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      totalDespesas += obj.valor
+    });
+
+    this.dataReceitasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalReceitas });
+    this.dataDespesasFiltered.push({ congregation: 'TOTAL GERAL', mes: '', valor: totalDespesas });
+
+    this.reportIn = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4'
+    });
+
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.congregation);
+      tempObj.push(formattedValue);
+      this.prepareIn.push(tempObj);
+    });
+
+    const setHeaderPageConfigIn = (data: any) => {
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.reportIn.setFontSize(12); // Adjust font size as needed
+        this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
+      }
+    };
+
+    autoTable(this.reportIn, {
+      head: [['MÊS', 'CONGREGAÇÃO', 'VALOR']],
+      body: this.prepareIn,
+      styles: { fontSize: 7 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data) => setHeaderPageConfigIn(data)
+    });
+
+    this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
+
+    // this.reportIn.save(`${this.file_name_in}.pdf`);
+    console.log(this.dataReceitasFiltered);
+
+    this.dataSourceDespesa.data = this.dataDespesasFiltered;
+    this.dataSourceReceita.data = this.dataReceitasFiltered;
+  }
+
+  filterAndSumByArea(array: any): void {
     this.sanitizeTables();
 
     this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ÁREA ${this.option}`
     let totalDespesas = 0;
     let totalReceitas = 0;
 
-    area.forEach((cong: any) => {
+    array.forEach((cong: any) => {
       this.receitasPerCong.push(
-        this.dataReceitas.filter((el: any) => {
-          return el.cong === cong
-        }),
+        this.dataReceitas.filter((el: any) => el.cong === cong)
       );
 
       this.despesasPerCong.push(
@@ -398,6 +511,20 @@ export class RelatoriosComponent implements OnInit {
   handleToggle(event: Event, index: number): void {
     const checkbox = event.target as HTMLInputElement;
     const congregation = CONGREGATIONS[index];
+    let receitaPorCong: Lancamento[] = []
+
+    this.commService.receitasList$.subscribe(
+      {
+        next: (data) => {
+          receitaPorCong = data
+        },
+        error: (err) => console.log(err),
+      }
+    );
+
+   receitaPorCong = receitaPorCong.filter((el: any) => {
+      return this.meses[moment(el.data_lan).month()] === this.selectedMonth
+    });
 
     if (checkbox.checked) {
       this.sanitizeTables();
@@ -414,7 +541,7 @@ export class RelatoriosComponent implements OnInit {
           return this.congSelected.includes(el.cong);
         });
 
-        let despesasByCong = this.dataDespesas.filter((el: any) => {
+        let despesasByCong = receitaPorCong.filter((el: Lancamento) => {
           return this.congSelected.includes(el.cong);
         });
 
@@ -425,10 +552,8 @@ export class RelatoriosComponent implements OnInit {
         console.log('Chamando no Selecionar', this.result);
 
         // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
-        this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'dizimista', 'obs', 'valor']
-
-        // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
         this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
+
       }
     } else {
       this.sanitizeTables();
@@ -436,10 +561,10 @@ export class RelatoriosComponent implements OnInit {
       console.log('Chamando no Deselect', this.result);
 
       const indexToRemove = this.congSelected.indexOf(congregation);
+      console.log('Index to Remove', indexToRemove)
       if (indexToRemove >= 0) {
         this.congSelected.splice(indexToRemove, 1);
       }
-      //this.getSumTotal(this.congSelected);
     }
   }
 
@@ -495,5 +620,10 @@ export class RelatoriosComponent implements OnInit {
 
   downloadPdf() {
     this.reportIn.save(`${this.file_name_in}.pdf`)
+  }
+
+  onKey(event: Event) {
+    const inputValue = event.target as HTMLInputElement;
+    console.log(inputValue.value);
   }
 }
