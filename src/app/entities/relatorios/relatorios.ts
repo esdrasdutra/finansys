@@ -379,4 +379,33 @@ export class RelatorioAnalitico {
     // const displayedColumns = ['mes', 'congregation', 'dizimista']
   }
 
+  printFuction(){
+    this.dataReceitasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.recibo);
+      tempObj.push(e.congregation);
+      tempObj.push(e.entrada);
+      tempObj.push(e.dizimista);
+      tempObj.push(e.obs);
+      tempObj.push(formattedValue);
+      //this.prepareIn.push(tempObj);
+    });
+    this.dataDespesasFiltered.forEach((e: any) => {
+      let tempObj = [];
+      const parsedValue = parseFloat(e.valor);
+      const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      tempObj.push(e.mes);
+      tempObj.push(e.recibo);
+      tempObj.push(e.congregation);
+      tempObj.push(e.entrada);
+      tempObj.push(e.dizimista);
+      tempObj.push(e.obs);
+      tempObj.push(formattedValue);
+      //this.prepareIn.push(tempObj);
+    });
+  }
+
 }
