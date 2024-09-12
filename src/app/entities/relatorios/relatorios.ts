@@ -2,6 +2,7 @@ import { inject } from "@angular/core";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import moment from "moment";
+import { LancamentoAddComponent } from "src/app/components/lancamento-add/lancamento-add.component";
 import { Congregation } from "src/app/enums/congregation.enum";
 import { Lancamento } from "src/app/models/Lancamento";
 import { ComunicationService } from "src/app/services/comunication.service";
@@ -52,6 +53,7 @@ export const COLUMNMAPPING: { [key: string]: string } = {
 export class RelatorioAnalitico {
   private commService: ComunicationService;
   dataReceitasFiltered: any = [];
+  dataDespesasFiltered: any = []
 
   constructor() {
     this.commService = inject(ComunicationService);
@@ -276,6 +278,109 @@ export class RelatorioAnalitico {
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
     return this.dataReceitasFiltered ;
+  }
+
+  getRelatoriosPorCongregacao(dataReceita: any, dataDespesa: any) {
+    let congName = '';
+    let month = null;
+    let totalValue = 0;
+    this.dataDespesasFiltered = [];
+    this.dataReceitasFiltered = [];
+
+    let file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ${congName}`;
+    let file_name_out = `RELATÓRIO ANALÍTICO DE SAÍDAS - ${congName}`;
+    
+    dataReceita.forEach((obj: Lancamento) => {
+      congName = obj.cong;
+      month = moment(obj.data_lan).format('MM');
+      this.dataReceitasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor })
+    });   
+
+    this.dataReceitasFiltered.forEach((obj: any) => {
+      let valor = parseFloat(obj.valor)
+      totalValue += valor
+    });
+
+    this.dataReceitasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', entrada: '', dizimista: '', obs: '', valor: totalValue });
+
+    dataDespesa.forEach((obj: any) => {
+      congName = obj.cong;
+      month = moment(obj.data_lan).format('MM');
+      this.dataDespesasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, saida: obj.saida, tipo_doc: obj.tipo_doc, obs: obj.obs, valor: obj.valor })
+    });
+
+    this.dataDespesasFiltered.forEach((obj: any) => {
+      let valor = parseFloat(obj.valor)
+      totalValue += valor
+    });
+
+    this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
+    return [this.dataReceitasFiltered, this.dataDespesasFiltered];
+  }
+
+  getDizimistasPorCongregacao(congregacaoSelecionada: string[]): void {
+    this.file_name = `RELATÓRIO GERAL - DÍZIMO OBREIROS ${congregacaoSelecionada}`
+
+    this.commService.receitasList$.subscribe(
+      {
+        next: (data) => {
+          this.dataReceitas = data;
+        },
+        error: (err) => console.log(err),
+      }
+    )
+
+    const startDate = moment(new Date(2024, 1, 1));
+    const endDate = moment(new Date(2024, 7, 31));
+
+
+    let dizimistasList = this.dataReceitas.filter((lanc: Lancamento) => 
+      {
+        const lancMoment = moment(lanc.data_lan);
+        return lancMoment.isBetween(startDate, endDate, 'days', '[]') && lanc.entrada === "ENTRADA DÍZIMO OBREIRO" && lanc.cong === congregacaoSelecionada[0];
+      });
+
+    dizimistasList.forEach((lanc: Lancamento) => {
+      let congName = lanc.cong;
+      let month = moment(lanc.data_lan).format('MM');
+      this.dataFiltered.push({mes: month, congregation: congName, dizimista: lanc.dizimista});
+    });    
+
+    this.report = new jsPDF({
+      orientation: "portrait",
+      unit: "cm",
+      format: 'a4',
+    })
+
+    this.dataFiltered.forEach((e: any) => {
+      let tempObj = [];
+      tempObj.push(e.mes);
+      tempObj.push(e.congregation);
+      tempObj.push(e.dizimista);
+      this.prepare.push(tempObj);
+    });
+
+    const setHeaderPageConfigIn = (data: any) => {
+      this.report.setTextColor(100);
+      data.settings.margin.top = 0.5;
+      if (data.pageNumber === 1) {
+        this.report.setFontSize(12);
+        this.report.text(this.file_name, this.report.internal.pageSize.getWidth() / 2, 1, { align: 'center' });
+      }
+    };
+
+    
+    autoTable(this.report, {
+      head: [['MES', 'CONGREGAÇÃO', 'DIZIMISTA']],
+      body: this.prepare,
+      styles: { fontSize: 8 },
+      margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
+      willDrawPage: (data: any) => setHeaderPageConfigIn(data)
+    });
+    
+    this.report.save(`${this.file_name}.pdf`);
+
+    // const displayedColumns = ['mes', 'congregation', 'dizimista']
   }
 
 }
