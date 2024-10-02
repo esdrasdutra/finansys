@@ -23,6 +23,6 @@
     </div>
 
     <div class="lancamentos">
-        <app-lancamento-list class="position-sticky custom-container"></app-lancamento-list>
+        <app-lancamento-list *ngIf="dataDespesas" [dataDespesas]="dataDespesas" class="position-sticky custom-container"></app-lancamento-list>
     </div>
 </section>

@@ -39,13 +39,8 @@ export class LancamentoListComponent implements OnInit {
 
   dataSourceDespesas = new MatTableDataSource<Lancamento>();
   dataSourceReceitas = new MatTableDataSource<Lancamento>();
-
-  dataDespesas: any = [];
-  dataReceitas: any = [];
-
   currentMonth = moment();
-  prevMonth = moment().add(-1, 'months');
-
+  prevMonth = moment().add(-2, 'months');
 
   selectedRowIndex = -1;
 
@@ -54,7 +49,9 @@ export class LancamentoListComponent implements OnInit {
     'forn', 'dizimista', 'obs', 'tipo_doc', 'conta', 'situacao', 'historico', 'status_lanc'
   ]
 
-  @Input() tipoLancFromParent!: any;
+  @Input() tipoLancFromParent!: any;  
+  @Input() dataDespesas!: Lancamento[];
+  @Input() dataReceitas: Lancamento[] = [];
   @Output() idLanc = new EventEmitter<Lancamento>();  
   constructor(
     private elementRef: ElementRef,
@@ -63,11 +60,15 @@ export class LancamentoListComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log('ESSE MES', this.currentMonth.month(), 'MES PASSADO', this.prevMonth.month())
+    console.log('Lancamento List',this.dataDespesas);
+    console.log('ESSE MES', this.currentMonth.month(), 'MES PASSADO', this.prevMonth.month());
+
+    
     this.commService.despesasList$.subscribe(
       {
         next: (data) => { 
-          this.dataSourceDespesas.data = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth.month() || moment(el.data_lan).month() === this.currentMonth.month());
+          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth.month() || moment(el.data_lan).month() === this.currentMonth.month());
+          console.log('Lancamento List',this.dataDespesas);
         },
         error: (err) => console.log(err),
       }
@@ -81,6 +82,7 @@ export class LancamentoListComponent implements OnInit {
         error: (err) => console.log(err),
       }
     )
+
   }
 
   onClickRow(row: any, event: any) {

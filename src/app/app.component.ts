@@ -16,7 +16,8 @@ export class AppComponent implements OnInit {
     "BALANCETES",
     "OBREIROS",
     "CONGREGAÇÕES",
-    "RELATORIOS"
+    "RELATORIOS",
+    "DASHBOARD"
   ]
 
   pathArray = [
@@ -25,6 +26,7 @@ export class AppComponent implements OnInit {
     'assets/add_obreiro_icon.svg',
     'assets/add_cong_icon.svg',
     'assets/fornecedores_icons.svg',
+    'assets/spreadsheet_icon.svg'
   ]
 
   appRoutes = [
@@ -32,7 +34,8 @@ export class AppComponent implements OnInit {
     "balancete",
     "obreiros",
     "congregacoes",
-    "relatorios"
+    "relatorios",
+    "dashboards",
   ]
 
   constructor(

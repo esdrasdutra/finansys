@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, Output } from '@angular/core';
 import { LancamentoService } from '../..//services/lancamentos/lancamento.service';
 import { FILTROS, MESES } from 'src/app/entities/relatorios/relatorios';
+import { Lancamento } from 'src/app/models/Lancamento';
+import { ComunicationService } from 'src/app/services/comunication.service';
+import moment from 'moment';
 
 @Component({
   selector: 'app-Home',
@@ -13,7 +16,8 @@ export class HomeComponent {
   filtros = FILTROS;
   meses = MESES;
 
-  constructor() { }
+  constructor(
+  ) { }
 
   ngOnInit(): void {
   }

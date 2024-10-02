@@ -11,7 +11,8 @@ export class ToolbarComponent {
     "BALANCETES",
     "OBREIROS",
     "CONGREGAÇÕES",
-    "FORNECEDORES"
+    "FORNECEDORES",
+    "DASHBOARDS",
   ]
 
   pathArray =[
@@ -20,6 +21,7 @@ export class ToolbarComponent {
     'assets/add_obreiro_icon.svg',
     'assets/add_cong_icon.svg',    
     'assets/fornecedores_icons.svg',
+    'assets/spreadsheet_icon.svg',
   ]
 
   appRoutes = [
@@ -27,6 +29,7 @@ export class ToolbarComponent {
     "balancete",
     "obreiros",
     "congregacoes",
-    "fornecedores"
+    "fornecedores",
+    "dashboards",
   ]
 }

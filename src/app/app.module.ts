@@ -14,6 +14,7 @@ import { CurrencyPipe } from '@angular/common';
 import { NgxMaskDirective, NgxMaskPipe } from 'ngx-mask';
 import { HomeModule } from './pages/home/home.module';
 import { DizimistasComponent } from './pages/relatorios/dizimistas/dizimistas.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 @NgModule({
   imports: [
@@ -34,6 +35,7 @@ import { DizimistasComponent } from './pages/relatorios/dizimistas/dizimistas.co
     IconsComponent,
     ToolbarComponent,
     DizimistasComponent,
+    DashboardComponent,
 ],
   providers: [CurrencyPipe, HttpClientModule],
   bootstrap: [AppComponent]

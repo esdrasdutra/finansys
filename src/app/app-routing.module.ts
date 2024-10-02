@@ -9,6 +9,7 @@ import { ObreirosComponent } from './pages/obreiros/obreiros.component';
 import { LancamentoAddComponent } from './components/lancamento-add/lancamento-add.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { PorcentagemDirigentesComponent } from './pages/relatorios/porcentagem-dirigentes/porcentagem-dirigentes.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, 
@@ -21,6 +22,7 @@ const routes: Routes = [
   { path: 'fornecedores', component: FornecedoresComponent},
   { path: 'relatorios', component: RelatoriosComponent},
   { path: 'dirigentes', component: PorcentagemDirigentesComponent },
+  { path: 'dashboards', component: DashboardComponent }
 ];
 
 @NgModule({
