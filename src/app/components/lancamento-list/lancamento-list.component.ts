@@ -6,6 +6,7 @@ import { LancamentoService } from '../..//services/lancamentos/lancamento.servic
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { PaginatorIntl } from '../..//services/paginator-intl.service';
 import { ComunicationService } from 'src/app/services/comunication.service';
+import { COLUMNMAPPING } from 'src/app/entities/relatorios/relatorios';
 moment.locale('pt-br');
 
 @Component({
@@ -14,75 +15,38 @@ moment.locale('pt-br');
   styleUrls: ['./lancamento-list.component.sass'],
   providers: [{provide: MatPaginatorIntl, useClass: PaginatorIntl}]
 })
-export class LancamentoListComponent implements OnInit {
+export class LancamentoListComponent {
 
-  columnMapping: { [key: string]: string } = {
-    'recibo': 'RECIBO',
-    'data_lan': 'LANÇAMENTO',
-    'data_ven': 'VENCIMENTO',
-    'tipo_doc': 'TIPO DOCUMENTO',
-    'num_doc': 'Nº DOCUMENTO',
-    'entrada': 'ENTRADAS',
-    'saida': 'SAÍDAS',
-    'cong': 'CONGREGAÇÃO',
-    'forn': 'FORNECEDOR',
-    'dizimista': 'NOME DO DIZIMISTA',
-    'obs': 'OBS:.',
-    'valor': 'VALOR',
-    'conta': 'CONTA',
-    'situacao': 'SITUAÇÃO',
-    'historico': 'HISTÓRICO',
-    'status_lanc': 'SITUAÇÃO'
-  };
+  columnMapping = COLUMNMAPPING;
 
   title = null;
 
   dataSourceDespesas = new MatTableDataSource<Lancamento>();
   dataSourceReceitas = new MatTableDataSource<Lancamento>();
-  currentMonth = moment();
-  prevMonth = moment().add(-2, 'months');
 
   selectedRowIndex = -1;
 
   displayedColumnsLancamento = [
     'recibo', 'data_lan', 'data_ven', 'valor', 'num_doc', 'entrada', 'saida', 'cong',
     'forn', 'dizimista', 'obs', 'tipo_doc', 'conta', 'situacao', 'historico', 'status_lanc'
-  ]
+  ];
+
+  displayDespesas: boolean = true
+  displayReceitas!: boolean
 
   @Input() tipoLancFromParent!: any;  
   @Input() dataDespesas!: Lancamento[];
-  @Input() dataReceitas: Lancamento[] = [];
+  @Input() dataReceitas!: Lancamento[];
+  @Input() filtroMes!: string;
   @Output() idLanc = new EventEmitter<Lancamento>();  
   constructor(
     private elementRef: ElementRef,
     private lancamentoService: LancamentoService,
-    private commService: ComunicationService,
   ) { }
 
-  ngOnInit(): void {
-    console.log('Lancamento List',this.dataDespesas);
-    console.log('ESSE MES', this.currentMonth.month(), 'MES PASSADO', this.prevMonth.month());
-
-    
-    this.commService.despesasList$.subscribe(
-      {
-        next: (data) => { 
-          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth.month() || moment(el.data_lan).month() === this.currentMonth.month());
-          console.log('Lancamento List',this.dataDespesas);
-        },
-        error: (err) => console.log(err),
-      }
-    )
-
-    this.commService.receitasList$.subscribe(
-      {
-        next: (data) => {
-          this.dataSourceReceitas.data = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth.month() || moment(el.data_lan).month() === this.currentMonth.month());
-        },
-        error: (err) => console.log(err),
-      }
-    )
-
+  ngOnChanges(): void {
+    this.dataSourceDespesas.data = this.dataDespesas;
+    this.dataSourceReceitas.data = this.dataReceitas;
   }
 
   onClickRow(row: any, event: any) {
@@ -90,6 +54,18 @@ export class LancamentoListComponent implements OnInit {
     this.lancamentoService.setLancamento(row);
     event.stopPropagation();
   }
+
+  changeTable(event: any) {
+    if (event.target.innerText === 'DESPESAS') {
+      this.displayDespesas = true
+      this.displayReceitas = false
+    }
+    if (event.target.innerText === 'RECEITAS') {
+      this.displayReceitas = true
+      this.displayDespesas = false
+    }
+  }
+    
 
   @HostListener('document:click', ['$event'])
   handleDocumentClick(event: MouseEvent) {

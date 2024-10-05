@@ -1,3 +1,18 @@
-<div class="content" role="main">
-  <app-dashboard></app-dashboard>
-</div>
+<section id="tab-container">
+    <div class="lancamentos">
+        <section class="mat-elevation-z8" tabindex="0">
+            <table mat-table [dataSource]="dataSource">
+                <ng-container *ngFor="let item of displayedColumns" [matColumnDef]="item">
+                    <th mat-header-cell class="f-sm" *matHeaderCellDef>
+                        {{ item }}
+                    </th>
+                    <td mat-cell class="f-sm" *matCellDef="let element">
+                        {{ element[item] }}
+                    </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </section>
+    </div>
+</section>

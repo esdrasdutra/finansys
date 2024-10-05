@@ -26,21 +26,30 @@ export class LancamentoService {
     this.lancamento$.next(lancamento);
   }
 
-  getLancamentos(): Observable<ListLancamentoResponse>{
-
-    const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
-    let lancamentos$ = new Observable<ListLancamentoResponse>();
-    // let lancamentosCached = localStorage.getItem('LancamentoService');
-
-    // if(!lancamentosCached){
-      lancamentos$ = this.requestService.get<ListLancamentoResponse>(url)
+  getLancamentos(data: any): Observable<any>{
+    const url = `http://localhost:8001/${this.lancamentoUrl}/?perPage=${data.perPage}&page=${data.page}&order=${data.order}`;
+    let lancamentos$ = new Observable<any>();
+      lancamentos$ = this.requestService.get(url)
       .pipe(
-        map((response: any) => response.data),
-        // tap( data =>  this.lancamentosCacheService.setValue(data, 'LancamentoService')), // Cache the fetched data
+        map((response: any) => {
+          console.log(response)
+          return response;
+        }),
         shareReplay(1)
       );
-    //}
+    return lancamentos$;
+  }
 
+  getAll(): Observable<any>{
+    const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
+    let lancamentos$ = new Observable<any>();
+      lancamentos$ = this.requestService.get(url)
+      .pipe(
+        map((response: any) => {
+          return response;
+        }),
+        shareReplay(1)
+      );
     return lancamentos$;
   }
 

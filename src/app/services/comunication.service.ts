@@ -14,6 +14,9 @@ export class ComunicationService {
   private date$ = new BehaviorSubject<any>({});
   selectedDate$ = this.date$.asObservable();
 
+  private lancamentosBus$ = new BehaviorSubject<any>([]);
+  lancamentosList$ = this.lancamentosBus$.asObservable();
+
   private despesasBus$ = new BehaviorSubject<Lancamento[]>([]);
   despesasList$ = this.despesasBus$.asObservable();
 
@@ -32,6 +35,11 @@ export class ComunicationService {
   setDespesas(lancamentos: Lancamento[], component: string) {
     console.log(`SETTING DESPESAS FROM ${component}`);
     this.despesasBus$.next(lancamentos)
+  }
+
+  setLancamentos(lancamentos: any, component: string) {
+    console.log(`SETTING LANCAMENTOS FROM ${component}`);
+    this.lancamentosBus$.next(lancamentos)
   }
 
   setReceitas(lancamentos: Lancamento[], component: string) {

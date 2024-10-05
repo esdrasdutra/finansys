@@ -3,7 +3,6 @@ import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { BalanceteComponent } from './pages/balancete/balancete.component';
 import { CongregacoesComponent } from './pages/congregacoes/congregacoes.component';
 import { FornecedoresComponent } from './pages/fornecedores/fornecedores.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -29,7 +28,6 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
   ],  
   declarations: [
     AppComponent,
-    BalanceteComponent,
     CongregacoesComponent,
     FornecedoresComponent,
     IconsComponent,

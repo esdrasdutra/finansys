@@ -38,30 +38,9 @@ export class AppComponent implements OnInit {
     "dashboards",
   ]
 
-  constructor(
-    private lancamentoService: LancamentoService,
-    private commService: ComunicationService,
-  ) { }
+  constructor() { }
 
   ngOnInit(): void {
-    this.lancamentoService.getLancamentos().subscribe(
-      (data: any) => {
-        let dataDespesas: Lancamento[] = [];
-        let dataReceitas: Lancamento[] = [];
-        data.forEach((el: any) => {
-          if (el.tipo_lanc === "RECEITA") {
-            dataReceitas.push(el);
-          } else if (el.tipo_lanc === "DESPESA") {
-            dataDespesas.push(el);
-          }
-        });
 
-        this.commService.setDespesas(dataDespesas, 'App Component');
-        this.commService.setReceitas(dataReceitas, 'App Component');
-      });
-  }
-
-  handleChange(event: Event) {
-    console.log(event);
   }
 }

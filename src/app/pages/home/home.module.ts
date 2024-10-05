@@ -35,6 +35,7 @@ import { RelatoriosComponent } from '../..//pages/relatorios/relatorios.componen
 import { PorcentagemDirigentesComponent } from 'src/app/pages/relatorios/porcentagem-dirigentes/porcentagem-dirigentes.component';
 import { RouterModule } from '@angular/router';
 import { MatDatepickerModule } from '@angular/material/datepicker';
+import { BalanceteComponent } from '../balancete/balancete.component';
 
 registerLocaleData(localePtBr);
 
@@ -48,6 +49,7 @@ registerLocaleData(localePtBr);
         ObreirosComponent,
         CrudButtonsComponent,
         DashboardComponent,
+        BalanceteComponent,
         RelatoriosComponent,
         PaginatorComponent,
         PorcentagemDirigentesComponent,

@@ -63,7 +63,6 @@ export class DashboardComponent implements OnInit {
     this.valorTotalDepesas = 0;
     this.inflowByMonth = [];
     this.outflowByMonth = [];
-
     this.selectDataByMonth(event.value);
   }
 

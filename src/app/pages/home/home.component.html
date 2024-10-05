@@ -7,7 +7,7 @@
                     <option *ngFor="let filtro of filtros" [value]="filtro">{{ filtro }}</option>
                 </select>
                 <mat-icon aria-hidden="false" aria-label="Search Icon" fontIcon="filter_list"></mat-icon>
-                <select id="input-group-filter">
+                <select id="input-group-filter" (change)="handleChange($event)">
                     <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
                 </select>
 
@@ -15,14 +15,14 @@
             </div>
         </div>
     </div>
+    <app-crud-buttons></app-crud-buttons>
+    <mat-paginator (page)="handlePageEvent($event)"[length]="length" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" aria-label="Selecione e página">
+    </mat-paginator>
 </section>
 
 <section id="tab-container">
-    <div class="crud-buttons">
-        <app-crud-buttons></app-crud-buttons>
-    </div>
-
     <div class="lancamentos">
-        <app-lancamento-list *ngIf="dataDespesas" [dataDespesas]="dataDespesas" class="position-sticky custom-container"></app-lancamento-list>
+        <app-lancamento-list [dataDespesas]="dataDespesas" [dataReceitas]="dataReceitas" [filtroMes]="filtroMes"
+            class="position-sticky custom-container"></app-lancamento-list>
     </div>
 </section>

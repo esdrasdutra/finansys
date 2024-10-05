@@ -32,28 +32,10 @@ export class LancamentoDeleteComponent {
   }
 
   private deleteLancamento(idLancamento: any) {
-
     this.lancamentoService.deleteLancamento(idLancamento)
       .pipe(first())
       .subscribe({
         next: () => {
-          this.lancamentoService.getLancamentos().subscribe(
-            (data: any) => {
-              let dataDespesas: Lancamento[] = [];
-              let dataReceitas: Lancamento[] = [];
-              data.forEach((el: any) => {
-                if (el.tipo_lanc === "RECEITA") {
-                  dataReceitas.push(el);
-                } else if (el.tipo_lanc === "DESPESA") {
-                  dataDespesas.push(el);
-                }
-              });
-              this.commService.setDespesas(dataDespesas, 'DELET COMPONENT');
-              this.commService.setReceitas(dataReceitas, 'DELET COMPONENT');
-              
-              localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
-              localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
-            });
           console.log('COMPLETE');
         },
         error: (err) => console.log(err),

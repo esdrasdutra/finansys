@@ -3,10 +3,13 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import moment from "moment";
 import { Congregation } from "src/app/enums/congregation.enum";
+import { Inflows } from "src/app/enums/inflows.enum";
 import { Lancamento } from "src/app/models/Lancamento";
 import { ComunicationService } from "src/app/services/comunication.service";
 
 export const CONGREGATIONS = Object.values(Congregation);
+
+export const ENTRADAS = Object.values(Inflows);
 
 export const AREAS = ['TC', '1', '2', '3', '4', '5', '6', '7', '8'];
 
