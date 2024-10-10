@@ -45,6 +45,8 @@ export class LancamentoListComponent {
   ) { }
 
   ngOnChanges(): void {
+    console.log(this.dataReceitas);
+
     this.dataSourceDespesas.data = this.dataDespesas;
     this.dataSourceReceitas.data = this.dataReceitas;
   }

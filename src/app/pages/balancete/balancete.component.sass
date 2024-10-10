@@ -1,51 +1,58 @@
-.tab
+.despesas
     display: flex
-    // background-color: rgb(15, 35, 24)
-    justify-content: space-between
+    justify-content: center
+    width: 50%
+    color: black
+    font-size: 24px
+    font-weight: 400
+    line-height: 32px
+    font-family: Roboto, sans-serif
+    letter-spacing: normal
+    cursor: pointer
+    &:hover
+        background: linear-gradient(to bottom,#dee9ee, #7baac2)    
 
-    .despesas
-        display: flex
-        justify-content: center
-        width: 50%
-        color: black
-        font-size: 24px
-        font-weight: 400
-        line-height: 32px
-        font-family: Roboto, sans-serif
-        letter-spacing: normal
-        cursor: pointer
-        &:hover
-            background: linear-gradient(to bottom,#dee9ee, #7baac2)    
+.receitas
+    display: flex
+    justify-content: center
+    width: 50%
+    color: black           
+    font-size: 24px
+    font-weight: 400
+    line-height: 32px
+    font-family: Roboto, sans-serif
+    letter-spacing: normal
+    cursor: pointer
+    &:hover
+        background: linear-gradient(to bottom,#dee9ee, #7baac2)
 
-    .receitas
-        display: flex
-        justify-content: center
-        width: 50%
-        color: black           
-        font-size: 24px
-        font-weight: 400
-        line-height: 32px
-        font-family: Roboto, sans-serif
-        letter-spacing: normal
-        cursor: pointer
-        &:hover
-            background: linear-gradient(to bottom,#dee9ee, #7baac2)
+.valor-despesa
+    color: white
+    background-color:  hsla(0, 100%, 50%, 0.5)
+    font-weight: bold
+    padding: 4px
+
+.valor-receita
+    color: white
+    background-color: hsla(120,100%,25%, 0.5)
+    font-weight: bold
+    padding: 4px
+
+th.mat-column-position, td.mat-column-position
+  padding-left: 8px
+
+.mat-mdc-table-sticky-border-elem-right
+  border-left: 1px solid #e0e0e0
+
+.mat-mdc-table-sticky-border-elem-left
+  border-right: 1px solid #e0e0e0
 
 .f-sm
     white-space: nowrap
     width: fit-content
     font-size: 12px
 
-#tab-container
-    width: 100vw
-    height: calc(100vh - 80px)
-    color: white
-    display: flex
-    position: relative
-    top: 80px
-    flex-direction: column
-    align-items: center
-    justify-content: center
+
 
 .lancamentos
     display: flex

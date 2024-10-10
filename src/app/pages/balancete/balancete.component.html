@@ -1,14 +1,27 @@
 <section id="tab-container">
     <div class="lancamentos">
+        <div id="tab">
+            <div class="despesas" (click)="changeTable($event)">
+                DESPESAS
+            </div>
+            <div class="receitas" (click)="changeTable($event)">
+                RECEITAS
+            </div>
+        </div>
         <section class="mat-elevation-z8" tabindex="0">
             <table mat-table [dataSource]="dataSource">
-                <ng-container *ngFor="let item of displayedColumns" [matColumnDef]="item">
+                <ng-container *ngFor="let item of displayedColumns" [matColumnDef]="item" [sticky]="item === 'receitas' || item === 'percentual' || item === 'total'">
                     <th mat-header-cell class="f-sm" *matHeaderCellDef>
                         {{ item }}
                     </th>
                     <td mat-cell class="f-sm" *matCellDef="let element">
-                        {{ element[item] }}
+                        <div *ngIf="meses.includes(item);then isValue else notValue"></div>
+                        <ng-template #isValue>
+                            {{ element[item] }} 
+                        </ng-template>
+                        <ng-template #notValue> {{ element[item] }}  </ng-template>
                     </td>
+                    
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>

@@ -6,36 +6,6 @@ import { ComunicationService } from 'src/app/services/comunication.service';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 import { Inflows } from 'src/app/enums/inflows.enum';
 
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-export interface Balancete {
-  receitas: string,
-  meses: string,
-  valor: number
-  total: number,
-  percentual: number
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-  { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
-  { position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li' },
-  { position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be' },
-  { position: 5, name: 'Boron', weight: 10.811, symbol: 'B' },
-  { position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C' },
-  { position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N' },
-  { position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O' },
-  { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
-  { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
-];
-
-const ELEMENT_DATA_2: Balancete[] = []
-
 @Component({
   selector: 'app-balancete',
   templateUrl: './balancete.component.html',
@@ -43,6 +13,8 @@ const ELEMENT_DATA_2: Balancete[] = []
 })
 export class BalanceteComponent implements OnInit {
   columnMapping = COLUMNMAPPING;
+
+  meses = MESES;
 
   dataDespesas!: Lancamento[];
   dataReceitas!: Lancamento[];
@@ -57,14 +29,16 @@ export class BalanceteComponent implements OnInit {
   displayColumnsReceitas: string[] = []
 
   displayColumnsDespesas = [
-    'DESPESAS', ...MESES, 'TOTAL', 'PERCENTUAL'
+    'DESPESAS', ...this.meses, 'TOTAL', 'PERCENTUAL'
   ];
+  displayDespesas!: boolean;
+  displayReceitas!: boolean;
 
   constructor(
     private commService: ComunicationService,
     private lancamentoService: LancamentoService,
   ) {
-    this.displayedColumns = ['receitas', ...MESES, 'total', 'percentual'];
+    this.displayedColumns = ['receitas', ...this.meses, 'total', 'percentual'];
 
     console.log(this.displayedColumns);
     console.log(this.displayColumnsDespesas);
@@ -92,23 +66,53 @@ export class BalanceteComponent implements OnInit {
   formatDados(): void {
     let INFLOWS = Object.values(Inflows);
     let dadosPorEntrada: any = [[]];
-    let dadosPorSaida: any = [[]];
-    let groupedData: any = [[]];
+    let totalToPercent = 0
 
-    INFLOWS.forEach((entry: string) => {
-      if (!dadosPorEntrada[entry]){
-        dadosPorEntrada[entry] = []
+    INFLOWS.forEach((entries: string) => {
+      delete dadosPorEntrada[0]
+
+      if (!dadosPorEntrada[entries]){
+        dadosPorEntrada[entries] = { receitas: entries }
       }
-      
+      dadosPorEntrada[entries].total = 0
       this.dadosBrutos.entradas.forEach((res: any) => {
-        if (entry === res.entrada){
-          dadosPorEntrada[entry][MESES[res.mes - 1]] = res.valor_total
+        if (entries === res.entrada) {
+          if (!dadosPorEntrada[entries]) {
+            dadosPorEntrada[entries] = [];
+          }
+      
+          if (!dadosPorEntrada[entries][this.meses[res.mes - 1]]) {
+            dadosPorEntrada[entries][this.meses[res.mes - 1]] = [];
+          }
+          dadosPorEntrada[entries].total += res.valor_total
+          totalToPercent += res.valor_total;
+
+          const formattedValue = res.valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });                   
+          dadosPorEntrada[entries][this.meses[res.mes - 1]].push( formattedValue );
         }
       });
+ 
     });
-    console.log(dadosPorEntrada);
+
+    INFLOWS.forEach((entries: string) => {
+      dadosPorEntrada[entries].percentual = 0;
+      dadosPorEntrada[entries].percentual = ((dadosPorEntrada[entries].total / totalToPercent ) * 100).toFixed(1) + '%'
+      const unformattedTotal = dadosPorEntrada[entries].total
+      const formattedTotal = unformattedTotal.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL' });
+      dadosPorEntrada[entries].total = formattedTotal
+    });
+
     this.dataSource = Object.values(dadosPorEntrada);
-  
-    console.log(this.dataSource)
+  }
+
+  changeTable(event: any) {
+    if (event.target.innerText === 'DESPESAS') {
+      this.displayDespesas = true
+      this.displayReceitas = false
+    }
+    if (event.target.innerText === 'RECEITAS') {
+      this.displayReceitas = true
+      this.displayDespesas = false
+    }
   }
 }
