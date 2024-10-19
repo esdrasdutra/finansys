@@ -14,6 +14,15 @@ interface EntradaDados {
   [key: string]: any; // Para armazenar os meses dinamicamente
 }
 
+interface ResumoMensalDetalhado {
+  receitas: string;
+  total: string;
+  percentual: string;
+  [key: string]: any; // Chaves dinâmicas para os meses
+}
+
+const RESUMO = ['Receitas', 'Despesas', 'Saldo', 'Percentual'];
+
 
 @Component({
   selector: 'app-balancete',
@@ -31,16 +40,19 @@ export class BalanceteComponent implements OnInit {
 
   totais = {}
 
-  dataSourceDespesas: any = [];
+  resumoPorTipo: Record<string, any> = {};
 
+  dataSourceDespesas: any = [];
   dataSourceReceitas: any = [];
+  dataSourceResumo: any = [];
 
   displayColumns = ['receitas', ...this.meses, 'total', 'percentual'];
+  displayColumnsResumo = ['receitas', ...this.meses, 'total'];
 
   constructor(
     private commService: ComunicationService,
     private lancamentoService: LancamentoService,
-  ) {}
+  ) { }
 
   isSticky(buttonToggleGroup: MatButtonToggleGroup, id: string) {
     return (buttonToggleGroup.value || []).indexOf(id) !== -1;
@@ -59,13 +71,17 @@ export class BalanceteComponent implements OnInit {
       this.dadosBrutos = data
     });
 
-    this.dataSourceReceitas = Object.values(this.formatarDados(this.dadosBrutos.entradas, Inflows));
-    this.dataSourceDespesas = Object.values(this.formatarDados(this.dadosBrutos.saidas, Outflows));
+    this.dataSourceReceitas = this.formatarDados(this.dadosBrutos.entradas, Inflows);
+    this.dataSourceDespesas = this.formatarDados(this.dadosBrutos.saidas, Outflows);
+    console.log(this.dataSourceReceitas);
 
-    
+    this.calcularDiferencaMensal(this.resumoPorTipo);
+    this.dataSourceResumo = Object.values(this.resumoPorTipo);
+
+    console.log(this.dataSourceResumo);
   }
 
-  formatarDados(dados: any [], type: typeof Inflows | typeof Outflows): Record <string, EntradaDados> {    
+  formatarDados(dados: any[], type: typeof Inflows | typeof Outflows) {
     let dadosPorTipo: Record<string, EntradaDados> = {};
 
     let totalPorMes: Record<string, number> = {}; // Armazena a soma de cada mês
@@ -83,6 +99,18 @@ export class BalanceteComponent implements OnInit {
       totalToPercent += res.valor_total;
     });
 
+    RESUMO.forEach((res: string) => {
+      if (!this.resumoPorTipo[res]) {
+        this.resumoPorTipo[res] = { receitas: res, total: 0, percentual: '' }
+      }
+
+      this.meses.forEach((mes: any) => {
+        if (!this.resumoPorTipo[res][mes]) {
+          this.resumoPorTipo[res][mes] = [];
+        }
+      });
+    });
+
     // Iterar sobre cada tipo de entrada
     Object.values(type).forEach((entries: string) => {
       // Inicializa o objeto para armazenar os dados da entrada atual
@@ -93,6 +121,7 @@ export class BalanceteComponent implements OnInit {
       // Itera sobre os dados brutos e processa cada entrada
       dados.forEach((res: any) => {
         let identifier = res.entrada ? res.entrada : res.saida;
+
         if (entries === identifier) {
           // Inicializa o array para armazenar os dados do mês correspondente
           if (!dadosPorTipo[entries][this.meses[res.mes - 1]]) {
@@ -125,20 +154,7 @@ export class BalanceteComponent implements OnInit {
 
       percentual = ((totalUnformatted / totalToPercent) * 100)
       dadosPorTipo[entries].percentual = percentual > 0 ? percentual.toFixed(1) + '%' : '  -  '
-    });
 
-    dadosPorTipo['Total'] = { receitas: 'Total', total: '', percentual: '' };
-
-    // Formata a soma total de cada mês e adiciona à linha 'Total', verificando se há valores para aquele mês
-    this.meses.forEach((mes: string) => {
-      const totalMes = totalPorMes[mes];
-      const formattedTotalMes = totalMes > 0
-        ? totalMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
-        : '  -  '; // Exibe 'R$ -' quando não houver valor acumulado
-      dadosPorTipo['Total'][mes] = formattedTotalMes;
-    });
-
-    Object.values(type).forEach((entries: string) => {
       this.meses.forEach((mes: string) => {
         if (!dadosPorTipo[entries][mes] || dadosPorTipo[entries][mes].length === 0) {
           dadosPorTipo[entries][mes] = '  -  '; // Insere "R$ -" se não houver registros
@@ -146,15 +162,76 @@ export class BalanceteComponent implements OnInit {
       });
     });
 
-    // Formata o total da coluna "Total" na linha 'Total'
-    dadosPorTipo['Total'].total = somaTotal > 0
+    dadosPorTipo['Total'] = { receitas: 'Total', total: '', percentual: '' };
+
+    const formattedTotalMeses = somaTotal > 0
       ? somaTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
       : '  -  '; // Exibe "R$ -" se não houver soma total
 
-    // Opcional: Se for necessário remover entradas como '-', '0', pode-se ajustar a lógica na origem dos dados brutos,
-    // mas caso precise de remoção, garantir que não sejam consideradas:
-    delete dadosPorTipo['-'];    
-    
-    return dadosPorTipo;
+    // Formata a soma total de cada mês e adiciona à linha 'Total', verificando se há valores para aquele mês
+    this.meses.forEach((mes: string) => {
+      const totalMes = totalPorMes[mes];
+      const formattedTotalMes = totalMes > 0
+        ? totalMes.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        : '  -  '; // Exibe 'R$ -' quando não houver valor acumulado
+
+      dadosPorTipo['Total'][mes] = formattedTotalMes;
+
+      if (type === Inflows) {
+        this.resumoPorTipo['Receitas'][mes] = formattedTotalMes;
+      } else {
+        this.resumoPorTipo['Despesas'][mes] = formattedTotalMes;
+      }
+    });
+
+    // Formata o total da coluna "Total" na linha 'Total'
+    dadosPorTipo['Total'].total = formattedTotalMeses;
+
+    delete dadosPorTipo['-'];
+    return Object.values(dadosPorTipo);
+  }
+
+  calcularDiferencaMensal(dados: any) {
+    const totalObj: any = {}
+    const percentualObj: any = {}
+
+    let acc = 0;
+
+    this.meses.forEach((mes: string) => {
+      const receita = dados['Receitas'][mes] !== "  -  " ? Number.parseFloat(dados['Receitas'][mes].replace(/[^\d,-]/g, '').replace(',', '.')) : 0;
+      const despesa = dados['Despesas'][mes] !== "  -  " ? Number.parseFloat(dados['Despesas'][mes].replace(/[^\d,-]/g, '').replace(',', '.')) : 0;
+
+      const diferenca = receita - despesa;
+      const percentual = (despesa / receita) * 100;
+
+      totalObj[mes] = diferenca !== 0
+        ? diferenca.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+        : "  -  ";
+
+      percentualObj[mes] = percentual > 0 ? percentual.toFixed(1) + '%' : '  -  ';
+      this.resumoPorTipo['Saldo'] = { receitas: 'Saldo', ...totalObj, total: 0, percentual: '' };
+      this.resumoPorTipo['Percentual'] = { receitas: 'Percentual', ...percentualObj, total: 0, percentual: '' };
+
+    });
+
+    RESUMO.forEach((head: string) => {
+      acc = 0;
+
+      if (head !== 'Percentual') {
+        this.meses.forEach((mes: string) => {
+          const value = dados[head][mes] !== '  -  ' ? Number.parseFloat(dados[head][mes].replace(/[^\d,-]/g, '').replace(',', '.')) : 0;
+          acc += value;
+        });
+        this.resumoPorTipo[head].total = acc.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      }
+    });
+
+    const totalReceita = dados['Receitas'].total !== '  -  ' ? Number.parseFloat(dados['Receitas'].total.replace(/[^\d,-]/g, '').replace(',', '.')) : 0;
+    const totalDespesas = dados['Despesas'].total !== '  -  ' ? Number.parseFloat(dados['Despesas'].total.replace(/[^\d,-]/g, '').replace(',', '.')) : 0;
+    const percentual = (totalDespesas / totalReceita) * 100
+
+    console.log(percentual);
+
+    dados['Percentual'].total = percentual > 0 ? percentual.toFixed(1) + '%' : '  -  ';
   }
 }
