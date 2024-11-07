@@ -15,8 +15,6 @@ export class MyCustomPaginatorIntl implements MatPaginatorIntl {
   itemsPerPageLabel = 'Itens por página';
   lastPageLabel = 'Última Página';
 
-  // You can set labels to an arbitrary string too, or dynamically compute
-  // it through other third-party internationalization libraries.
   nextPageLabel = 'Avançar';
   previousPageLabel = 'Voltar';
 
@@ -58,14 +56,15 @@ export class HomeComponent {
   ngOnInit(): void {
     this.lancamentoService.getLancamentos(
       {
-        "perPage": 21,
-        "page": 1,
+        "perPage": this.pageSize ? this.pageSize : 21,
+        "page": this.pageIndex ? this.pageIndex : 1,
         "order": "desc"
       }
     ).subscribe((data) => {    
       this.commService.setDespesas(data.saídas, 'Home Component');
       this.commService.setReceitas(data.entradas, 'Home Component');
       this.length = data.length
+
     });
 
     this.commService.despesasList$.subscribe(data => this.dataDespesas = data);
@@ -75,6 +74,10 @@ export class HomeComponent {
   handlePageEvent(event: PageEvent) {
     this.pageSize = event.pageSize;
     this.pageIndex = event.pageIndex;
+    console.log(event);
+
+    //this.pageIndex !== 1 ? (this.length - 1) * this.pageSize : this.pageIndex === 1
+    //console.log(this.pageIndex);
 
     this.lancamentoService.getLancamentos(
       {
@@ -85,7 +88,7 @@ export class HomeComponent {
     ).subscribe((data) => {    
       this.commService.setDespesas(data.saídas, 'Home Component');
       this.commService.setReceitas(data.entradas, 'Home Component');
-      this.length = data.pages
+      this.length = data.length
     });
 
     this.commService.despesasList$.subscribe(data => this.dataDespesas = data);

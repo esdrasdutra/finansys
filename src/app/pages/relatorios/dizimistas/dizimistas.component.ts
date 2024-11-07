@@ -46,7 +46,7 @@ export class DizimistasComponent {
     this.commService.despesasList$.subscribe(
       {
         next: (data) => {
-          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3)
+          this.dataDespesas = data //.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3)
         },
         error: (err) => console.log(err),
       }
@@ -55,7 +55,7 @@ export class DizimistasComponent {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3);
+          this.dataReceitas = data //.filter((el: any) => moment(el.data_lan).month() === 2) //|| moment(el.data_lan).month() === 3);
         },
         error: (err) => console.log(err),
       }
@@ -155,12 +155,7 @@ export class DizimistasComponent {
     });
 
     this.reportIn.save(`${this.file_name_in}.pdf`);
-
-    this.displayedColumnsIn = ['mes', 'congregation', 'dizimista']
-
+    this.displayedColumnsIn = ['mes', 'congregation', 'dizimista'];
     this.dataSourceReceita.data = this.dataReceitasFiltered;
-
   }
-
-
 }

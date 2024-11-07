@@ -71,7 +71,7 @@ export class RelatoriosComponent implements OnInit {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth);
+          this.dataReceitas = data //.filter((el: any) => moment(el.data_lan).month() === this.prevMonth);
         },
         error: (err) => console.log(err),
       }
@@ -80,7 +80,7 @@ export class RelatoriosComponent implements OnInit {
     this.commService.despesasList$.subscribe(
       {
         next: (data) => {
-          this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth);
+          this.dataDespesas = data //.filter((el: any) => moment(el.data_lan).month() === this.prevMonth);
         },
         error: (err) => console.log(err),
       }

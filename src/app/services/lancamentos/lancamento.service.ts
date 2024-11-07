@@ -32,7 +32,8 @@ export class LancamentoService {
       lancamentos$ = this.requestService.get(url)
       .pipe(
         map((response: any) => {
-          console.log(response)
+          console.log('Chamando Lancamentos');
+          console.log(response);
           return response;
         }),
         shareReplay(1)
