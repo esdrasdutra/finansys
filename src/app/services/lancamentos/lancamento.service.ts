@@ -28,14 +28,14 @@ export class LancamentoService {
 
   getLancamentos(): Observable<ListLancamentoResponse>{
 
-    const url = `http://localhost:8001/${this.lancamentoUrl}/all`;
+    const url = `http://localhost:8001/${this.lancamentoUrl}/all_crude`;
     let lancamentos$ = new Observable<ListLancamentoResponse>();
     // let lancamentosCached = localStorage.getItem('LancamentoService');
 
     // if(!lancamentosCached){
       lancamentos$ = this.requestService.get<ListLancamentoResponse>(url)
       .pipe(
-        map((response: any) => response.data),
+        map((response: any) => response),
         // tap( data =>  this.lancamentosCacheService.setValue(data, 'LancamentoService')), // Cache the fetched data
         shareReplay(1)
       );

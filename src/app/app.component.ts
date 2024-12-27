@@ -45,13 +45,9 @@ export class AppComponent implements OnInit {
       (data: any) => {
         let dataDespesas: Lancamento[] = [];
         let dataReceitas: Lancamento[] = [];
-        data.forEach((el: any) => {
-          if (el.tipo_lanc === "RECEITA") {
-            dataReceitas.push(el);
-          } else if (el.tipo_lanc === "DESPESA") {
-            dataDespesas.push(el);
-          }
-        });
+        dataReceitas = data.entradas;
+        dataDespesas = data.saidas;
+        console.log(dataDespesas);
 
         this.commService.setDespesas(dataDespesas, 'App Component');
         this.commService.setReceitas(dataReceitas, 'App Component');

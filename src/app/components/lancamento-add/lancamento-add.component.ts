@@ -205,13 +205,16 @@ export class LancamentoAddComponent {
             (data: any) => {
               let dataDespesas: Lancamento[] = [];
               let dataReceitas: Lancamento[] = [];
-              data.forEach((el: any) => {
+              dataReceitas = data.entradas;
+              dataDespesas = data.saidas;
+
+              /* data.forEach((el: any) => {
                 if (el.tipo_lanc === "RECEITA") {
                   dataReceitas.push(el);
                 } else if (el.tipo_lanc === "DESPESA") {
                   dataDespesas.push(el);
                 }
-              });
+              }); */
 
               this.commService.setDespesas(dataDespesas, 'ADD COMPONENT');
               this.commService.setReceitas(dataReceitas, 'ADD COMPONENT');
@@ -232,13 +235,16 @@ export class LancamentoAddComponent {
             (data: any) => {
               let dataDespesas: Lancamento[] = [];
               let dataReceitas: Lancamento[] = [];
-              data.forEach((el: any) => {
+              dataReceitas = data.entradas;
+              dataDespesas = data.saidas;
+
+            /*data.forEach((el: any) => {
                 if (el.tipo_lanc === "RECEITA") {
                   dataReceitas.push(el);
                 } else if (el.tipo_lanc === "DESPESA") {
                   dataDespesas.push(el);
                 }
-              });
+              }); */
 
               this.commService.setDespesas(dataDespesas, 'UPDATE COMPONENT');
               this.commService.setReceitas(dataReceitas, 'UPDATE COMPONENT');
