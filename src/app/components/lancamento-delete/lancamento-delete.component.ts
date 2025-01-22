@@ -41,18 +41,11 @@ export class LancamentoDeleteComponent {
             (data: any) => {
               let dataDespesas: Lancamento[] = [];
               let dataReceitas: Lancamento[] = [];
-              data.forEach((el: any) => {
-                if (el.tipo_lanc === "RECEITA") {
-                  dataReceitas.push(el);
-                } else if (el.tipo_lanc === "DESPESA") {
-                  dataDespesas.push(el);
-                }
-              });
+              dataReceitas = data.entradas;
+              dataDespesas = data.saidas;
+
               this.commService.setDespesas(dataDespesas, 'DELET COMPONENT');
               this.commService.setReceitas(dataReceitas, 'DELET COMPONENT');
-              
-              localStorage.setItem('DESPESAS', JSON.stringify(dataDespesas));
-              localStorage.setItem('RECEITAS', JSON.stringify(dataReceitas));
             });
           console.log('COMPLETE');
         },
