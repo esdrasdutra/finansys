@@ -92,11 +92,6 @@ export class LancamentoAddComponent {
         });
     }
 
-    this.transactionForm.get('valor')?.valueChanges
-      .subscribe(() => {
-        this.checkTypeDoc();
-      })
-
     this.transactionForm.get('recibo')?.valueChanges
       .subscribe(() => {
         this.updateHistory();
@@ -190,14 +185,26 @@ export class LancamentoAddComponent {
 
   submitForm() {
     if (this.isAddMode) {
-      this.addLancamento();
+      const formData = this.formatValor();
+      this.addLancamento(formData);
     } else {
+
       this.updateLancamento(this.transactionForm.value);
     }
   }
 
-  private addLancamento() {
-    this.lancamentoService.addLancamento(this.transactionForm.value)
+  formatValor() {
+    const formData = { ...this.transactionForm.value };
+    // Garantir que 'valor' seja uma string formatada corretamente
+    if (formData.valor !== null && formData.valor !== '') {
+      formData.valor = Number(formData.valor).toFixed(2);
+    }
+
+    return formData
+  }
+
+  private addLancamento(formData: any) {
+    this.lancamentoService.addLancamento(formData)
       .pipe(first())
       .subscribe({
         next: () => {
@@ -227,6 +234,7 @@ export class LancamentoAddComponent {
   private updateLancamento(updatedForm: any) {
     updatedForm.data_lan = updatedForm.data_lan ? new Date(updatedForm.data_lan).toISOString().slice(0, 10) : 0;
     updatedForm.data_ven = updatedForm.data_ven ? new Date(updatedForm.data_ven).toISOString().slice(0, 10) : 0;
+
     this.lancamentoService.updateLancamento(updatedForm)
       .pipe(first())
       .subscribe({
