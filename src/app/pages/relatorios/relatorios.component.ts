@@ -70,6 +70,7 @@ export class RelatoriosComponent implements OnInit {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
+          console.log(data, 'Receitas');
           this.dataReceitas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth);
         },
         error: (err) => console.log(err),
@@ -79,12 +80,14 @@ export class RelatoriosComponent implements OnInit {
     this.commService.despesasList$.subscribe(
       {
         next: (data) => {
+          console.log(data, 'Despesas')
           this.dataDespesas = data.filter((el: any) => moment(el.data_lan).month() === this.prevMonth);
         },
         error: (err) => console.log(err),
       }
     )
   }
+
   sanitizeTables(){    
     this.dataSourceReceita = new MatTableDataSource<Lancamento[]>;
     this.dataSourceDespesa = new MatTableDataSource<Lancamento[]>;    
@@ -504,7 +507,7 @@ export class RelatoriosComponent implements OnInit {
 
     console.log(this.prepareOut)
     
-    //this.reportOut.save(`${this.file_name_out}.pdf`);
+    this.reportOut.save(`${this.file_name_out}.pdf`);
 
   }
 
@@ -534,8 +537,6 @@ export class RelatoriosComponent implements OnInit {
         this.getSumTotal(this.congSelected);
       } else {        
         this.sanitizeTables();
-        console.log(this.dataDespesasFiltered, this.dataReceitasFiltered);
-
         console.log(`Relatório Analítico Completo da Congregação ${this.congSelected}`);
         let receitasByCong = this.dataReceitas.filter((el: any) => {
           return this.congSelected.includes(el.cong);
@@ -553,6 +554,44 @@ export class RelatoriosComponent implements OnInit {
 
         // mes: month, recibo: obj.recibo, congregation: congName, outflow: obj.saida, dizimista: obj.dizimista, obs: obj.obs, valor: obj.valor
         this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
+        this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'tipo_doc', 'obs', 'valor']
+
+        this.reportIn = new jsPDF({
+          orientation: "portrait",
+          unit: "cm",
+          format: 'a4'
+        });
+
+        this.reportOut = new jsPDF({
+          orientation: "portrait",
+          unit: "cm",
+          format: 'a4'
+        });
+
+        this.dataSourceReceita.data.forEach((e: any) => {
+          let tempObj = [];
+          const parsedValue = parseFloat(e.valor);
+          const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+          tempObj.push(e.mes);
+          tempObj.push(e.congregation);
+          tempObj.push(formattedValue);
+          this.prepareIn.push(tempObj);
+        });
+
+        this.dataSourceDespesa.data.forEach((e: any) => {
+          let tempObj = [];
+          const parsedValue = parseFloat(e.valor);
+          const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+          tempObj.push(e.mes);
+          tempObj.push(e.congregation);
+          tempObj.push(formattedValue);
+          this.prepareIn.push(tempObj);
+        });
+
+
+        
+
+
 
       }
     } else {
@@ -586,8 +625,6 @@ export class RelatoriosComponent implements OnInit {
 
       if (this.sumTotal) {
         CONGREGATIONS.forEach((el: any) => this.congSelected.push(el));
-        this.dataSourceDespesa.data = [];
-        this.dataSourceReceita.data = [];
         console.log('CONGREGACOES SELECIONADAS: ', this.congSelected);
         this.getSumTotal(this.congSelected);
 

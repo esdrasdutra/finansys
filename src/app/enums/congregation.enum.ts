@@ -35,5 +35,6 @@ export enum Congregation {
     CONG_34 = "MORIA II",
     CONG_35 = "SHEKINAH",
     CONG_36 = "VIVÊNCIA CRISTÃ",
+    CONG_37 = "MONTE SIÃO",
     TC = "TEMPLO CENTRAL"
 }

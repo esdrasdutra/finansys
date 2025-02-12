@@ -6,6 +6,10 @@
                 <select class="form-select" id="month-select" (change)="onChange($event.target)" [(ngModel)]="selectedMonth">
                     <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
                   </select>
+
+                  <select class="form-select" id="year-select" (change)="onChange($event.target)" [(ngModel)]="selectedYear">
+                    <option *ngFor="let ano of anos" [value]="ano">{{ ano }}</option>
+                  </select>
             </div>
 
             <div class="dashboard-spacer">

@@ -183,13 +183,12 @@ export class LancamentoAddComponent {
     }
   }
 
-  submitForm() {
+  submitForm() {    
+    const formData = this.formatValor();
     if (this.isAddMode) {
-      const formData = this.formatValor();
       this.addLancamento(formData);
     } else {
-
-      this.updateLancamento(this.transactionForm.value);
+      this.updateLancamento(formData);
     }
   }
 

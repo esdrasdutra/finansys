@@ -13,6 +13,7 @@ export class DashboardComponent implements OnInit {
   data: any = [];
 
   selectedMonth!: string;
+  selectedYear!: string;
 
   despesasList: any = [];
   receitasList: any = [];
@@ -28,8 +29,11 @@ export class DashboardComponent implements OnInit {
     'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'
   ];
 
+  anos = ['2023', '2024', '2025', '2026', '2027'];
+
   saldoMensal: any;
   mes_atual: string = '';
+  ano_atual: string  = '';
 
   constructor(
     private commService: ComunicationService,
@@ -38,6 +42,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     let today = Date.now()
     const currentMonthIndex = moment(today).month();
+    const currentYear = moment(today).year().toString();
 
     this.commService.despesasList$.subscribe(
       {
@@ -54,8 +59,9 @@ export class DashboardComponent implements OnInit {
     )
     
     this.selectedMonth = this.meses[currentMonthIndex];
+    this.selectedYear = currentYear;
 
-    this.selectDataByMonth(this.selectedMonth)
+    this.selectDataByMonth(this.selectedMonth, currentYear)
   }
 
   onChange(event: any): void {
@@ -64,26 +70,34 @@ export class DashboardComponent implements OnInit {
     this.inflowByMonth = [];
     this.outflowByMonth = [];
 
-    this.selectDataByMonth(event.value);
+    if (event.id === 'year-select') {
+      this.selectDataByMonth(this.selectedMonth, event.value);
+    } else {
+      this.selectDataByMonth(event.value, this.selectedYear);
+    }
   }
 
-  selectDataByMonth(month: string): void {
+  selectDataByMonth(month: string, year: string): void {
     this.valorTotalDepesas = 0;
     this.valorTotalReceita = 0;
     this.despesasList.forEach((el: any) => {
       let monthInt = moment(el.data_lan).month();
-      let monthStr = this.meses[monthInt];     
+      let yearStr = moment(el.data_lan).year().toString();
+      
+      let monthStr = this.meses[monthInt];
 
-      if (monthStr === month) {
+      if (monthStr === month && yearStr === year) {
         this.outflowByMonth.push(el);
       }
     });
 
     this.receitasList.forEach((el: any) => {
       let monthInt = moment(el.data_lan).month();
+      let yearStr = moment(el.data_lan).year().toString();
+
       let monthStr = this.meses[monthInt];
 
-      if (monthStr === month) {
+      if (monthStr === month && yearStr === year) {
         this.inflowByMonth.push(el);
       }
     });
