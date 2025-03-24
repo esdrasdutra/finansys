@@ -12,18 +12,18 @@ export const CONGREGATIONS = Object.values(Congregation);
 export const AREAS = ['TC', '1', '2', '3', '4', '5', '6', '7', '8'];
 
 export const AREAMAPPING: { [key: string]: Congregation[] } = {
-  'TC': [CONGREGATIONS[36]],
+  'TC': [CONGREGATIONS[37]],
   '1': [CONGREGATIONS[5], CONGREGATIONS[13], CONGREGATIONS[25], CONGREGATIONS[12], CONGREGATIONS[8]],
   '2': [CONGREGATIONS[19], CONGREGATIONS[23], CONGREGATIONS[18]],
   '3': [CONGREGATIONS[30], CONGREGATIONS[4], CONGREGATIONS[24], CONGREGATIONS[21]],
   '4': [CONGREGATIONS[27], CONGREGATIONS[28], CONGREGATIONS[3], CONGREGATIONS[26], CONGREGATIONS[1]],
   '5': [CONGREGATIONS[17], CONGREGATIONS[2], CONGREGATIONS[16], CONGREGATIONS[15]],
   '6': [CONGREGATIONS[9], CONGREGATIONS[20], CONGREGATIONS[22], CONGREGATIONS[14], CONGREGATIONS[31], CONGREGATIONS[35]],
-  '7': [CONGREGATIONS[0], CONGREGATIONS[29], CONGREGATIONS[33], CONGREGATIONS[11], CONGREGATIONS[7]],
+  '7': [CONGREGATIONS[0], CONGREGATIONS[29], CONGREGATIONS[33], CONGREGATIONS[11], CONGREGATIONS[7], CONGREGATIONS[36]],
   '8': [CONGREGATIONS[32], CONGREGATIONS[6], CONGREGATIONS[10], CONGREGATIONS[34]],
 }
 
-export const FILTROS: string[] = ['Mês', 'Recibo','Valor', 'Tipo Documento', 'Nº Documento'];
+export const FILTROS: string[] = ['Mês', 'Recibo', 'Valor', 'Tipo Documento', 'Nº Documento'];
 
 export const MESES = [
   'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
@@ -51,6 +51,8 @@ export const COLUMNMAPPING: { [key: string]: string } = {
 };
 
 export class RelatorioAnalitico {
+  currentMonth = moment();
+
   private commService: ComunicationService;
   dataReceitasFiltered: any = [];
   dataDespesasFiltered: any = []
@@ -58,9 +60,10 @@ export class RelatorioAnalitico {
   constructor() {
     this.commService = inject(ComunicationService);
   }
-  
+
   dataReceitas: any = [];
-  
+  dizimistasList: any = [];
+
   file_name!: string;
   report = new jsPDF();
   prepare: any = [];
@@ -68,10 +71,27 @@ export class RelatorioAnalitico {
   novaLista: any = [];
   receitasPerCong: any = [];
 
-  getDizimistas(data: any): void {
-    this.file_name = `RELATÓRIO GERAL - DÍZIMO OBREIROS`
+  getDizimistas(selectedMonth: string): void {
+    console.log(this.dataFiltered.length, selectedMonth);
+    
+    this.commService.receitasList$.subscribe(
+      {
+        next: (data) => {
+          this.dataReceitas = data.filter((el: any) => {
+            const dataLancamento = moment(el.data_lan);
+            return (
+              (MESES[dataLancamento.month()] === selectedMonth) &&
+              dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+            );
+          });
+        },
+        error: (err) => console.log(err),
+      }
+    )
 
-    let dizimistasList = data.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
+    this.file_name = `RELATÓRIO GERAL - DÍZIMO OBREIROS - ${selectedMonth}`
+
+    this.dizimistasList = this.dataReceitas.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
 
     let congregationMap: any = [];
 
@@ -81,7 +101,7 @@ export class RelatorioAnalitico {
       }
     }
 
-    for (const lancamento of dizimistasList) {
+    for (const lancamento of this.dizimistasList) {
       const congregacao = lancamento.cong;
 
       let dizimista;
@@ -125,9 +145,8 @@ export class RelatorioAnalitico {
       for (const congregacao of area.congregacoes) {
         for (const dizimista of congregacao.dizimistas) {
           if (dizimista.nome) {
-            let mes = moment().add(-1, 'months');
             this.dataFiltered.push({
-              mes: mes.format('MM'),
+              mes: selectedMonth,
               dizimista: dizimista.nome,
               congregation: congregacao.nome,
             });
@@ -140,7 +159,10 @@ export class RelatorioAnalitico {
       orientation: "portrait",
       unit: "cm",
       format: 'a4',
-    })
+    });
+
+    
+    console.log(this.dataFiltered.length, selectedMonth);
 
     this.dataFiltered.forEach((e: any) => {
       let tempObj = [];
@@ -159,7 +181,7 @@ export class RelatorioAnalitico {
       }
     };
 
-    
+
     autoTable(this.report, {
       head: [['MÊS', 'CONGREGAÇÃO', 'DIZIMISTA']],
       body: this.prepare,
@@ -167,8 +189,8 @@ export class RelatorioAnalitico {
       margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
       willDrawPage: (data: any) => setHeaderPageConfigIn(data)
     });
-    
-    this.report.save(`${this.file_name}.pdf`);
+
+    // this.report.save(`${this.file_name}.pdf`);
 
     // const displayedColumns = ['mes', 'congregation', 'dizimista']
   }
@@ -177,7 +199,7 @@ export class RelatorioAnalitico {
     let totalReceitas = 0;
     let totalAvulsas = 0
     this.file_name = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`;
-    
+
     CONGREGATIONS.forEach((cong: any) => {
       this.receitasPerCong.push(
         data.filter((el: any) => el.cong === cong),
@@ -227,7 +249,7 @@ export class RelatorioAnalitico {
     };
 
     autoTable(this.report, {
-      head: [[ 'CONGREGAÇÃO', 'VALOR']],
+      head: [['CONGREGAÇÃO', 'VALOR']],
       body: this.prepare,
       styles: { fontSize: 7 },
       margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
@@ -240,7 +262,7 @@ export class RelatorioAnalitico {
 
   getRelatorioPorPeriodo() {
     this.file_name = `RELATÓRIO DE ENTRADAS - POR PERÍODO`;
-    
+
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
@@ -253,7 +275,7 @@ export class RelatorioAnalitico {
     const startDate = moment(new Date(2024, 1, 1));
     const endDate = moment(new Date(2024, 5, 30));
 
-    CONGREGATIONS.forEach((cong: string)=> {
+    CONGREGATIONS.forEach((cong: string) => {
       this.receitasPerCong.push(
         this.dataReceitas.filter((el: Lancamento) => {
           const lancMoment = moment(el.data_lan);
@@ -273,10 +295,11 @@ export class RelatorioAnalitico {
       })
       this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
     });
-    return this.dataReceitasFiltered ;
+    return this.dataReceitasFiltered;
   }
 
-  getRelatoriosPorCongregacao(dataReceita: any, dataDespesa: any) {
+  getRelatoriosPorCongregacao(dataReceita: any, dataDespesa: any, selectedMonth: string) {
+    console.log(selectedMonth)
     let congName = '';
     let month = null;
     let totalValue = 0;
@@ -285,12 +308,14 @@ export class RelatorioAnalitico {
 
     let file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ${congName}`;
     let file_name_out = `RELATÓRIO ANALÍTICO DE SAÍDAS - ${congName}`;
-    
+
     dataReceita.forEach((obj: Lancamento) => {
       congName = obj.cong;
-      month = moment(obj.data_lan).format('MM');
-      this.dataReceitasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor })
-    });   
+      month = MESES[moment(obj.data_lan).month()];
+      if (month === selectedMonth) {
+        this.dataReceitasFiltered.push({ mes: month, recibo: obj.recibo, congregation: congName, entrada: obj.entrada, dizimista: obj.dizimista, obs: obj.historico, valor: obj.valor })
+      }
+    });
 
     this.dataReceitasFiltered.forEach((obj: any) => {
       let valor = parseFloat(obj.valor)
@@ -330,17 +355,16 @@ export class RelatorioAnalitico {
     const endDate = moment(new Date(2024, 7, 31));
 
 
-    let dizimistasList = this.dataReceitas.filter((lanc: Lancamento) => 
-      {
-        const lancMoment = moment(lanc.data_lan);
-        return lancMoment.isBetween(startDate, endDate, 'days', '[]') && lanc.entrada === "ENTRADA DÍZIMO OBREIRO" && lanc.cong === congregacaoSelecionada[0];
-      });
+    let dizimistasList = this.dataReceitas.filter((lanc: Lancamento) => {
+      const lancMoment = moment(lanc.data_lan);
+      return lancMoment.isBetween(startDate, endDate, 'days', '[]') && lanc.entrada === "ENTRADA DÍZIMO OBREIRO" && lanc.cong === congregacaoSelecionada[0];
+    });
 
     dizimistasList.forEach((lanc: Lancamento) => {
       let congName = lanc.cong;
       let month = moment(lanc.data_lan).format('MM');
-      this.dataFiltered.push({mes: month, congregation: congName, dizimista: lanc.dizimista});
-    });    
+      this.dataFiltered.push({ mes: month, congregation: congName, dizimista: lanc.dizimista });
+    });
 
     this.report = new jsPDF({
       orientation: "portrait",
@@ -365,7 +389,7 @@ export class RelatorioAnalitico {
       }
     };
 
-    
+
     autoTable(this.report, {
       head: [['MES', 'CONGREGAÇÃO', 'DIZIMISTA']],
       body: this.prepare,
@@ -373,13 +397,13 @@ export class RelatorioAnalitico {
       margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
       willDrawPage: (data: any) => setHeaderPageConfigIn(data)
     });
-    
+
     this.report.save(`${this.file_name}.pdf`);
 
     // const displayedColumns = ['mes', 'congregation', 'dizimista']
   }
 
-  printFuction(){
+  printFuction() {
     this.dataReceitasFiltered.forEach((e: any) => {
       let tempObj = [];
       const parsedValue = parseFloat(e.valor);

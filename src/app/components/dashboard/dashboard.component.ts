@@ -34,6 +34,9 @@ export class DashboardComponent implements OnInit {
   saldoMensal: any;
   mes_atual: string = '';
   ano_atual: string  = '';
+    currentMonth = moment();
+  
+    prevMonth = moment().add(-1, 'months');
 
   constructor(
     private commService: ComunicationService,
@@ -46,14 +49,26 @@ export class DashboardComponent implements OnInit {
 
     this.commService.despesasList$.subscribe(
       {
-        next: (data) => { this.despesasList = data },
+        next: (data) => {  this.despesasList = data.filter((el: any) => {
+                    const dataLancamento = moment(el.data_lan);
+                    return (
+                      dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                    );
+                  }); },
         error: (err) => console.log(err),
       }
     )
 
     this.commService.receitasList$.subscribe(
       {
-        next: (data) => { this.receitasList = data },
+        next: (data) => { 
+                  this.receitasList = data.filter((el: any) =>
+                    {
+                      const dataLancamento = moment(el.data_lan);
+                      return (
+                        dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                      );
+                    }); },
         error: (err) => console.log(err),
       }
     )

@@ -47,7 +47,6 @@ export class AppComponent implements OnInit {
         let dataReceitas: Lancamento[] = [];
         dataReceitas = data.entradas;
         dataDespesas = data.saidas;
-        console.log(dataDespesas);
 
         this.commService.setDespesas(dataDespesas, 'App Component');
         this.commService.setReceitas(dataReceitas, 'App Component');
