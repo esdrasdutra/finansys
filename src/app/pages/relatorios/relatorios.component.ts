@@ -72,6 +72,7 @@ export class RelatoriosComponent implements OnInit {
       {
         next: (data) => {
           console.log(data, 'Receitas');
+
           this.dataReceitas = data.filter((el: any) => {
             const dataLancamento = moment(el.data_lan);
             return (
@@ -122,21 +123,27 @@ export class RelatoriosComponent implements OnInit {
     const results = this.relatorio.getRelatorioPorPeriodo();
 
     const doc = new jsPDF({
-      orientation: "portrait",
+      orientation: "landscape",
       unit: "cm",
       format: 'a4'
     });
-
-    let startY = 1;
-    let currentArea = '';
 
     const setHeaderPageConfigIn = (data: any) => {
       data.settings.margin.top = 1;
       if (data.pageNumber === 1) {
         doc.setFontSize(10);
-        doc.text('RELATÓRIO SEMESTRAL DE ENTRADAS', doc.internal.pageSize.getWidth() / 2, 1, { align: 'center' });
+        doc.text('RELATÓRIO TRIMESTRAL DE ENTRADAS', doc.internal.pageSize.getWidth() / 2, 1, { align: 'center' });
       }
     };
+
+    autoTable(doc, {
+      head: [Object.keys(results[0])], // Usa as chaves do primeiro objeto como cabeçalho
+      body: results,
+      styles: {
+        fontSize: 10,
+      },
+      startY: 20, // Posição vertical inicial da tabela
+    });
 
     // Gerar o PDF como um Data URL
     const pdfData = doc.output('dataurlstring');
@@ -144,7 +151,7 @@ export class RelatoriosComponent implements OnInit {
     // Abrir o PDF em uma nova aba
     window.open(pdfData, '_blank');
 
-    //doc.save('RELATÓRIO SEMESTRAL DE ENTRADAS.pdf');
+    doc.save('RELATÓRIO SEMESTRAL DE ENTRADAS.pdf');
 
   }
 
@@ -549,16 +556,43 @@ export class RelatoriosComponent implements OnInit {
     if (checkbox.checked) {
       this.sanitizeTables();
       this.congSelected.push(congregation);
-      console.log(`Selecionando ${this.congSelected}`);
       if (this.congSelected.length !== 1) {
         this.getSumTotal(this.congSelected);
       } else {
         this.sanitizeTables();
+        console.log(`Selecionando ${this.congSelected}`);
+
+        this.commService.receitasList$.subscribe(
+          {
+            next: (data) => {
+              console.log(data, 'Despesas')
+              this.dataReceitas = data.filter((el: any) => {
+                const dataLancamento = moment(el.data_lan);
+                return (dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                );
+              });
+            },
+            error: (err) => console.log(err)
+          })
+
+        this.commService.despesasList$.subscribe(
+          {
+            next: (data) => {
+              console.log(data, 'Despesas')
+              this.dataDespesas = data.filter((el: any) => {
+                const dataLancamento = moment(el.data_lan);
+                return (dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                );
+              });
+            },
+            error: (err) => console.log(err)
+          })
+
         let receitasByCong = this.dataReceitas.filter((el: any) => {
           return this.congSelected.includes(el.cong);
         });
 
-        let despesasByCong = receitaPorCong.filter((el: Lancamento) => {
+        let despesasByCong = this.dataDespesas.filter((el: Lancamento) => {
           return this.congSelected.includes(el.cong);
         });
 
@@ -615,11 +649,11 @@ export class RelatoriosComponent implements OnInit {
             this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
           }
         };
-    
+
         ['mes', 'recibo', 'congregation', 'entrada', 'tipo_doc', 'obs', 'valor']
 
         autoTable(this.reportIn, {
-          head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'ENTRADA', 'TIPO DOC.','OBS:', 'VALOR']],
+          head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'ENTRADA', 'TIPO DOC.', 'OBS:', 'VALOR']],
           body: this.prepareIn,
           styles: { fontSize: 7 },
           margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
