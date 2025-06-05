@@ -71,7 +71,8 @@ export class RelatorioAnalitico {
   novaLista: any = [];
   receitasPerCong: any = [];
 
-  getDizimistas(selectedMonth: string): void {
+  getDizimistas(selectedMonth: string, selectedCong?: string): void {
+
     console.log(this.dataFiltered.length, selectedMonth);
 
     this.commService.receitasList$.subscribe(
@@ -92,6 +93,8 @@ export class RelatorioAnalitico {
     this.file_name = `RELATÓRIO GERAL - DÍZIMO OBREIROS - ${selectedMonth}`
 
     this.dizimistasList = this.dataReceitas.filter((el: any) => el.entrada === "ENTRADA DÍZIMO OBREIRO");
+
+    console.log(this.dizimistasList);
 
     let congregationMap: any = [];
 
@@ -155,14 +158,14 @@ export class RelatorioAnalitico {
       }
     }
 
+    console.log(this.dataFiltered);
+
+
     this.report = new jsPDF({
       orientation: "portrait",
       unit: "cm",
       format: 'a4',
     });
-
-
-    console.log(this.dataFiltered.length, selectedMonth);
 
     this.dataFiltered.forEach((e: any) => {
       let tempObj = [];
@@ -190,9 +193,9 @@ export class RelatorioAnalitico {
       willDrawPage: (data: any) => setHeaderPageConfigIn(data)
     });
 
-    // this.report.save(`${this.file_name}.pdf`);
+    this.report.save(`${this.file_name}.pdf`);
 
-    // const displayedColumns = ['mes', 'congregation', 'dizimista']
+    const displayedColumns = ['mes', 'congregation', 'dizimista']
   }
 
   getDizimoDirigentes(data: any): Lancamento[] {
