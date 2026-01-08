@@ -77,7 +77,7 @@ export class RelatoriosComponent implements OnInit {
             const dataLancamento = moment(el.data_lan);
             return (
               (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) &&
-              dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+              dataLancamento.year() === this.currentMonth.year() - 1 // Verifica se o ano é o corrente
             );
           });
         },
@@ -93,7 +93,7 @@ export class RelatoriosComponent implements OnInit {
             const dataLancamento = moment(el.data_lan);
             return (
               (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) &&
-              dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+              dataLancamento.year() === this.currentMonth.year() - 1// Verifica se o ano é o corrente
             );
           });
         },
@@ -565,10 +565,10 @@ export class RelatoriosComponent implements OnInit {
         this.commService.receitasList$.subscribe(
           {
             next: (data) => {
-              console.log(data, 'Despesas')
+              console.log(data, 'Receitas')
               this.dataReceitas = data.filter((el: any) => {
                 const dataLancamento = moment(el.data_lan);
-                return (dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                return (dataLancamento.year() === this.currentMonth.year() - 1 // Verifica se o ano é o corrente
                 );
               });
             },
@@ -581,7 +581,7 @@ export class RelatoriosComponent implements OnInit {
               console.log(data, 'Despesas')
               this.dataDespesas = data.filter((el: any) => {
                 const dataLancamento = moment(el.data_lan);
-                return (dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                return (dataLancamento.year() === this.currentMonth.year() -1 // Verifica se o ano é o corrente
                 );
               });
             },

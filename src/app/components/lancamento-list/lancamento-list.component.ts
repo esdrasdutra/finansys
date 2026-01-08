@@ -71,8 +71,8 @@ export class LancamentoListComponent implements OnInit {
           this.dataSourceDespesas.data = data.filter((el: any) => {
             const dataLancamento = moment(el.data_lan);
             return (
-              (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) &&
-              dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+              (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) 
+              && dataLancamento.year() === this.currentMonth.year() - 1  // Verifica se o ano é o corrente
             );
           });
         },
@@ -87,8 +87,8 @@ export class LancamentoListComponent implements OnInit {
             {
               const dataLancamento = moment(el.data_lan);
               return (
-                (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) &&
-                dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) 
+                && dataLancamento.year() === this.currentMonth.year() - 1  // Verifica se o ano é o corrente
               );
             });
           },

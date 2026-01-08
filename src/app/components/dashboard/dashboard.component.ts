@@ -52,7 +52,7 @@ export class DashboardComponent implements OnInit {
         next: (data) => {  this.despesasList = data.filter((el: any) => {
                     const dataLancamento = moment(el.data_lan);
                     return (
-                      dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                      dataLancamento.year() === this.currentMonth.year() -1// Verifica se o ano é o corrente
                     );
                   }); },
         error: (err) => console.log(err),
@@ -66,7 +66,7 @@ export class DashboardComponent implements OnInit {
                     {
                       const dataLancamento = moment(el.data_lan);
                       return (
-                        dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+                        dataLancamento.year() === this.currentMonth.year() -1// Verifica se o ano é o corrente
                       );
                     }); },
         error: (err) => console.log(err),
