@@ -82,7 +82,7 @@ export class RelatorioAnalitico {
             const dataLancamento = moment(el.data_lan);
             return (
               (MESES[dataLancamento.month()] === selectedMonth) &&
-              dataLancamento.year() === this.currentMonth.year() // Verifica se o ano é o corrente
+              dataLancamento.year() === this.currentMonth.year() - 1 // Verifica se o ano é o corrente
             );
           });
         },
@@ -263,128 +263,6 @@ export class RelatorioAnalitico {
     return this.dataFiltered;
   }
 
-  getRelatorioPorPeriodo() {
-    this.file_name = `RELATÓRIO DE ENTRADAS - 1º TRIMESTRE`;
-
-    this.commService.receitasList$.subscribe(
-      {
-        next: (data) => {
-          this.dataReceitas = data;
-        },
-        error: (err) => console.log(err),
-      }
-    )
-
-    const startDate = moment(new Date(2025, 0, 1));
-    const endDate = moment(new Date(2025, 2, 31));
-
-    CONGREGATIONS.forEach((cong: string) => {
-      this.receitasPerCong.push(
-        this.dataReceitas.filter((el: Lancamento) => {
-          const lancMoment = moment(el.data_lan);
-          return (lancMoment.year() === this.currentMonth.year() && el.cong === cong && lancMoment.isBetween(startDate, endDate, 'days', '[]')) // Verifica se o ano é o corrente
-        }),
-      );
-    });
-
-    this.receitasPerCong.forEach((cong: any) => {
-      let valueTemp = 0;
-      let congName = '';
-      let month = null;
-
-      cong.forEach((res: any) => {
-        valueTemp += parseFloat(res.valor)
-        congName = res.cong
-        month = moment(res.data_lan).format('MM');
-      })
-
-      this.dataReceitasFiltered.push({ congregation: congName, mes: month, valor: valueTemp })
-    });
-
-    const result = this.processarReceitas(this.dataReceitas, CONGREGATIONS, this.currentMonth, startDate, endDate);
-
-    const filtrada = this.organizarPorArea(result, AREAMAPPING);
-
-    const preparada = this.formatarParaTabela(filtrada);
-
-    return preparada;
-  }
-
-  processarReceitas(dataReceitas: any, congregations: any, currentMonth: any, startDate: any, endDate: any) {
-    const relatorioMensal: any = {}; // Objeto para armazenar os resultados por mês
-
-    congregations.forEach((cong: any) => {
-      dataReceitas.forEach((lancamento: any) => {
-        const lancMoment = moment(lancamento.data_lan);
-        const mes = lancMoment.format('MM'); // Obtém o mês como string (MM)
-
-        if (
-          lancMoment.year() === currentMonth.year() &&
-          lancamento.cong === cong &&
-          lancMoment.isBetween(startDate, endDate, 'days', '[]')
-        ) {
-          if (!relatorioMensal[mes]) {
-            relatorioMensal[mes] = []; // Cria um array para o mês se não existir
-          }
-
-          // Verifica se já existe um registro para a congregação no mês
-          const registroExistente = relatorioMensal[mes].find((item: { congregation: any; }) => item.congregation === cong);
-
-          if (registroExistente) {
-            registroExistente.valor += parseFloat(lancamento.valor); // Adiciona o valor ao registro existente
-          } else {
-            relatorioMensal[mes].push({
-              congregation: cong,
-              mes: mes,
-              valor: parseFloat(lancamento.valor),
-            }); // Cria um novo registro para a congregação
-          }
-        }
-      });
-    });
-
-    // Converte o objeto relatorioMensal em um array de arrays
-    const resultadoFinal = Object.values(relatorioMensal);
-    return resultadoFinal;
-  }
-
-  organizarPorArea(resultadosMensais: any, areaMapping: any) {
-    const resultadosPorArea: any = {};
-
-    // Iterar sobre cada mês nos resultados mensais
-    resultadosMensais.forEach((mes: any) => {
-
-      // Iterar sobre cada congregação no mês
-      mes.forEach((congr: any) => {
-        const congregacao = congr.congregation;
-        const valor = congr.valor;
-        const mesRelatorio = congr.mes;
-
-        // Encontrar a área correspondente à congregação
-        for (const area in areaMapping) {
-
-          if (areaMapping[area].some((cong: any) => cong === congregacao)) {
-
-            // Se a área ainda não existir, criar um array para ela
-            if (!resultadosPorArea[area]) {
-              resultadosPorArea[area] = [];
-            }
-
-            // Adicionar os dados da congregação à área
-            resultadosPorArea[area].push({
-              congregation: congregacao,
-              mes: mesRelatorio,
-              valor: valor,
-            });
-            break; // Sair do loop assim que a área for encontrada
-          }
-        }
-      });
-    });
-
-    return resultadosPorArea;
-  }
-
   formatarParaTabela(dadosPorArea: any) {
     const prepareIn: any = [];
     const somasMensais: any = {}; // Objeto para armazenar as somas por mês
@@ -398,10 +276,10 @@ export class RelatorioAnalitico {
         const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         // Criar o array temporário com os dados formatados
-        const tempObj = [
-          entrada.mes,
-          entrada.congregation,
-          formattedValue,
+        const tempObj = [{
+          mes: entrada.mes,
+          cong: entrada.congregation,
+          val: formattedValue,}
         ];
 
         // Adicionar o array temporário ao prepareIn
@@ -415,7 +293,7 @@ export class RelatorioAnalitico {
       });
 
       // Adicionar a linha de somas ao prepareIn
-      const linhaSomas = ['Somas', '', '']; // Linha para exibir "Somas" na primeira coluna
+      const linhaSomas = ['Total', '', '', '']; // Linha para exibir "Somas" na primeira coluna
       for (const mes in somasMensais) {
         const somaFormatada = somasMensais[mes].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         linhaSomas[Number(mes)] = somaFormatada; // Adicionar a soma formatada na coluna correspondente ao mês
@@ -423,70 +301,107 @@ export class RelatorioAnalitico {
       prepareIn.push(linhaSomas);
     }
 
+    const tableData: any = {};
+
+    const sums = prepareIn.pop(); // Remove a linha de somas
+
+    prepareIn.forEach((item: any[]) => {
+      const congregation = item[1];
+      const value = item[2];
+
+      if (!tableData[congregation]) {
+        tableData[congregation] = [];
+      }
+
+      tableData[congregation].push(value);
+    });
+
+    // Adiciona as somas à última linha
+    const tableArray = Object.entries(tableData).map(([congregation, values]) => [congregation, values]);
+    tableArray.push(['Somas', ...sums.slice(1)]);
+
     return prepareIn;
   }
 
   formatarParaTabelaComSomas(dadosPorArea: any) {
     const prepareIn: any = [];
     const somasMensais: any = {}; // Objeto para armazenar as somas por mês
-  
+
+    const header = ['Congregação', 'Área', 'JAN', 'FEV', 'MAR'];
+    prepareIn.push(header);
+
+    // Objeto para armazenar os totais por congregação
+    const congregacoes: any = {};
+
     // Iterar sobre cada área nos dados
     for (const area in dadosPorArea) {
+
       // Iterar sobre cada entrada (congregation, mes, valor) na área
       dadosPorArea[area].forEach((entrada: any) => {
         const parsedValue = parseFloat(entrada.valor);
         const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  
+
         // Criar o objeto para a linha
         const linha = {
           Congregação: entrada.congregation,
           area: area,
-          'JAN': entrada.mes === '01' ? formattedValue : '',
-          'FEV': entrada.mes === '02' ? formattedValue : '',
-          'MAR': entrada.mes === '03' ? formattedValue : '',
-          total: '', // O total será calculado posteriormente
+          JAN: entrada.mes === '01' ? formattedValue : '',
+          FEV: entrada.mes === '02' ? formattedValue : '',
+          MAR: entrada.mes === '03' ? formattedValue : '',
         };
-  
+
         // Adicionar a linha ao prepareIn
-        prepareIn.push(linha);
-  
+        prepareIn.push(Object.values(linha));
+
+        console.log('MEIO DO PROCESSO: ', prepareIn);
+
         // Calcular as somas mensais
         if (!somasMensais[entrada.mes]) {
           somasMensais[entrada.mes] = 0;
         }
         somasMensais[entrada.mes] += parsedValue;
+
+        // Inicializar o objeto de totais por congregação
+        if (!congregacoes[entrada.congregation]) {
+          congregacoes[entrada.congregation] = {
+            JAN: 0,
+            FEV: 0,
+            MAR: 0,
+          };
+        }
+
+        // Acumular os valores para cada congregação
+        if (entrada.mes === '01') {
+          congregacoes[entrada.congregation].JAN += parsedValue;
+        } else if (entrada.mes === '02') {
+          congregacoes[entrada.congregation].FEV += parsedValue;
+        } else if (entrada.mes === '03') {
+          congregacoes[entrada.congregation].MAR += parsedValue;
+        }
       });
     }
-  
-    // Calcular os totais por congregação
-    const congregacoes: any= {};
+
+    // Calcular os totais por congregação e adicionar à tabela
     prepareIn.forEach((linha: any) => {
-      if (!congregacoes[linha.Congregação]) {
-        congregacoes[linha.Congregação] = {
-          'JAN': 0,
-          'FEV': 0,
-          'MAR': 0,
-        };
-      }
-      if (linha['JAN']) {
-        congregacoes[linha.Congregação]['JAN'] += parseFloat(linha['JAN'].replace(/[^\d,-]/g, '').replace(',', '.'));
-      }
-      if (linha['FEV']) {
-        congregacoes[linha.Congregação]['FEV'] += parseFloat(linha['FEV'].replace(/[^\d,-]/g, '').replace(',', '.'));
-      }
-      if (linha['MAR']) {
-        congregacoes[linha.Congregação]['MAR'] += parseFloat(linha['MAR'].replace(/[^\d,-]/g, '').replace(',', '.'));
+      if (Array.isArray(linha) && linha[0] !== 'Congregação') {
+        const congregacao = linha[0];
+        const total = congregacoes[congregacao].JAN + congregacoes[congregacao].FEV + congregacoes[congregacao].MAR;
+        linha[4] = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
       }
     });
-  
-    // Adicionar os totais às linhas
-    prepareIn.forEach((linha: any) => {
-      linha.total = (congregacoes[linha.Congregação][' JAN'] + congregacoes[linha.Congregação]['FEV'] + congregacoes[linha.Congregação]['MAR']).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    });
-  
+
+    // Adicionar a linha de somas ao final da tabela
+    const linhaSomas = ['Somas'];
+    linhaSomas.push(
+      somasMensais['01'] ? somasMensais['01'].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+      somasMensais['02'] ? somasMensais['02'].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+      somasMensais['03'] ? somasMensais['03'].toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00',
+      '' // O total da soma não é necessário aqui
+    );
+    prepareIn.push(linhaSomas);
+
     return prepareIn;
   }
-
 
   getRelatoriosPorCongregacao(dataReceita: any, dataDespesa: any, selectedMonth: string) {
 
@@ -526,9 +441,6 @@ export class RelatorioAnalitico {
     });
 
     this.dataDespesasFiltered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
-
-    console.log(this.dataDespesasFiltered);
-    console.log(this.dataReceitasFiltered);
 
 
     return [this.dataReceitasFiltered, this.dataDespesasFiltered];
