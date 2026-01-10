@@ -57,6 +57,8 @@ export class RelatoriosComponent implements OnInit {
   file_name_in = '';
   dirigentes = false;
   selectedMonth: any;
+  selectedYear!: number;
+  availableYears: number[] = [];
 
   // datas correntes
   currentMonth = moment();
@@ -70,6 +72,15 @@ export class RelatoriosComponent implements OnInit {
 
   ngOnInit(): void {
     this.initSubscriptions();
+    this.populateYears();
+    this.selectedYear = this.currentMonth.year();
+  }
+
+  private populateYears() {
+    const currentYear = moment().year();
+    for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+      this.availableYears.push(year);
+    }
   }
 
   /* -------------------------
@@ -164,8 +175,7 @@ export class RelatoriosComponent implements OnInit {
     ).subscribe(receitas => {
       // 2. Passa os dados para o serviço, que tem a responsabilidade de processá-los
       if (receitas && receitas.length > 0) {
-        console.log('Gerando relatório anual de receitas...');
-            this.relatorioService.gerarPdfPorPeriodo(receitas);
+        this.relatorioService.gerarPdfPorPeriodo(receitas, this.selectedYear);
       } else {
         console.warn("Não há dados de receita para gerar o relatório.");
         // Opcional: mostrar uma mensagem para o usuário

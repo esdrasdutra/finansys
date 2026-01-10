@@ -19,7 +19,11 @@
                     <mat-icon aria-hidden="false" aria-label="Search Icon" fontIcon="filter_list"></mat-icon>
                     <select id="input-group-filter" [(ngModel)]="selectedMonth">
                         <option *ngFor="let mes of meses" [value]="mes">{{ mes }}</option>
-                    </select>                    
+                    </select>
+                    <mat-icon aria-hidden="false" aria-label="Search Icon" fontIcon="filter_list"></mat-icon>
+                    <select id="input-group-filter" [(ngModel)]="selectedYear">
+                        <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
+                    </select>
                     <input type="text" (keyup)="onKey($event)">
                 </div>
             </div>

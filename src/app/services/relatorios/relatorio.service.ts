@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { matSelectAnimations } from '@angular/material/select';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
@@ -33,20 +34,20 @@ export class RelatorioService {
 
   constructor() { }
 
-  public gerarPdfPorPeriodo(receitas: Lancamento[]): void {
-    const doc = this.createDoc('landscape');
-    const currentYear = moment().year();
-
+  public gerarPdfPorPeriodo(receitas: Lancamento[], selectedYear: number): void {
+    const doc = this.createDoc('landscape');    
+    const meses = MESES.slice(0, 11);
     // 1. Processa e agrupa os dados
-    const resultsByArea = this.processarReceitasPorArea(receitas, currentYear);
+    const resultsByArea = this.processarReceitasPorArea(receitas, selectedYear, meses );
 
     // 2. Gera as páginas do PDF
-    const columns = ['Congregação', ...MESES.slice(0, 11), 'TOTAL'];
+    const columns = ['Congregação', ...meses, 'TOTAL'];
+    console.log('Colunas do relatório:', columns);
 
     Object.keys(AREAMAPPING).forEach((areaKey, idx) => {
-      const areaNum = parseInt(areaKey, 10);
       const congsDaArea = AREAMAPPING[areaKey];
       const resultadosDaArea = resultsByArea[areaKey] || [];
+      console.log('Área:', areaKey, 'Congregações:', congsDaArea, 'Resultados:', resultadosDaArea);
 
       if (resultadosDaArea.length === 0) {
         return; // Pula a área se não houver dados
@@ -55,10 +56,10 @@ export class RelatorioService {
       if (idx > 0 && doc.getNumberOfPages() > 0) doc.addPage();
 
       const congregationsData: Record<string, any> = {};
+
       congsDaArea.forEach(congName => {
         congregationsData[congName] = {
           congregation: congName,
-          jan: 0, fev: 0, mar: 0, abr: 0, mai: 0, jun: 0, jul: 0, ago: 0, set: 0, out: 0, nov: 0, total: 0
         };
       });
 
@@ -70,15 +71,15 @@ export class RelatorioService {
         const v = Number(item.valor ?? 0);
 
         switch (item.mes) {
-            case '01': target.jan = v; break;
-            case '02': target.fev = v; break;
-            case '03': target.mar = v; break;
-            case '04': target.abr = v; break;
-            case '05': target.mai = v; break;
-            case '06': target.jun = v; break;
-            case '07': target.jul = v; break;
-            case '08': target.ago = v; break;
-            case '09': target.set = v; break;
+            case '1': target.jan = v; break;
+            case '2': target.fev = v; break;
+            case '3': target.mar = v; break;
+            case '4': target.abr = v; break;
+            case '5': target.mai = v; break;
+            case '6': target.jun = v; break;
+            case '7': target.jul = v; break;
+            case '8': target.ago = v; break;
+            case '9': target.set = v; break;
             case '10': target.out = v; break;
             case '11': target.nov = v; break;
             default: break;
@@ -130,14 +131,14 @@ export class RelatorioService {
     window.open(pdfData, '_blank');
   }
 
-  private processarReceitasPorArea(receitas: Lancamento[], year: number): Record<string, any[]> {
+  private processarReceitasPorArea(receitas: Lancamento[], year: number, meses: string[]): Record<string, any[]> {
     const relatorioMensal: Record<string, any[]> = {};
-    console.log(year);
+
     receitas.forEach((lancamento: Lancamento) => {
       const lancMoment = moment(lancamento.data_lan);
-      const mes = lancMoment.format('MM');
+      const mes = lancMoment.format('M');
 
-      if (lancMoment.year() === year) {
+      if (lancMoment.year() == year && meses.includes(MESES[parseInt(mes) - 1])) {
         if (!relatorioMensal[mes]) {
           relatorioMensal[mes] = []; 
         }
@@ -172,7 +173,6 @@ export class RelatorioService {
             }
         });
     });
-
     return resultadosPorArea;
   }
 
