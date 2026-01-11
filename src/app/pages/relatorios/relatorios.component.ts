@@ -579,6 +579,23 @@ export class RelatoriosComponent implements OnInit {
     if (this.reportIn) this.reportIn.save(`${this.file_name_in}.pdf`);
   }
 
+  handleRelatorioVertical() {
+    this.sanitizeTables();
+
+    // 1. Pega o valor mais recente da lista de receitas
+    this.commService.receitasList$.pipe(
+      take(1) // Usa take(1) para pegar o valor atual e fazer unsubscribe automaticamente!
+    ).subscribe(receitas => {
+      // 2. Passa os dados para o serviço, que tem a responsabilidade de processá-los
+      if (receitas && receitas.length > 0) {
+        this.relatorioService.gerarPdfPorCongregacaoVertical(receitas, this.selectedYear);
+      } else {
+        console.warn("Não há dados de receita para gerar o relatório.");
+        // Opcional: mostrar uma mensagem para o usuário
+      }
+    });
+  }
+
   onKey(event: Event) {
     const inputValue = event.target as HTMLInputElement;
     console.log(inputValue.value);

@@ -60,6 +60,7 @@ export class RelatorioService {
       congsDaArea.forEach(congName => {
         congregationsData[congName] = {
           congregation: congName,
+          total: 0
         };
       });
 
@@ -174,6 +175,119 @@ export class RelatorioService {
         });
     });
     return resultadosPorArea;
+  }
+
+  public gerarPdfPorCongregacaoVertical(receitas: Lancamento[], year: number): void {
+    const doc = this.createDoc('portrait');
+    const congregationsData = this.processarReceitasPorCongregacao(receitas, year);
+    const sortedCongregations = Object.keys(congregationsData).filter(congName => congregationsData[congName].total > 0).sort();
+
+    if (sortedCongregations.length === 0) {
+        doc.setFontSize(12);
+        doc.text('Nenhum dado encontrado para o ano selecionado.', doc.internal.pageSize.getWidth() / 2, 10, { align: 'center' });
+        const pdfData = doc.output('dataurlstring');
+        window.open(pdfData, '_blank');
+        return;
+    }
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const leftMargin = 0.7;
+    const rightMargin = leftMargin;
+    const gutterX = 0.4;
+    const gutterY = 0.6;
+    const cols = 2;
+    const rows = 2;
+    const perPage = cols * rows;
+    const cellWidth = (pageWidth - leftMargin - rightMargin - (cols - 1) * gutterX) / cols;
+    const topStartY = 1.2;
+
+    // Ajuste aqui o espaçamento vertical EXTRA entre a primeira linha de tabelas (duas primeiras)
+    // e a segunda linha de tabelas (duas últimas). Valor em centímetros.
+    // Modifique `middleRowExtraGap` conforme necessário para aumentar/diminuir esse espaço.
+    const middleRowExtraGap = 0.7;
+
+    for (let p = 0; p < sortedCongregations.length; p += perPage) {
+      if (p > 0) doc.addPage();
+
+      let currentStartY = topStartY;
+
+      // for each row (2 rows per page)
+      for (let r = 0; r < rows; r++) {
+        let rowFinalYs: number[] = [];
+
+        // for each column (2 columns)
+        for (let c = 0; c < cols; c++) {
+          const idx = p + r * cols + c;
+          if (idx >= sortedCongregations.length) continue;
+
+          const congName = sortedCongregations[idx];
+          const data = congregationsData[congName];
+
+          // Title above each table
+          const startX = leftMargin + c * (cellWidth + gutterX);
+          const titleY = currentStartY - 0.35;
+          doc.setFontSize(9);
+          doc.text(`CONGREGAÇÃO: ${congName}`, startX + cellWidth / 2, titleY, { align: 'center' });
+
+          const body = data.months.map((m: any) => [m.monthName, this.formatCurrency(m.value)]);
+
+          autoTable(doc, {
+            head: [['MÊS', 'VALOR']],
+            body,
+            foot: [['TOTAL', this.formatCurrency(data.total)]],
+            startY: currentStartY,
+            tableWidth: cellWidth,
+            margin: { left: startX },
+            theme: 'striped',
+            headStyles: { fillColor: [220, 220, 220], textColor: 20 },
+            footStyles: { fontStyle: 'bold' },
+            styles: { fontSize: 9 },
+          });
+
+          const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY : currentStartY;
+          rowFinalYs.push(finalY);
+        }
+
+        // advance to next row startY using the tallest table in this row
+        const maxFinalY = rowFinalYs.length ? Math.max(...rowFinalYs) : currentStartY;
+
+        // Se estivermos avançando da primeira linha para a segunda, aplique o espaçamento extra configurável
+        const extraGap = (r === 0) ? middleRowExtraGap : 0;
+        currentStartY = maxFinalY + gutterY + extraGap;
+      }
+    }
+
+    const pdfData = doc.output('dataurlstring');
+    window.open(pdfData, '_blank');
+  }
+
+  private processarReceitasPorCongregacao(receitas: Lancamento[], year: number): Record<string, { total: number, months: { monthName: string, value: number }[] }> {
+    const K_CONGREGATION = {} as Record<string, { total: number, months: { monthName: string, value: number }[] }>;
+  
+    Object.values(Congregation).forEach(congName => {
+        K_CONGREGATION[congName] = {
+            total: 0,
+            months: MESES.slice(0, 11).map((monthName, index) => ({
+                month: (index + 1).toString(),
+                monthName: monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase(),
+                value: 0
+            }))
+        };
+    });
+  
+    receitas.forEach(lancamento => {
+        const lancMoment = moment(lancamento.data_lan);
+        if (lancMoment.year() == year) {
+            const congName = lancamento.cong;
+            const monthIndex = lancMoment.month(); // 0-11
+            if (K_CONGREGATION[congName] && monthIndex < 11) {
+                const value = parseFloat(lancamento.valor);
+                K_CONGREGATION[congName].months[monthIndex].value += value;
+                K_CONGREGATION[congName].total += value;
+            }
+        }
+    });
+    return K_CONGREGATION;
   }
 
   private createDoc(orientation: 'portrait' | 'landscape'): jsPDF {
