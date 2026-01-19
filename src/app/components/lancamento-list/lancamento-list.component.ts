@@ -6,7 +6,6 @@ import { LancamentoService } from '../..//services/lancamentos/lancamento.servic
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { PaginatorIntl } from '../..//services/paginator-intl.service';
 import { ComunicationService } from 'src/app/services/comunication.service';
-import { MESES } from 'src/app/entities/relatorios/relatorios';
 moment.locale('pt-br');
 
 @Component({

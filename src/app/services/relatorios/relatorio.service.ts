@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { matSelectAnimations } from '@angular/material/select';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import moment from 'moment';
@@ -15,7 +14,7 @@ const MESES = [
 
 // Definindo o Mapeamento de Área aqui para ser auto-contido.
 const AREAMAPPING: { [key: string]: Congregation[] } = {
-    'TC': [Congregation.SEDE],
+    'TC': [Congregation.TEMPLO_CENTRAL],
     '1': [Congregation.ESCUDO_DA_FE, Congregation.FRUTOS_DA_FE_II, Congregation.LIRIOS_DOS_VALES, Congregation.LUZ_E_VIDA, Congregation.NOVA_VIDA],
     '2': [Congregation.MONTE_DAS_OLIVEIRAS, Congregation.MONTE_HOREBE, Congregation.NOVA_ALIANCA],
     '3': [Congregation.DEUS_FORTE, Congregation.MONTE_SINAI, Congregation.NOVA_JERUSALEM, Congregation.ROCHA_ETERNA],
@@ -36,13 +35,12 @@ export class RelatorioService {
 
   public gerarPdfPorPeriodo(receitas: Lancamento[], selectedYear: number): void {
     const doc = this.createDoc('landscape');    
-    const meses = MESES.slice(0, 11);
+    const meses = MESES.slice(0, 12);
     // 1. Processa e agrupa os dados
     const resultsByArea = this.processarReceitasPorArea(receitas, selectedYear, meses );
 
     // 2. Gera as páginas do PDF
     const columns = ['Congregação', ...meses, 'TOTAL'];
-    console.log('Colunas do relatório:', columns);
 
     Object.keys(AREAMAPPING).forEach((areaKey, idx) => {
       const congsDaArea = AREAMAPPING[areaKey];
@@ -83,6 +81,7 @@ export class RelatorioService {
             case '9': target.set = v; break;
             case '10': target.out = v; break;
             case '11': target.nov = v; break;
+            case '12': target.dez = v; break;
             default: break;
         }
         target.total += v;
@@ -103,6 +102,7 @@ export class RelatorioService {
           this.formatCurrency(c.set ?? 0),
           this.formatCurrency(c.out ?? 0),
           this.formatCurrency(c.nov ?? 0),
+          this.formatCurrency(c.dez ?? 0),
           this.formatCurrency(c.total ?? 0),
         ]));
 
@@ -116,12 +116,12 @@ export class RelatorioService {
         head: [columns],
         body: rows,
         tableWidth: 'auto',
-        styles: { fontSize: 8, cellWidth: 'auto', overflow: 'ellipsize' },
+        styles: { fontSize: 7, cellWidth: 'auto', overflow: 'ellipsize' },
         margin: { top: 1.2, left: 0.5, right: 0.5, bottom: 0.5 },
         willDrawPage: (data: any) => {
           doc.setTextColor(100);
           data.settings.margin = { top: 1.2, left: 0.5, right: 0.5, bottom: 0.5 };
-          doc.setFontSize(9);
+          doc.setFontSize(8);
           doc.text(`RELATÓRIO ANUAL - ÁREA ${areaKey}`, doc.internal.pageSize.getWidth() / 2, 1.0, { align: 'center' });
         }
       });
@@ -129,6 +129,7 @@ export class RelatorioService {
     
     // 3. Abre o PDF em uma nova aba
     const pdfData = doc.output('dataurlstring');
+    doc.save('RELATORIO ANUAL - ENTRADAS')
     window.open(pdfData, '_blank');
   }
 

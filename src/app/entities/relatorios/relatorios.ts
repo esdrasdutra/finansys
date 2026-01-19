@@ -11,17 +11,18 @@ export const CONGREGATIONS = Object.values(Congregation);
 
 export const AREAS = ['TC', '1', '2', '3', '4', '5', '6', '7', '8'];
 
+// Definindo o Mapeamento de Área aqui para ser auto-contido.
 export const AREAMAPPING: { [key: string]: Congregation[] } = {
-  'TC': [CONGREGATIONS[37]],
-  '1': [CONGREGATIONS[5], CONGREGATIONS[13], CONGREGATIONS[25], CONGREGATIONS[12], CONGREGATIONS[8]],
-  '2': [CONGREGATIONS[19], CONGREGATIONS[23], CONGREGATIONS[18]],
-  '3': [CONGREGATIONS[30], CONGREGATIONS[4], CONGREGATIONS[24], CONGREGATIONS[21]],
-  '4': [CONGREGATIONS[27], CONGREGATIONS[28], CONGREGATIONS[3], CONGREGATIONS[26], CONGREGATIONS[1]],
-  '5': [CONGREGATIONS[17], CONGREGATIONS[2], CONGREGATIONS[16], CONGREGATIONS[15]],
-  '6': [CONGREGATIONS[9], CONGREGATIONS[20], CONGREGATIONS[22], CONGREGATIONS[14], CONGREGATIONS[31], CONGREGATIONS[35]],
-  '7': [CONGREGATIONS[0], CONGREGATIONS[29], CONGREGATIONS[33], CONGREGATIONS[11], CONGREGATIONS[7], CONGREGATIONS[36]],
-  '8': [CONGREGATIONS[32], CONGREGATIONS[6], CONGREGATIONS[10], CONGREGATIONS[34]],
-}
+    'TC': [Congregation.TEMPLO_CENTRAL],
+    '1': [Congregation.ESCUDO_DA_FE, Congregation.FRUTOS_DA_FE_II, Congregation.LIRIOS_DOS_VALES, Congregation.LUZ_E_VIDA, Congregation.NOVA_VIDA],
+    '2': [Congregation.MONTE_DAS_OLIVEIRAS, Congregation.MONTE_HOREBE, Congregation.NOVA_ALIANCA],
+    '3': [Congregation.DEUS_FORTE, Congregation.MONTE_SINAI, Congregation.NOVA_JERUSALEM, Congregation.ROCHA_ETERNA],
+    '4': [Congregation.BETEL, Congregation.CONQUISTA, Congregation.PERSEVERANCA, Congregation.PORTA_DAS_OVELHAS, Congregation.PROMESSA_DE_DEUS],
+    '5': [Congregation.CHAMA_VIVA, Congregation.MAR_DE_CRISTAL, Congregation.MARANATA, Congregation.MONTE_CARMELO],
+    '6': [Congregation.GETSEMANI, Congregation.MANANCIAL, Congregation.MONTE_MORIA, Congregation.MONTE_TABOR, Congregation.ROSA_DE_SARON, Congregation.VIVENCIA_CRISTA],
+    '7': [Congregation.ALTO_REFUGIO, Congregation.FRUTOS_DA_FE, Congregation.LIBERDADE, Congregation.REDENCAO, Congregation.MORIA_II],
+    '8': [Congregation.MONTE_SIAO, Congregation.FILADELFIA, Congregation.HERANCA_DE_CRISTO, Congregation.SHALOM, Congregation.SHEKINAH],
+};
 
 export const FILTROS: string[] = ['Mês', 'Recibo', 'Valor', 'Tipo Documento', 'Nº Documento'];
 

@@ -1,6 +1,5 @@
 export enum Congregation {
-    TC = "TEMPLO CENTRAL",
-    SEDE = "SEDE",
+    TEMPLO_CENTRAL = "TEMPLO CENTRAL",
     ESCUDO_DA_FE = "ESCUDO DA FÉ",
     FRUTOS_DA_FE_II = "FRUTOS DA FE II",
     LIRIOS_DOS_VALES = "LÍRIOS DOS VALES",
