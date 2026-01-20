@@ -291,6 +291,30 @@ export class RelatorioService {
     return K_CONGREGATION;
   }
 
+  public getAnnualEntriesByCongregation(lancamentos: Lancamento[], year: number): Record<string, number> {
+    const annualEntries: Record<string, number> = {};
+
+    // Initialize all congregations with 0
+    Object.values(Congregation).forEach(congName => {
+      annualEntries[congName] = 0;
+    });
+
+    lancamentos.forEach(lancamento => {
+      const lancMoment = moment(lancamento.data_lan);
+      if (lancMoment.year() === year) {
+        if (lancamento.tipo_lanc === 'RECEITA') {
+          const congName = lancamento.cong;
+          const value = parseFloat(lancamento.valor);
+          if (annualEntries[congName] !== undefined) {
+            annualEntries[congName] += value;
+          }
+        }
+      }
+    });
+
+    return annualEntries;
+  }
+
   private createDoc(orientation: 'portrait' | 'landscape'): jsPDF {
     return new jsPDF({ orientation, unit: 'cm', format: 'a4' });
   }
