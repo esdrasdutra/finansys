@@ -1,11 +1,22 @@
 <div class="container">
     <h2>Relatório de Entradas Anuais por Congregação</h2>
 
-    <div class="year-selection">
-        <label for="yearSelect">Selecione o Ano:</label>
-        <select id="yearSelect" [(ngModel)]="selectedYear" (change)="onYearChange()">
-            <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
-        </select>
+    <div class="date-selection">
+        <mat-form-field appearance="fill">
+            <mat-label>Data Inicial</mat-label>
+            <input matInput [matDatepicker]="pickerStart" [(ngModel)]="startDate">
+            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+            <mat-datepicker #pickerStart></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+            <mat-label>Data Final</mat-label>
+            <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="endDate">
+            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+            <mat-datepicker #pickerEnd></mat-datepicker>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" (click)="onDateChange()">Filtrar</button>
     </div>
 
     <div class="data-table">
@@ -13,7 +24,7 @@
             <thead>
                 <tr>
                     <th>Congregação</th>
-                    <th>Total Anual</th>
+                    <th>Total no Período</th>
                 </tr>
             </thead>
             <tbody>
@@ -24,7 +35,7 @@
                     </tr>
                 </ng-container>
                 <tr *ngIf="isAnnualEntriesEmpty()">
-                    <td colspan="2" class="text-center">Nenhum dado disponível para o ano selecionado.</td>
+                    <td colspan="2" class="text-center">Nenhum dado disponível para o período selecionado.</td>
                 </tr>
             </tbody>
         </table>

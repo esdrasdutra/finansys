@@ -5,6 +5,7 @@ import { Lancamento } from 'src/app/models/Lancamento';
 import { Congregation } from 'src/app/enums/congregation.enum';
 import { ComunicationService } from 'src/app/services/comunication.service';
 import { take } from 'rxjs';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-entradas-anuais-congregacao',
@@ -13,45 +14,59 @@ import { take } from 'rxjs';
 })
 export class EntradasAnuaisCongregacaoComponent implements OnInit {
   annualEntries: Record<string, number> = {};
-  selectedYear: number = new Date().getFullYear();
-  availableYears: number[] = [];
+  startDate: moment.Moment;
+  endDate: moment.Moment;
   congregations = Object.values(Congregation);
 
   constructor(
     private commService: ComunicationService,
     private relatorioService: RelatorioService
-  ) { }
+  ) {
+    const today = moment();
+    this.startDate = today.clone().startOf('year');
+    this.endDate = today.clone().endOf('year');
+  }
 
   ngOnInit(): void {
-    this.populateAvailableYears();
     this.loadAnnualEntries();
   }
 
-  populateAvailableYears(): void {
-    const currentYear = new Date().getFullYear();
-    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
-      this.availableYears.push(i);
-    }
-  }
-
-  onYearChange(): void {
-    // The selectedYear is bound with ngModel, so we just need to reload the data.
+  onDateChange(): void {
     this.loadAnnualEntries();
   }
 
   loadAnnualEntries(): void {
-    // 1. Pega o valor mais recente da lista de receitas
-        this.commService.receitasList$.pipe(
-          take(1) // Usa take(1) para pegar o valor atual e fazer unsubscribe automaticamente!
-        ).subscribe(receitas => {
-          // 2. Passa os dados para o serviço, que tem a responsabilidade de processá-los
-          if (receitas && receitas.length > 0) {
-            this.annualEntries = this.relatorioService.getAnnualEntriesByCongregation(receitas, this.selectedYear);
-          } else {
-            console.warn("Não há dados de receita para gerar o relatório.");
-            // Opcional: mostrar uma mensagem para o usuário
-          }
+    this.commService.receitasList$.pipe(
+      take(1)
+    ).subscribe(receitas => {
+      if (receitas && receitas.length > 0) {
+        const filteredReceitas = receitas.filter(r => {
+          const lancamentoDate = moment(r.data_lan);
+          return lancamentoDate.isBetween(this.startDate, this.endDate, null, '[]');
         });
+        this.annualEntries = this.processAnnualEntries(filteredReceitas);
+      } else {
+        console.warn("Não há dados de receita para gerar o relatório.");
+        this.annualEntries = {};
+      }
+    });
+  }
+
+  processAnnualEntries(receitas: Lancamento[]): Record<string, number> {
+    const annualEntries: Record<string, number> = {};
+
+    Object.values(Congregation).forEach(congName => {
+      annualEntries[congName] = 0;
+    });
+
+    receitas.forEach(lancamento => {
+      const congName = lancamento.cong;
+      if (annualEntries.hasOwnProperty(congName)) {
+        annualEntries[congName] += parseFloat(lancamento.valor);
+      }
+    });
+
+    return annualEntries;
   }
 
   formatCurrency(value: number): string {
@@ -59,7 +74,7 @@ export class EntradasAnuaisCongregacaoComponent implements OnInit {
   }
 
   isAnnualEntriesEmpty(): boolean {
-    return Object.keys(this.annualEntries).length === 0;
+    return Object.keys(this.annualEntries).length === 0 || Object.values(this.annualEntries).every(v => v === 0);
   }
 
 }

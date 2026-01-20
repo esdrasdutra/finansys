@@ -291,33 +291,6 @@ export class RelatorioService {
     return K_CONGREGATION;
   }
 
-    public getAnnualEntriesByCongregation(receitas: Lancamento[], year: number): Record<string, number> {
-    const annualEntries: Record<string, number> = {};
-
-    // Inicializa todas as congregações com 0
-    Object.values(Congregation).forEach(congName => {
-      annualEntries[congName] = 0;
-    });
-
-    // Soma todas as receitas do ano por congregação
-    receitas.forEach(lancamento => {
-      const lancMoment = moment(lancamento.data_lan);
-      
-      if (lancMoment.year() == year) {
-        console.log('Processing lancamento:', lancamento);
-        const congName = lancamento.cong;
-        console.log(lancamento.data_lan, '->', year, 'Congregação:', congName, 'Valor:', lancamento.valor);
-        if (annualEntries.hasOwnProperty(congName)) {
-          annualEntries[congName] += parseFloat(lancamento.valor);
-        }
-      }
-    });
-
-    console.log('Annual Entries by Congregation:', annualEntries);
-
-    return annualEntries;
-  }
-
   private createDoc(orientation: 'portrait' | 'landscape'): jsPDF {
     return new jsPDF({ orientation, unit: 'cm', format: 'a4' });
   }

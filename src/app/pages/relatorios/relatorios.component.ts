@@ -11,6 +11,20 @@ import { Lancamento } from 'src/app/models/Lancamento';
 import { take } from 'rxjs';
 import { RelatorioService } from 'src/app/services/relatorios/relatorio.service';
 
+interface ReportConfig {
+  type: 'despesasTotal';
+  payload: {
+    tipoDespesa: string;
+  };
+}
+
+interface ReportData {
+  title: string;
+  data: any[];
+  columns: string[];
+  type: 'receita' | 'despesa';
+}
+
 @Component({
   selector: 'app-relatorios',
   templateUrl: './relatorios.component.html',
@@ -34,8 +48,10 @@ export class RelatoriosComponent implements OnInit {
   displayedColumnsOut: string[] = [];
 
   // pdfs / preparação
-  reportIn!: jsPDF;
-  reportOut!: jsPDF;
+  private currentReportIn: jsPDF | null = null;
+  private currentReportOut: jsPDF | null = null;
+  private currentReportNameIn: string = '';
+  private currentReportNameOut: string = '';
   prepareIn: any[] = [];
   prepareOut: any[] = [];
 
@@ -53,8 +69,6 @@ export class RelatoriosComponent implements OnInit {
   sumTotal = false;
   filterByArea = false;
   outflowCenter = '';
-  file_name_out = '';
-  file_name_in = '';
   dirigentes = false;
   selectedMonth: any;
   selectedYear!: number;
@@ -225,6 +239,60 @@ export class RelatoriosComponent implements OnInit {
     });
   }
 
+  private generateReport(config: ReportConfig): ReportData {
+    switch (config.type) {
+      case 'despesasTotal':
+        const despesasWithMonth = this.dataDespesas.map((obj: any) => ({
+          mes: this.monthOf(obj.data_lan),
+          recibo: obj.recibo,
+          congregation: obj.cong,
+          saida: obj.saida,
+          tipo_doc: obj.tipo_doc ?? '',
+          obs: obj.obs ?? '',
+          valor: obj.valor ?? 0
+        }));
+
+        const filtered = despesasWithMonth.filter((d: any) => d.saida === config.payload.tipoDespesa);
+        const totalValue = filtered.reduce((s: number, f: any) => s + parseFloat(f.valor ?? 0), 0);
+        filtered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
+
+        return {
+          title: `RELATÓRIO GERAL DE DESPESAS - ${config.payload.tipoDespesa}`,
+          data: filtered,
+          columns: ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor'],
+          type: 'despesa'
+        };
+      default:
+        throw new Error('Tipo de relatório não suportado');
+    }
+  }
+
+  private displayReport(reportData: ReportData) {
+    if (reportData.type === 'receita') {
+      this.dataSourceReceita.data = reportData.data;
+      this.displayedColumnsIn = reportData.columns;
+    } else {
+      this.dataSourceDespesa.data = reportData.data;
+      this.displayedColumnsOut = reportData.columns;
+    }
+
+    // Prepare for PDF generation
+    const report = this.createDoc('landscape');
+    const preparedData = this.prepareTableRowsFromObjects(reportData.data, reportData.columns, 'valor', (o: any) => reportData.columns.map(col => col === 'valor' ? 'valor' : o[col]));
+    
+    const header = reportData.columns.map(c => this.columnMapping[c] || c.toUpperCase());
+
+    this.buildPdfFromPrepared(report, reportData.title, header, preparedData, 8.5);
+
+    if (reportData.type === 'receita') {
+      this.currentReportIn = report;
+      this.currentReportNameIn = reportData.title;
+    } else {
+      this.currentReportOut = report;
+      this.currentReportNameOut = reportData.title;
+    }
+  }
+
   /* -------------------------
      Implementações que expõem ações ao template
      ------------------------- */
@@ -257,7 +325,7 @@ export class RelatoriosComponent implements OnInit {
 
   getSumTotal(array: any[]): void {
     this.sanitizeTables();
-    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - TOTAL GERAL`;
+    this.currentReportNameIn = `REATÓRIO ANALÍTICO DE ENTRADAS - TOTAL GERAL`;
 
     // agrupamento das listas por congregação
     const receitasGrouped = this.groupByCongregation(this.dataReceitas);
@@ -277,10 +345,10 @@ export class RelatoriosComponent implements OnInit {
     this.finalizeTotals(receitasSummed, despesasSummed);
 
     // preparar PDF/tabela
-    this.reportIn = this.createDoc('portrait');
+    this.currentReportIn = this.createDoc('portrait');
     this.prepareIn = this.prepareTableRowsFromObjects(receitasSummed, ['mes', 'congregation', 'valor'], 'valor', (o: any) => [o.mes, o.congregation, 'valor']);
 
-    this.buildPdfFromPrepared(this.reportIn, this.file_name_in, ['MÊS', 'CONGREGAÇÃO', 'VALOR'], this.prepareIn, 9);
+    this.buildPdfFromPrepared(this.currentReportIn, this.currentReportNameIn, ['MÊS', 'CONGREGAÇÃO', 'VALOR'], this.prepareIn, 9);
 
     this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
     this.dataSourceDespesa.data = despesasSummed;
@@ -289,7 +357,7 @@ export class RelatoriosComponent implements OnInit {
 
   getDizimoDirigentes(array: any): void {
     this.sanitizeTables();
-    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`;
+    this.currentReportNameIn = `REATÓRIO ANALÍTICO DE ENTRADAS - 10% (DIRIGENTES)`;
 
     // remove ofertas avulsas antes de agrupar
     const receitasFiltered = this.dataReceitas.filter((el: any) => el.entrada !== 'ENTRADA OFERTA AVULSA');
@@ -301,9 +369,9 @@ export class RelatoriosComponent implements OnInit {
 
     this.finalizeTotals(receitasSummed, despesasSummed);
 
-    this.reportIn = this.createDoc('portrait');
+    this.currentReportIn = this.createDoc('portrait');
     this.prepareIn = this.prepareTableRowsFromObjects(receitasSummed, ['mes', 'congregation', 'valor'], 'valor', (o: any) => [o.mes, o.congregation, 'valor']);
-    this.buildPdfFromPrepared(this.reportIn, this.file_name_in, ['MÊS', 'CONGREGAÇÃO', 'VALOR'], this.prepareIn, 7);
+    this.buildPdfFromPrepared(this.currentReportIn, this.currentReportNameIn, ['MÊS', 'CONGREGAÇÃO', 'VALOR'], this.prepareIn, 7);
 
     this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
     this.dataSourceDespesa.data = despesasSummed;
@@ -312,7 +380,7 @@ export class RelatoriosComponent implements OnInit {
 
   filterAndSumByArea(array: any): void {
     this.sanitizeTables();
-    this.file_name_in = `REATÓRIO ANALÍTICO DE ENTRADAS - ÁREA ${this.option}`;
+    this.currentReportNameIn = `REATÓRIO ANALÍTICO DE ENTRADAS - ÁREA ${this.option}`;
 
     const receitasGrouped = this.groupByCongregation(this.dataReceitas);
     const despesasGrouped = this.groupByCongregation(this.dataDespesas);
@@ -328,9 +396,9 @@ export class RelatoriosComponent implements OnInit {
     const despesasSummed = this.sumPerCong(despesasFilteredBySelection);
     this.finalizeTotals(receitasSummed, despesasSummed);
 
-    this.reportIn = this.createDoc('portrait');
+    this.currentReportIn = this.createDoc('portrait');
     this.prepareIn = this.prepareTableRowsFromObjects(receitasSummed, ['mes', 'congregation', 'valor'], 'valor', (o: any) => [o.mes, o.congregation, 'valor']);
-    this.buildPdfFromPrepared(this.reportIn, this.file_name_in, ['MÊS', 'CONGREGAÇÃO', 'VALOR'], this.prepareIn, 9);
+    this.buildPdfFromPrepared(this.currentReportIn, this.currentReportNameIn, ['MÊS', 'CONGREGAÇÃO', 'VALOR'], this.prepareIn, 9);
 
     this.displayedColumnsIn = ['mes', 'congregation', 'valor'];
     this.displayedColumnsOut = ['mes', 'congregation', 'valor'];
@@ -340,32 +408,8 @@ export class RelatoriosComponent implements OnInit {
 
   despesasTotal(tipoDespesa: string): void {
     this.sanitizeTables();
-    this.file_name_out = `RELATÓRIO GERAL DE DESPESAS - ${tipoDespesa}`;
-
-    // preparar lista completa de despesas no ano corrente (mes formatado)
-    const despesasWithMonth = this.dataDespesas.map((obj: any) => ({
-      mes: this.monthOf(obj.data_lan),
-      recibo: obj.recibo,
-      congregation: obj.cong,
-      saida: obj.saida,
-      tipo_doc: obj.tipo_doc ?? '',
-      obs: obj.obs ?? '',
-      valor: obj.valor ?? 0
-    }));
-
-    const filtered = despesasWithMonth.filter((d: any) => d.saida === tipoDespesa);
-    const totalValue = filtered.reduce((s: number, f: any) => s + parseFloat(f.valor ?? 0), 0);
-    filtered.push({ mes: '', recibo: '', congregation: 'TOTAL GERAL', saida: '', tipo_doc: '', obs: '', valor: totalValue });
-
-    this.dataDespesasFiltered = filtered;
-    this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor'];
-    this.dataSourceDespesa.data = this.dataDespesasFiltered;
-
-    this.reportOut = this.createDoc('landscape');
-    this.prepareOut = this.prepareTableRowsFromObjects(this.dataDespesasFiltered, ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor'], 'valor', (o: any) => [o.mes, o.recibo, o.congregation, o.saida, o.tipo_doc, o.obs, 'valor']);
-    this.buildPdfFromPrepared(this.reportOut, this.file_name_out, ['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'SAÍDA', 'TIPO DOC', 'OBS', 'VALOR'], this.prepareOut, 8.5);
-
-    this.reportOut.save(`${this.file_name_out}.pdf`);
+    const reportData = this.generateReport({ type: 'despesasTotal', payload: { tipoDespesa } });
+    this.displayReport(reportData);
   }
 
   handleToggle(event: Event, index: number): void {
@@ -374,164 +418,29 @@ export class RelatoriosComponent implements OnInit {
 
     if (checkbox.checked) {
       this.congSelected.push(congregation);
-      if (this.congSelected.length !== 1) {
-        this.getSumTotal(this.congSelected);
-      } else {
-        this.sanitizeTables();
-        console.log(`Selecionando ${this.congSelected}`);
-
-        this.commService.receitasList$.subscribe(
-          {
-            next: (data) => {
-              console.log(data, 'Receitas')
-              this.dataReceitas = data.filter((el: any) => {
-                const dataLancamento = moment(el.data_lan);
-                return (dataLancamento.year() === this.currentMonth.year() - 1 // Verifica se o ano é o corrente
-                );
-              });
-            },
-            error: (err) => console.log(err)
-          })
-
-        this.commService.despesasList$.subscribe(
-          {
-            next: (data) => {
-              console.log(data, 'Despesas')
-              this.dataDespesas = data.filter((el: any) => {
-                const dataLancamento = moment(el.data_lan);
-                return (dataLancamento.year() === this.currentMonth.year() -1 // Verifica se o ano é o corrente
-                );
-              });
-            },
-            error: (err) => console.log(err)
-          })
-
-        let receitasByCong = this.dataReceitas.filter((el: any) => {
-          return this.congSelected.includes(el.cong);
-        });
-
-        let despesasByCong = this.dataDespesas.filter((el: Lancamento) => {
-          return this.congSelected.includes(el.cong);
-        });
-
-        this.result = this.relatorio.getRelatoriosPorCongregacao(receitasByCong, despesasByCong, this.selectedMonth);
-
-        this.dataSourceReceita.data = this.result[0];
-        this.dataSourceDespesa.data = this.result[1];
-
-        this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor']
-        this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'tipo_doc', 'obs', 'valor']
-
-        this.reportIn = new jsPDF({
-          orientation: "landscape",
-          unit: "cm",
-          format: 'a4'
-        });
-
-        this.file_name_in = `REATÓRIO DE ENTRADAS - ${this.congSelected} - ${this.selectedMonth}`;
-
-        this.reportOut = new jsPDF({
-          orientation: "landscape",
-          unit: "cm",
-          format: 'a4'
-        });
-
-        this.dataSourceReceita.data.forEach((e: any) => {
-          let tempObj = [];
-          const parsedValue = parseFloat(e.valor);
-          const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-          tempObj.push(e.mes);
-          tempObj.push(e.recibo);
-          tempObj.push(e.congregation);
-          tempObj.push(e.entrada);
-          tempObj.push(e.tipo_doc);
-          tempObj.push(e.obs);
-          tempObj.push(formattedValue);
-          this.prepareIn.push(tempObj);
-        });
-
-        this.dataSourceDespesa.data.forEach((e: any) => {
-          let tempObj = [];
-          const parsedValue = parseFloat(e.valor);
-          const formattedValue = parsedValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-          tempObj.push(e.mes);
-          tempObj.push(e.congregation);
-          tempObj.push(formattedValue);
-          this.prepareOut.push(tempObj);
-        });
-
-        const setHeaderPageConfigIn = (data: any) => {
-          data.settings.margin.top = 0.5;
-          if (data.pageNumber === 1) {
-            this.reportIn.setFontSize(12); // Adjust font size as needed
-            this.reportIn.text(this.file_name_in, this.reportIn.internal.pageSize.getWidth() / 2, 1, { align: 'center' }); // Adjust text position as needed
-          }
-        };
-
-        ['mes', 'recibo', 'congregation', 'entrada', 'tipo_doc', 'obs', 'valor']
-
-        autoTable(this.reportIn, {
-          head: [['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'ENTRADA', 'TIPO DOC.', 'OBS:', 'VALOR']],
-          body: this.prepareIn,
-          styles: { fontSize: 7 },
-          margin: { top: 1.2, left: 0.5, bottom: 0.5, right: 0.5 },
-          willDrawPage: (data) => setHeaderPageConfigIn(data)
-        });
-
-
-      }
+      console.log(congregation, 'adicionada à seleção.');
     } else {
       const idx = this.congSelected.indexOf(congregation);
-      if (idx >= 0) this.congSelected.splice(idx, 1);
+      if (idx >= 0) {
+        this.congSelected.splice(idx, 1);
+      }
     }
+    
+    this.runReportForSelection();
+  }
 
-    // comportamento original: quando há seleção única ou múltipla, recalcula e prepara relatórios
+  private runReportForSelection() {
     if (this.congSelected.length === 0) {
       this.sanitizeTables();
       return;
     }
 
-    this.sanitizeTables();
-    // recarrega dados do ano corrente para garantir uso da base mais recente
-    // (mantive o filtro por ano do código anterior)
-    this.commService.receitasList$.subscribe({
-      next: (data) => {
-        this.dataReceitas = data.filter((el: any) => moment(el.data_lan).year() === this.currentMonth.year());
-        this.processSelectionForReport();
-      }, error: (err) => console.error(err)
-    });
-    this.commService.despesasList$.subscribe({
-      next: (data) => {
-        this.dataDespesas = data.filter((el: any) => moment(el.data_lan).year() === this.currentMonth.year());
-        this.processSelectionForReport();
-      }, error: (err) => console.error(err)
-    });
-  }
-
-  private processSelectionForReport() {
-    // se ambos já foram carregados, gera relatório (evita chamadas duplicadas)
-    if (!this.dataReceitas || !this.dataDespesas) return;
-
-    const receitasByCong = this.dataReceitas.filter((el: any) => this.congSelected.includes(el.cong));
-    const despesasByCong = this.dataDespesas.filter((el: any) => this.congSelected.includes(el.cong));
-
-    this.result = this.relatorio.getRelatoriosPorCongregacao(receitasByCong, despesasByCong, this.selectedMonth);
-
-    this.dataSourceReceita.data = this.result[0] ?? [];
-    this.dataSourceDespesa.data = this.result[1] ?? [];
-
-    this.displayedColumnsOut = ['mes', 'recibo', 'congregation', 'saida', 'tipo_doc', 'obs', 'valor'];
-    this.displayedColumnsIn = ['mes', 'recibo', 'congregation', 'entrada', 'tipo_doc', 'obs', 'valor'];
-
-    // preparar PDF de entradas
-    this.reportIn = this.createDoc('landscape');
-    this.file_name_in = `REATÓRIO DE ENTRADAS - ${this.congSelected} - ${this.selectedMonth}`;
-
-    this.prepareIn = this.prepareTableRowsFromObjects(this.dataSourceReceita.data, ['mes', 'recibo', 'congregation', 'entrada', 'tipo_doc', 'obs', 'valor'], 'valor', (o: any) => [o.mes, o.recibo, o.congregation, o.entrada, o.tipo_doc, o.obs, 'valor']);
-    this.buildPdfFromPrepared(this.reportIn, this.file_name_in, ['MÊS', 'RECIBO', 'CONGREGAÇÃO', 'ENTRADA', 'TIPO DOC.', 'OBS:', 'VALOR'], this.prepareIn, 7);
-
-    // preparar array simples de despesas para visualização
-    this.prepareOut = this.prepareTableRowsFromObjects(this.dataSourceDespesa.data, ['mes', 'congregation', 'valor'], 'valor', (o: any) => [o.mes, o.congregation, 'valor']);
+    if (this.sumTotal || this.congSelected.length > 1) {
+      this.getSumTotal(this.congSelected);
+    } else if (this.congSelected.length === 1) {
+      console.log('TODO: Implement getDetailedCongregationReport for single selection');
+      // this.getDetailedCongregationReport(this.congSelected[0]);
+    }
   }
 
   handleAreaSelection(event: any): void {
@@ -576,7 +485,12 @@ export class RelatoriosComponent implements OnInit {
   }
 
   downloadPdf() {
-    if (this.reportIn) this.reportIn.save(`${this.file_name_in}.pdf`);
+    if (this.currentReportIn) {
+      this.currentReportIn.save(`${this.currentReportNameIn}.pdf`);
+    }
+    if (this.currentReportOut) {
+      this.currentReportOut.save(`${this.currentReportNameOut}.pdf`);
+    }
   }
 
   handleRelatorioVertical() {

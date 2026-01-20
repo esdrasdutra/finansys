@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 
 
@@ -34,6 +34,7 @@ import { PaginatorComponent } from '../..//components/paginator/paginator.compon
 import { RelatoriosComponent } from '../..//pages/relatorios/relatorios.component';
 import { PorcentagemDirigentesComponent } from 'src/app/pages/relatorios/porcentagem-dirigentes/porcentagem-dirigentes.component';
 import { RouterModule } from '@angular/router';
+import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { EntradasAnuaisCongregacaoComponent } from '../relatorios/entradas-anuais-congregacao/entradas-anuais-congregacao.component';
 
@@ -71,7 +72,8 @@ registerLocaleData(localePtBr);
     ],
     providers: [
         provideNgxMask(),
-        { provide: LOCALE_ID, useValue: 'pt-BR'}
+        { provide: LOCALE_ID, useValue: 'pt-BR'},
+        { provide: MAT_DATE_LOCALE, useValue: 'pt-BR' }
     ],
     imports: [
         RouterModule,
@@ -91,7 +93,8 @@ registerLocaleData(localePtBr);
         NgxMaskPipe,
         DatepickerViewsSelectionExampleComponent,
         MatPaginatorModule,
-        MatDatepickerModule,        
+        MatDatepickerModule,
+        MatInputModule,
         MatSelectModule,
     ]
 })
