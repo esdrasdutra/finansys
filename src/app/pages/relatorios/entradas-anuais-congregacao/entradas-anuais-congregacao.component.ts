@@ -3,6 +3,8 @@ import { LancamentoService } from 'src/app/services/lancamentos/lancamento.servi
 import { RelatorioService } from 'src/app/services/relatorios/relatorio.service';
 import { Lancamento } from 'src/app/models/Lancamento';
 import { Congregation } from 'src/app/enums/congregation.enum';
+import { ComunicationService } from 'src/app/services/comunication.service';
+import { take } from 'rxjs';
 
 @Component({
   selector: 'app-entradas-anuais-congregacao',
@@ -16,7 +18,7 @@ export class EntradasAnuaisCongregacaoComponent implements OnInit {
   congregations = Object.values(Congregation);
 
   constructor(
-    private lancamentoService: LancamentoService,
+    private commService: ComunicationService,
     private relatorioService: RelatorioService
   ) { }
 
@@ -38,17 +40,18 @@ export class EntradasAnuaisCongregacaoComponent implements OnInit {
   }
 
   loadAnnualEntries(): void {
-    this.lancamentoService.getLancamentos().subscribe(
-      (response) => {
-        const lancamentos: Lancamento[] = response.data;
-        console.log(this.selectedYear);
-        console.log(lancamentos);
-        this.annualEntries = this.relatorioService.getAnnualEntriesByCongregation(lancamentos, this.selectedYear);
-      },
-      (error) => {
-        console.error('Erro ao buscar lançamentos:', error);
-      }
-    );
+    // 1. Pega o valor mais recente da lista de receitas
+        this.commService.receitasList$.pipe(
+          take(1) // Usa take(1) para pegar o valor atual e fazer unsubscribe automaticamente!
+        ).subscribe(receitas => {
+          // 2. Passa os dados para o serviço, que tem a responsabilidade de processá-los
+          if (receitas && receitas.length > 0) {
+            this.annualEntries = this.relatorioService.getAnnualEntriesByCongregation(receitas, this.selectedYear);
+          } else {
+            console.warn("Não há dados de receita para gerar o relatório.");
+            // Opcional: mostrar uma mensagem para o usuário
+          }
+        });
   }
 
   formatCurrency(value: number): string {
