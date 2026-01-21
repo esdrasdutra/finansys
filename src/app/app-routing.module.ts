@@ -10,6 +10,7 @@ import { LancamentoAddComponent } from './components/lancamento-add/lancamento-a
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { PorcentagemDirigentesComponent } from './pages/relatorios/porcentagem-dirigentes/porcentagem-dirigentes.component';
 import { EntradasAnuaisCongregacaoComponent } from './pages/relatorios/entradas-anuais-congregacao/entradas-anuais-congregacao.component';
+import { BalancoMensalCongregacaoComponent } from './pages/relatorios/balanco-mensal-congregacao/balanco-mensal-congregacao.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, 
@@ -23,6 +24,7 @@ const routes: Routes = [
   { path: 'relatorios', component: RelatoriosComponent},
   { path: 'dirigentes', component: PorcentagemDirigentesComponent },
   { path: 'relatorios/entradas-anuais', component: EntradasAnuaisCongregacaoComponent },
+  { path: 'relatorios/balanco-mensal-congregacao', component: BalancoMensalCongregacaoComponent },
 ];
 
 @NgModule({

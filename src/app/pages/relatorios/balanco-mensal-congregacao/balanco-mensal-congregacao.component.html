@@ -1,0 +1,50 @@
+<div>
+  <h2>Relatório de Balanço Mensal por Congregação (Dados Brutos)</h2>
+
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Mês</th>
+        <th>Recibo</th>
+        <th>Dt. Lançamento</th>
+        <th>Dt. Vec.</th>
+        <th>Tipo Doc.</th>
+        <th>Nº Doc.</th>
+        <th>Congregação</th>
+        <th>Fornecedor</th>
+        <th>Cód. Dizimista</th>
+        <th>Nome Dizimista</th>
+        <th>Função</th>
+        <th>Observação</th>
+        <th>Valor</th>
+        <th>Conta</th>
+        <th>Situação</th>
+        <th>Tipo Lançamento</th>
+        <th>Histórico</th>
+        <th>Status Lanç.</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let lancamento of parsedLancamentos">
+        <td>{{ lancamento.mes }}</td>
+        <td>{{ lancamento.recibo }}</td>
+        <td>{{ lancamento.data_lan | date:'shortDate' }}</td>
+        <td>{{ lancamento.data_ven | date:'shortDate' }}</td>
+        <td>{{ lancamento.tipo_doc }}</td>
+        <td>{{ lancamento.num_doc }}</td>
+        <td>{{ lancamento.cong }}</td>
+        <td>{{ lancamento.forn }}</td>
+        <td>{{ lancamento.cod_dizimista }}</td>
+        <td>{{ lancamento.dizimista }}</td>
+        <td>{{ lancamento.funcao }}</td>
+        <td>{{ lancamento.obs }}</td>
+        <td>{{ lancamento.valor | currency:'BRL':'symbol':'1.2-2' }}</td>
+        <td>{{ lancamento.conta }}</td>
+        <td>{{ lancamento.situacao }}</td>
+        <td>{{ lancamento.tipo_lanc }}</td>
+        <td>{{ lancamento.historico }}</td>
+        <td>{{ lancamento.status_lanc }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
