@@ -27,7 +27,6 @@ export class LancamentoService {
   }
 
   getLancamentos(): Observable<ListLancamentoResponse>{
-
     const url = `http://localhost:8001/${this.lancamentoUrl}/all_crude`;
     let lancamentos$ = new Observable<ListLancamentoResponse>();
     // let lancamentosCached = localStorage.getItem('LancamentoService');
@@ -62,5 +61,26 @@ export class LancamentoService {
   deleteLancamento(lancamento: any): Observable<RemoveLancamentoResponse>{
     const url = `http://localhost:8001/${this.lancamentoUrl}/${lancamento.id}`
     return this.requestService.delete(url);
+  }
+
+  listReceitas(): Observable<Lancamento[]> {
+    return this.getLancamentos().pipe(
+      map((response: any) => {
+        // the backend used by the app component returns an object with
+        // `entradas`/`saidas` instead of `data`. fall back to whichever
+        // property is available so the filter actually runs.
+        const source: Lancamento[] = response.data ?? response.entradas ?? [];
+        return source.filter(l => l.entrada && l.entrada !== '-' && l.entrada !== '');
+      })
+    );
+  }
+
+  listDespesas(): Observable<Lancamento[]> {
+    return this.getLancamentos().pipe(
+      map((response: any) => {
+        const source: Lancamento[] = response.data ?? response.saidas ?? [];
+        return source.filter(l => l.saida && l.saida !== '-' && l.saida !== '');
+      })
+    );
   }
 }

@@ -90,37 +90,37 @@ export class RelatoriosComponent implements OnInit {
     this.selectedYear = this.currentMonth.year();
   }
 
-  private populateYears() {
-    const currentYear = moment().year();
-    for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+  private populateYears(): void {
+    const startYear = moment().year() - 5;
+    const endYear = moment().year() + 1;
+    for (let year = startYear; year <= endYear; year++) {
       this.availableYears.push(year);
     }
+  }
+
+  private filterBySelectedYear(list: any[]): any[] {
+    return list.filter((el: any) => {
+      const d = moment(el.data_lan);
+      return d.year() === this.selectedYear;
+    });
   }
 
   /* -------------------------
      Subscriptions / Inicialização
      ------------------------- */
   private initSubscriptions(): void {
-    this.commService.receitasList$.subscribe({
+    this.commService.getAllReceitas().subscribe({
       next: (data) => {
-        this.dataReceitas = this.filterByCurrentOrPrevMonth(data);
+        this.dataReceitas = this.filterBySelectedYear(data);
       },
       error: (err) => console.error(err)
     });
 
-    this.commService.despesasList$.subscribe({
+    this.commService.getAllDespesas().subscribe({
       next: (data) => {
-        this.dataDespesas = this.filterByCurrentOrPrevMonth(data);
+        this.dataDespesas = this.filterBySelectedYear(data);
       },
       error: (err) => console.error(err)
-    });
-  }
-
-  private filterByCurrentOrPrevMonth(list: any[]): any[] {
-    return list.filter((el: any) => {
-      const d = moment(el.data_lan);
-      return d.year() === this.currentMonth.year()
-        && (d.month() === this.currentMonth.month() || d.month() === this.prevMonth.month());
     });
   }
 
@@ -190,6 +190,36 @@ export class RelatoriosComponent implements OnInit {
       // 2. Passa os dados para o serviço, que tem a responsabilidade de processá-los
       if (receitas && receitas.length > 0) {
         this.relatorioService.gerarPdfPorPeriodo(receitas, this.selectedYear);
+      } else {
+        console.warn("Não há dados de receita para gerar o relatório.");
+        // Opcional: mostrar uma mensagem para o usuário
+      }
+    });
+  }
+
+  handleRelatorioAnualCompleto(): void {
+    this.sanitizeTables();
+
+    // 1. Pega o valor mais recente da lista de receitas
+    this.commService.receitasList$.pipe(
+      take(1) // Usa take(1) para pegar o valor atual e fazer unsubscribe automaticamente!
+    ).subscribe(receitas => {
+      // 2. Passa os dados para o serviço, que tem a responsabilidade de processá-los
+      if (receitas && receitas.length > 0) {
+        console.log(receitas);
+
+        this.commService.despesasList$.pipe(
+          take(1)
+        ).subscribe(despesas => {
+          if (despesas && despesas.length > 0) {
+            console.log(despesas);
+            this.relatorioService.gerarPdfAnualLancamentos(receitas, despesas, this.selectedYear);
+          } else {
+            console.warn("Não há dados de despesa para gerar o relatório anual completo.");
+            // Opcional: mostrar uma mensagem para o usuário
+          }
+        });
+        //this.relatorioService.gerarPdfPorPeriodo(receitas, this.selectedYear);
       } else {
         console.warn("Não há dados de receita para gerar o relatório.");
         // Opcional: mostrar uma mensagem para o usuário

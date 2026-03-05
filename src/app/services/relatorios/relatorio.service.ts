@@ -291,6 +291,183 @@ export class RelatorioService {
     return K_CONGREGATION;
   }
 
+  public gerarPdfAnualLancamentos(receitas: Lancamento[], despesas: Lancamento[], selectedYear: number): void {
+    const doc = this.createDoc('landscape');
+    const meses = MESES.slice(0, 12);
+
+    const resultsByAreaReceitas = this.processarReceitasPorArea(receitas, selectedYear, meses);
+    const resultsByAreaDespesas = this.processarDespesasPorArea(despesas, selectedYear, meses);
+
+    const columns = ['Congregação', ...meses, 'TOTAL'];
+    let firstArea = true;
+
+    Object.keys(AREAMAPPING).forEach((areaKey) => {
+      const congsDaArea = AREAMAPPING[areaKey];
+      const resultadosReceitasDaArea = resultsByAreaReceitas[areaKey] || [];
+      const resultadosDespesasDaArea = resultsByAreaDespesas[areaKey] || [];
+
+      if (resultadosReceitasDaArea.length === 0 && resultadosDespesasDaArea.length === 0) {
+        return; // Pula a área se não houver dados para receitas ou despesas
+      }
+
+      if (!firstArea) {
+        doc.addPage();
+      } else {
+        firstArea = false;
+      }
+
+      // --- Tabela de Receitas ---
+      const congregationsDataReceitas: Record<string, any> = {};
+      congsDaArea.forEach(congName => {
+        congregationsDataReceitas[congName] = { congregation: congName, total: 0 };
+      });
+
+      resultadosReceitasDaArea.forEach((item: any) => {
+        const cong = item.congregation;
+        if (!congregationsDataReceitas[cong]) return;
+        const target = congregationsDataReceitas[cong];
+        const v = Number(item.valor ?? 0);
+        target[meses[parseInt(item.mes) - 1].toLowerCase().substring(0, 3)] = (target[meses[parseInt(item.mes) - 1].toLowerCase().substring(0, 3)] || 0) + v;
+        target.total += v;
+      });
+
+      const rowsReceitas = Object.values(congregationsDataReceitas)
+        .filter((c: any) => c.total !== 0)
+        .map((c: any) => ([
+          c.congregation,
+          this.formatCurrency(c.jan ?? 0),
+          this.formatCurrency(c.fev ?? 0),
+          this.formatCurrency(c.mar ?? 0),
+          this.formatCurrency(c.abr ?? 0),
+          this.formatCurrency(c.mai ?? 0),
+          this.formatCurrency(c.jun ?? 0),
+          this.formatCurrency(c.jul ?? 0),
+          this.formatCurrency(c.ago ?? 0),
+          this.formatCurrency(c.set ?? 0),
+          this.formatCurrency(c.out ?? 0),
+          this.formatCurrency(c.nov ?? 0),
+          this.formatCurrency(c.dez ?? 0),
+          this.formatCurrency(c.total ?? 0),
+        ]));
+      
+      if (rowsReceitas.length > 0) {
+        autoTable(doc, {
+          head: [columns],
+          body: rowsReceitas,
+          startY: 1.5,
+          tableWidth: 'auto',
+          styles: { fontSize: 7, cellWidth: 'auto', overflow: 'ellipsize' },
+          margin: { top: 1.2, left: 0.5, right: 0.5, bottom: 0.5 },
+          willDrawPage: (data: any) => {
+            doc.setTextColor(100);
+            doc.setFontSize(8);
+            doc.text(`RELATÓRIO ANUAL DE ENTRADAS - ÁREA ${areaKey} - ${selectedYear}`, doc.internal.pageSize.getWidth() / 2, 1.0, { align: 'center' });
+          }
+        });
+      }
+
+
+      // --- Tabela de Despesas ---
+      const congregationsDataDespesas: Record<string, any> = {};
+      congsDaArea.forEach(congName => {
+        congregationsDataDespesas[congName] = { congregation: congName, total: 0 };
+      });
+
+      resultadosDespesasDaArea.forEach((item: any) => {
+        const cong = item.congregation;
+        if (!congregationsDataDespesas[cong]) return;
+        const target = congregationsDataDespesas[cong];
+        const v = Number(item.valor ?? 0);
+        target[meses[parseInt(item.mes) - 1].toLowerCase().substring(0, 3)] = (target[meses[parseInt(item.mes) - 1].toLowerCase().substring(0, 3)] || 0) + v;
+        target.total += v;
+      });
+
+      const rowsDespesas = Object.values(congregationsDataDespesas)
+        .filter((c: any) => c.total !== 0)
+        .map((c: any) => ([
+          c.congregation,
+          this.formatCurrency(c.jan ?? 0),
+          this.formatCurrency(c.fev ?? 0),
+          this.formatCurrency(c.mar ?? 0),
+          this.formatCurrency(c.abr ?? 0),
+          this.formatCurrency(c.mai ?? 0),
+          this.formatCurrency(c.jun ?? 0),
+          this.formatCurrency(c.jul ?? 0),
+          this.formatCurrency(c.ago ?? 0),
+          this.formatCurrency(c.set ?? 0),
+          this.formatCurrency(c.out ?? 0),
+          this.formatCurrency(c.nov ?? 0),
+          this.formatCurrency(c.dez ?? 0),
+          this.formatCurrency(c.total ?? 0),
+        ]));
+      
+      if (rowsDespesas.length > 0) {
+        autoTable(doc, {
+          head: [columns],
+          body: rowsDespesas,
+          startY: (doc as any).lastAutoTable.finalY + 1.0, // Start below the income table
+          tableWidth: 'auto',
+          styles: { fontSize: 7, cellWidth: 'auto', overflow: 'ellipsize' },
+          margin: { left: 0.5, right: 0.5, bottom: 0.5 },
+          willDrawPage: (data: any) => {
+            doc.setTextColor(100);
+            doc.setFontSize(8);
+            doc.text(`RELATÓRIO ANUAL DE DESPESAS - ÁREA ${areaKey} - ${selectedYear}`, doc.internal.pageSize.getWidth() / 2, (doc as any).lastAutoTable.finalY + 0.5, { align: 'center' });
+          }
+        });
+      }
+    });
+
+    const pdfData = doc.output('dataurlstring');
+    doc.save(`RELATORIO ANUAL - ENTRADAS_E_SAIDAS_${selectedYear}`);
+    window.open(pdfData, '_blank');
+  }
+
+  private processarDespesasPorArea(despesas: Lancamento[], year: number, meses: string[]): Record<string, any[]> {
+    const relatorioMensal: Record<string, any[]> = {};
+
+    despesas.forEach((lancamento: Lancamento) => {
+      const lancMoment = moment(lancamento.data_lan);
+      const mes = lancMoment.format('M');
+
+      if (lancMoment.year() == year && meses.includes(MESES[parseInt(mes) - 1])) {
+        if (!relatorioMensal[mes]) {
+          relatorioMensal[mes] = [];
+        }
+
+        const registroExistente = relatorioMensal[mes].find(item => item.congregation === lancamento.cong);
+
+        if (registroExistente) {
+          registroExistente.valor += parseFloat(lancamento.valor);
+        } else {
+          relatorioMensal[mes].push({
+            congregation: lancamento.cong,
+            mes: mes,
+            valor: parseFloat(lancamento.valor),
+          });
+        }
+      }
+    });
+
+    const resultadosPorArea: Record<string, any[]> = {};
+    const resultadosMensais = Object.values(relatorioMensal);
+
+    resultadosMensais.forEach((mes: any[]) => {
+        mes.forEach((congr: any) => {
+            for (const area in AREAMAPPING) {
+                if (AREAMAPPING[area].some(c => c === congr.congregation)) {
+                    if (!resultadosPorArea[area]) {
+                        resultadosPorArea[area] = [];
+                    }
+                    resultadosPorArea[area].push(congr);
+                    break;
+                }
+            }
+        });
+    });
+    return resultadosPorArea;
+  }
+
   private createDoc(orientation: 'portrait' | 'landscape'): jsPDF {
     return new jsPDF({ orientation, unit: 'cm', format: 'a4' });
   }
