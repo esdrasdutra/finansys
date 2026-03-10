@@ -70,7 +70,8 @@ export class RelatoriosComponent implements OnInit {
   filterByArea = false;
   outflowCenter = '';
   dirigentes = false;
-  selectedMonth: any;
+  selectedMonth: any;               // usado em outros relatórios
+  selectedMonths: string[] = [];    // meses escolhidos para o relatório anual detalhado
   selectedYear!: number;
   availableYears: number[] = [];
 
@@ -88,6 +89,8 @@ export class RelatoriosComponent implements OnInit {
     this.initSubscriptions();
     this.populateYears();
     this.selectedYear = this.currentMonth.year();
+    // ao iniciar seleciona todos os meses por padrão para manter comportamento anterior
+    this.selectedMonths = [...this.meses];
   }
 
   private populateYears(): void {
@@ -148,6 +151,20 @@ export class RelatoriosComponent implements OnInit {
     return moment(dateStr).format('MM');
   }
 
+  /**
+   * Inclui/Remove um mês da lista de seleção para o relatório anual detalhado.
+   */
+  toggleMonthSelection(event: any): void {
+    const mes = event.target.value;
+    if (event.target.checked) {
+      if (!this.selectedMonths.includes(mes)) {
+        this.selectedMonths.push(mes);
+      }
+    } else {
+      this.selectedMonths = this.selectedMonths.filter(m => m !== mes);
+    }
+  }
+
   private createDoc(orientation: 'portrait' | 'landscape' = 'portrait'): jsPDF {
     return new jsPDF({ orientation, unit: 'cm', format: 'a4' });
   }
@@ -206,7 +223,6 @@ export class RelatoriosComponent implements OnInit {
     ).subscribe(receitas => {
       // 2. Passa os dados para o serviço, que tem a responsabilidade de processá-los
       if (receitas && receitas.length > 0) {
-        console.log(receitas);
 
         this.commService.despesasList$.pipe(
           take(1)
@@ -223,6 +239,32 @@ export class RelatoriosComponent implements OnInit {
       } else {
         console.warn("Não há dados de receita para gerar o relatório.");
         // Opcional: mostrar uma mensagem para o usuário
+      }
+    });
+  }
+
+  handleRelatorioAnualDetalhado(): void {
+    this.sanitizeTables();
+    this.commService.receitasList$.pipe(
+      take(1)
+    ).subscribe(receitas => {
+      if (receitas && receitas.length > 0) {
+        this.commService.despesasList$.pipe(
+          take(1)
+        ).subscribe(despesas => {
+          if (despesas && despesas.length > 0) {
+            this.relatorioService.gerarPdfAnualDetalhado(
+              receitas,
+              despesas,
+              this.selectedYear,
+              this.selectedMonths
+            );
+          } else {
+            console.warn("Não há dados de despesa para gerar o relatório anual detalhado.");
+          }
+        });
+      } else {
+        console.warn("Não há dados de receita para gerar o relatório.");
       }
     });
   }

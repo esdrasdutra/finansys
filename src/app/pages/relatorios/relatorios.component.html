@@ -4,6 +4,7 @@
     <button type="button" (click)="handleDizimistas()">Relatório Quantitativo de Dizimistas - OBREIROS</button>
     <button type="button" (click)="handlePeriodo()"> Relatório de Entradas por Período</button>
     <button type="button" (click)="handleRelatorioAnualCompleto()"> Relatório Anual Completo (Entradas e Saídas)</button>
+    <button type="button" (click)="handleRelatorioAnualDetalhado()"> Relatório Anual Detalhado (Todas as Movimentações)</button>
     <button type="button" (click)="handleDizimoDirigentes()"> 10% DIRIGENTES</button>
     <button type="button" routerLink="/relatorios/entradas-anuais"> Entradas Anuais por Congregação</button>
     <button type="button" (click)="handleRelatorioVertical()"> Chamar Função CH</button>
@@ -27,6 +28,16 @@
                     <select id="input-group-filter" [(ngModel)]="selectedYear">
                         <option *ngFor="let year of availableYears" [value]="year">{{ year }}</option>
                     </select>
+                    
+                    <!-- seleção de meses múltiplos para relatório anual detalhado -->
+                    <mat-icon aria-hidden="false" aria-label="Search Icon" fontIcon="filter_list"></mat-icon>
+                    <div class="month-multiple-selection">
+                        <label style="font-weight:bold;">Meses do relatório</label>
+                        <div *ngFor="let mes of meses" style="display: inline-block; margin-right:8px;">
+                            <input type="checkbox" [value]="mes" (change)="toggleMonthSelection($event)" [checked]="selectedMonths.includes(mes)" />
+                            {{ mes }}
+                        </div>
+                    </div>
                     <input type="text" (keyup)="onKey($event)">
                 </div>
             </div>

@@ -423,6 +423,122 @@ export class RelatorioService {
     window.open(pdfData, '_blank');
   }
 
+  /**
+   * Gera um relatório anual detalhado de receitas e despesas.  
+   * Permite passar uma lista opcional de meses (nomes em maiúsculas, conforme
+   * constante MESES) para limitar os lançamentos incluídos. Se não for passada
+   * nenhuma lista, todos os meses do ano serão considerados (comportamento
+   * compatível com versão anterior).
+   */
+  public gerarPdfAnualDetalhado(
+    receitas: Lancamento[],
+    despesas: Lancamento[],
+    selectedYear: number,
+    mesesSelecionados: string[] = []
+  ): void {
+    const doc = this.createDoc('landscape');
+
+    // Normaliza lista de meses: se vazia, inclui todos os meses
+    const mesesFiltro = mesesSelecionados && mesesSelecionados.length ? mesesSelecionados : MESES.slice(0, 12);
+
+    // Filtrar e Ordenar Receitas
+    const receitasFiltradas = receitas
+      .filter(r => {
+        const m = moment(r.data_lan);
+        const nomeMes = MESES[m.month()];
+        return m.year() === selectedYear && mesesFiltro.includes(nomeMes);
+      })
+      .sort((a, b) => moment(a.data_lan).diff(moment(b.data_lan)));
+
+    // Filtrar e Ordenar Despesas
+    const despesasFiltradas = despesas
+      .filter(d => {
+        const m = moment(d.data_lan);
+        const nomeMes = MESES[m.month()];
+        return m.year() === selectedYear && mesesFiltro.includes(nomeMes);
+      })
+      .sort((a, b) => moment(a.data_lan).diff(moment(b.data_lan)));
+
+    // Colunas omitindo Dizimista/Histórico conforme solicitado
+    const columnsReceitas = ['DATA', 'RECIBO', 'CONGREGAÇÃO', 'TIPO', 'VALOR'];
+    const rowsReceitas = receitasFiltradas.map(r => [
+      moment(r.data_lan).format('DD/MM/YYYY'),
+      r.recibo,
+      r.cong,
+      r.entrada,
+      this.formatCurrency(r.valor)
+    ]);
+
+    // Colunas omitindo Fornecedor/Histórico conforme solicitado
+    const columnsDespesas = ['DATA', 'RECIBO', 'CONGREGAÇÃO', 'TIPO','HISTÓRICO', 'VALOR'];
+    const rowsDespesas = despesasFiltradas.map(d => [
+      moment(d.data_lan).format('DD/MM/YYYY'),
+      d.recibo,
+      d.cong,
+      d.saida,
+      d.historico,
+      this.formatCurrency(d.valor)
+    ]);
+
+    const totalReceitas = receitasFiltradas.reduce((acc, r) => acc + parseFloat(r.valor), 0);
+    const totalDespesas = despesasFiltradas.reduce((acc, d) => acc + parseFloat(d.valor), 0);
+
+    // --- Tabela de Receitas ---
+    autoTable(doc, {
+      head: [columnsReceitas],
+      body: rowsReceitas,
+      startY: 1.5,
+      styles: { fontSize: 8 },
+      margin: { top: 1.5, left: 0.5, right: 0.5, bottom: 0.5 },
+      didDrawPage: (data) => {
+        doc.setFontSize(10);
+        doc.setTextColor(40);
+        doc.text(`RELATÓRIO ANUAL DETALHADO DE ENTRADAS - ${selectedYear}` + (mesesFiltro.length < 12 ? ` (${mesesFiltro.join(', ')})` : ''), doc.internal.pageSize.getWidth() / 2, 1.0, { align: 'center' });
+      }
+    });
+
+    // Corrigindo desalinhamento: Forçar nova página para despesas para garantir cabeçalho limpo no topo da página
+    doc.addPage();
+    
+    // --- Tabela de Despesas ---
+    autoTable(doc, {
+      head: [columnsDespesas],
+      body: rowsDespesas,
+      startY: 1.5,
+      styles: { fontSize: 8 },
+      margin: { top: 1.5, left: 0.5, right: 0.5, bottom: 0.5 },
+      didDrawPage: (data) => {
+        doc.setFontSize(10);
+        doc.setTextColor(40);
+        doc.text(`RELATÓRIO ANUAL DETALHADO DE SAÍDAS - ${selectedYear}` + (mesesFiltro.length < 12 ? ` (${mesesFiltro.join(', ')})` : ''), doc.internal.pageSize.getWidth() / 2, 1.0, { align: 'center' });
+      }
+    });
+
+    // --- Resumo Final ---
+    const finalYDespesas = (doc as any).lastAutoTable.finalY;
+    const summaryYStart = finalYDespesas + 1.5;
+    
+    if (summaryYStart + 3 > doc.internal.pageSize.getHeight()) {
+      doc.addPage();
+      doc.setFontSize(12);
+      doc.text('RESUMO ANUAL', 0.5, 1.5);
+      doc.text(`Total de Entradas: ${this.formatCurrency(totalReceitas)}`, 0.5, 2.5);
+      doc.text(`Total de Saídas: ${this.formatCurrency(totalDespesas)}`, 0.5, 3.2);
+      doc.text(`Saldo Líquido: ${this.formatCurrency(totalReceitas - totalDespesas)}`, 0.5, 3.9);
+    } else {
+      doc.setFontSize(12);
+      doc.text('RESUMO ANUAL', 0.5, summaryYStart);
+      doc.text(`Total de Entradas: ${this.formatCurrency(totalReceitas)}`, 0.5, summaryYStart + 1.0);
+      doc.text(`Total de Saídas: ${this.formatCurrency(totalDespesas)}`, 0.5, summaryYStart + 1.7);
+      doc.text(`Saldo Líquido: ${this.formatCurrency(totalReceitas - totalDespesas)}`, 0.5, summaryYStart + 2.4);
+    }
+
+    const pdfData = doc.output('dataurlstring');
+    const fileSuffix = mesesFiltro.length < 12 ? `_MESES_${mesesFiltro.map(m => m.substring(0,3)).join('_')}` : '';
+    doc.save(`RELATORIO_ANUAL_DETALHADO_${selectedYear}${fileSuffix}`);
+    window.open(pdfData, '_blank');
+  }
+
   private processarDespesasPorArea(despesas: Lancamento[], year: number, meses: string[]): Record<string, any[]> {
     const relatorioMensal: Record<string, any[]> = {};
 
