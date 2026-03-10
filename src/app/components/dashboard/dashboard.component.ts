@@ -33,10 +33,10 @@ export class DashboardComponent implements OnInit {
 
   saldoMensal: any;
   mes_atual: string = '';
-  ano_atual: string  = '';
-    currentMonth = moment();
-  
-    prevMonth = moment().add(-1, 'months');
+  ano_atual: string = '';
+  currentMonth = moment();
+
+  prevMonth = moment().add(-1, 'months');
 
   constructor(
     private commService: ComunicationService,
@@ -49,30 +49,32 @@ export class DashboardComponent implements OnInit {
 
     this.commService.despesasList$.subscribe(
       {
-        next: (data) => {  this.despesasList = data.filter((el: any) => {
-                    const dataLancamento = moment(el.data_lan);
-                    return (
-                      dataLancamento.year() === this.currentMonth.year() -1// Verifica se o ano é o corrente
-                    );
-                  }); },
+        next: (data) => {
+          this.despesasList = data.filter((el: any) => {
+            const dataLancamento = moment(el.data_lan);
+            return (
+              dataLancamento.year() === this.currentMonth.year()
+            );
+          });
+        },
         error: (err) => console.log(err),
       }
     )
 
     this.commService.receitasList$.subscribe(
       {
-        next: (data) => { 
-                  this.receitasList = data.filter((el: any) =>
-                    {
-                      const dataLancamento = moment(el.data_lan);
-                      return (
-                        dataLancamento.year() === this.currentMonth.year() -1// Verifica se o ano é o corrente
-                      );
-                    }); },
+        next: (data) => {
+          this.receitasList = data.filter((el: any) => {
+            const dataLancamento = moment(el.data_lan);
+            return (
+              dataLancamento.year() === this.currentMonth.year()
+            );
+          });
+        },
         error: (err) => console.log(err),
       }
     )
-    
+
     this.selectedMonth = this.meses[currentMonthIndex];
     this.selectedYear = currentYear;
 
@@ -98,8 +100,10 @@ export class DashboardComponent implements OnInit {
     this.despesasList.forEach((el: any) => {
       let monthInt = moment(el.data_lan).month();
       let yearStr = moment(el.data_lan).year().toString();
-      
+
       let monthStr = this.meses[monthInt];
+
+      console.log(yearStr, year);
 
       if (monthStr === month && yearStr === year) {
         this.outflowByMonth.push(el);
@@ -116,7 +120,7 @@ export class DashboardComponent implements OnInit {
         this.inflowByMonth.push(el);
       }
     });
-    
+
     this.inflowByMonth.forEach((lanc: any) => {
       this.valorTotalReceita += parseFloat(lanc.valor);
     });

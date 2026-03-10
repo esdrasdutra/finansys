@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { Lancamento } from '../..//models/Lancamento';
 import moment from 'moment';
@@ -6,6 +6,9 @@ import { LancamentoService } from '../..//services/lancamentos/lancamento.servic
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { PaginatorIntl } from '../..//services/paginator-intl.service';
 import { ComunicationService } from 'src/app/services/comunication.service';
+import { Inflows } from '../../enums/inflows.enum';
+import { Outflows } from '../../enums/outflows.enum';
+import { Account } from '../../enums/account.enum';
 moment.locale('pt-br');
 
 @Component({
@@ -14,7 +17,7 @@ moment.locale('pt-br');
   styleUrls: ['./lancamento-list.component.sass'],
   providers: [{provide: MatPaginatorIntl, useClass: PaginatorIntl}]
 })
-export class LancamentoListComponent implements OnInit {
+export class LancamentoListComponent implements OnInit, OnChanges {
 
   columnMapping: { [key: string]: string } = {
     'recibo': 'RECIBO',
@@ -56,24 +59,58 @@ export class LancamentoListComponent implements OnInit {
   ]
 
   @Input() tipoLancFromParent!: any;
+  @Input() filterEntradaInput: string = '';
+  @Input() filterSaidaInput: string = '';
+  @Input() filterContaInput: string = '';
+  @Input() filterSituacaoInput: string = '';
+  @Input() filterTipoDocInput: string = '';
   @Output() idLanc = new EventEmitter<Lancamento>();  
+
+  // Filtros
+  filterEntrada: string = '';
+  filterSaida: string = '';
+  filterConta: string = '';
+  filterSituacao: string = '';
+  filterTipoDoc: string = '';
+
+  // Opções para filtros
+  inflowsOptions = Object.values(Inflows);
+  outflowsOptions = Object.values(Outflows);
+  accountOptions = Object.values(Account);
+  situacaoOptions = ['PAGO', 'PENDENTE', 'VENCIDO']; // Ajustar conforme necessário
+  tipoDocOptions = ['RECIBO', 'NOTA FISCAL', 'OUTROS']; // Ajustar conforme necessário
+
   constructor(
     private elementRef: ElementRef,
     private lancamentoService: LancamentoService,
     private commService: ComunicationService,
   ) { }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filterEntradaInput']) {
+      this.filterEntrada = this.filterEntradaInput;
+    }
+    if (changes['filterSaidaInput']) {
+      this.filterSaida = this.filterSaidaInput;
+    }
+    if (changes['filterContaInput']) {
+      this.filterConta = this.filterContaInput;
+    }
+    if (changes['filterSituacaoInput']) {
+      this.filterSituacao = this.filterSituacaoInput;
+    }
+    if (changes['filterTipoDocInput']) {
+      this.filterTipoDoc = this.filterTipoDocInput;
+    }
+    this.applyFilters();
+  }
+
   ngOnInit(): void {
     this.commService.despesasList$.subscribe(
       {
         next: (data) => {
-          this.dataSourceDespesas.data = data.filter((el: any) => {
-            const dataLancamento = moment(el.data_lan);
-            return (
-              (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) 
-              && dataLancamento.year() === this.currentMonth.year() - 1  // Verifica se o ano é o corrente
-            );
-          });
+          this.dataDespesas = data;
+          this.applyFilters();
         },
         error: (err) => console.log(err),
       }
@@ -82,18 +119,44 @@ export class LancamentoListComponent implements OnInit {
     this.commService.receitasList$.subscribe(
       {
         next: (data) => {
-          this.dataSourceReceitas.data = data.filter((el: any) =>
-            {
-              const dataLancamento = moment(el.data_lan);
-              return (
-                (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) 
-                && dataLancamento.year() === this.currentMonth.year() - 1  // Verifica se o ano é o corrente
-              );
-            });
-          },
+          this.dataReceitas = data;
+          this.applyFilters();
+        },
         error: (err) => console.log(err),
       }
     )
+  }
+
+  applyFilters(): void {
+    // Filtrar despesas
+    this.dataSourceDespesas.data = this.dataDespesas.filter((el: any) => {
+      const dataLancamento = moment(el.data_lan);
+      const matchesDate = (
+        (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) 
+        && dataLancamento.year() === this.currentMonth.year() - 1
+      );
+      const matchesEntrada = !this.filterEntrada || el.entrada === this.filterEntrada;
+      const matchesSaida = !this.filterSaida || el.saida === this.filterSaida;
+      const matchesConta = !this.filterConta || el.conta === this.filterConta;
+      const matchesSituacao = !this.filterSituacao || el.situacao === this.filterSituacao;
+      const matchesTipoDoc = !this.filterTipoDoc || el.tipo_doc === this.filterTipoDoc;
+      return matchesDate && matchesEntrada && matchesSaida && matchesConta && matchesSituacao && matchesTipoDoc;
+    });
+
+    // Filtrar receitas
+    this.dataSourceReceitas.data = this.dataReceitas.filter((el: any) => {
+      const dataLancamento = moment(el.data_lan);
+      const matchesDate = (
+        (dataLancamento.month() === this.prevMonth.month() || dataLancamento.month() === this.currentMonth.month()) 
+        && dataLancamento.year() === this.currentMonth.year() - 1
+      );
+      const matchesEntrada = !this.filterEntrada || el.entrada === this.filterEntrada;
+      const matchesSaida = !this.filterSaida || el.saida === this.filterSaida;
+      const matchesConta = !this.filterConta || el.conta === this.filterConta;
+      const matchesSituacao = !this.filterSituacao || el.situacao === this.filterSituacao;
+      const matchesTipoDoc = !this.filterTipoDoc || el.tipo_doc === this.filterTipoDoc;
+      return matchesDate && matchesEntrada && matchesSaida && matchesConta && matchesSituacao && matchesTipoDoc;
+    });
   }
 
   onClickRow(row: any, event: any) {
