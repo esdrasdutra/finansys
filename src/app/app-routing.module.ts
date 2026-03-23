@@ -9,7 +9,7 @@ import { ObreirosComponent } from './pages/obreiros/obreiros.component';
 import { LancamentoAddComponent } from './components/lancamento-add/lancamento-add.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { PorcentagemDirigentesComponent } from './pages/relatorios/porcentagem-dirigentes/porcentagem-dirigentes.component';
-import { EntradasAnuaisCongregacaoComponent } from './pages/relatorios/entradas-anuais-congregacao/entradas-anuais-congregacao.component';
+import { RelatorioEntradasCentroCustoComponent } from './pages/relatorios/entradas-anuais-congregacao/relatorio-entradas-centro-custo.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/home', pathMatch: 'full' }, 
@@ -22,7 +22,7 @@ const routes: Routes = [
   { path: 'fornecedores', component: FornecedoresComponent},
   { path: 'relatorios', component: RelatoriosComponent},
   { path: 'dirigentes', component: PorcentagemDirigentesComponent },
-  { path: 'relatorios/entradas-anuais', component: EntradasAnuaisCongregacaoComponent },
+  { path: 'relatorios/entradas-anuais', component: RelatorioEntradasCentroCustoComponent },
 ];
 
 @NgModule({

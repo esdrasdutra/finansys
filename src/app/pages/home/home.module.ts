@@ -36,7 +36,8 @@ import { PorcentagemDirigentesComponent } from 'src/app/pages/relatorios/porcent
 import { RouterModule } from '@angular/router';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { EntradasAnuaisCongregacaoComponent } from '../relatorios/entradas-anuais-congregacao/entradas-anuais-congregacao.component';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { RelatorioEntradasCentroCustoComponent } from '../relatorios/entradas-anuais-congregacao/relatorio-entradas-centro-custo.component';
 
 registerLocaleData(localePtBr);
 
@@ -53,7 +54,7 @@ registerLocaleData(localePtBr);
         RelatoriosComponent,
         PaginatorComponent,
         PorcentagemDirigentesComponent,
-        EntradasAnuaisCongregacaoComponent,
+        RelatorioEntradasCentroCustoComponent,
     ],
     exports: [
         HomeComponent,
@@ -67,7 +68,7 @@ registerLocaleData(localePtBr);
         PaginatorComponent,
         MatCheckboxModule,
         MatNativeDateModule,
-        EntradasAnuaisCongregacaoComponent,
+        RelatorioEntradasCentroCustoComponent,
 
     ],
     providers: [
@@ -96,6 +97,7 @@ registerLocaleData(localePtBr);
         MatDatepickerModule,
         MatInputModule,
         MatSelectModule,
+        MatExpansionModule,
     ]
 })
 export class HomeModule { }

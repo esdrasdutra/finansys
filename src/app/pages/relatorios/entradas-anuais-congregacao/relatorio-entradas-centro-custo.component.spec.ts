@@ -4,11 +4,11 @@ import { of } from 'rxjs';
 import { LancamentoService } from 'src/app/services/lancamentos/lancamento.service';
 import { RelatorioService } from 'src/app/services/relatorios/relatorio.service';
 
-import { EntradasAnuaisCongregacaoComponent } from './entradas-anuais-congregacao.component';
+import { RelatorioEntradasCentroCustoComponent } from './relatorio-entradas-centro-custo.component';
 
-describe('EntradasAnuaisCongregacaoComponent', () => {
-  let component: EntradasAnuaisCongregacaoComponent;
-  let fixture: ComponentFixture<EntradasAnuaisCongregacaoComponent>;
+describe('RelatorioEntradasCentroCustoComponent', () => {
+  let component: RelatorioEntradasCentroCustoComponent;
+  let fixture: ComponentFixture<RelatorioEntradasCentroCustoComponent>;
   let lancamentoServiceSpy: jasmine.SpyObj<LancamentoService>;
   let relatorioServiceSpy: jasmine.SpyObj<RelatorioService>;
 
@@ -17,7 +17,7 @@ describe('EntradasAnuaisCongregacaoComponent', () => {
     relatorioServiceSpy = jasmine.createSpyObj('RelatorioService', ['getAnnualEntriesByCongregation']);
 
     await TestBed.configureTestingModule({
-      declarations: [ EntradasAnuaisCongregacaoComponent ],
+      declarations: [ RelatorioEntradasCentroCustoComponent ],
       imports: [ FormsModule ],
       providers: [
         { provide: LancamentoService, useValue: lancamentoServiceSpy },
@@ -29,7 +29,7 @@ describe('EntradasAnuaisCongregacaoComponent', () => {
     lancamentoServiceSpy.getLancamentos.and.returnValue(of({ data: [] }));
     relatorioServiceSpy.getAnnualEntriesByCongregation.and.returnValue({});
 
-    fixture = TestBed.createComponent(EntradasAnuaisCongregacaoComponent);
+    fixture = TestBed.createComponent(RelatorioEntradasCentroCustoComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

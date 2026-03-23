@@ -1,0 +1,69 @@
+<div class="container">
+  <h2>Relatório de Entradas por Centro de Custo</h2>
+
+  <div class="date-selection">
+    <mat-form-field appearance="fill">
+      <mat-label>Data Inicial</mat-label>
+      <input matInput [matDatepicker]="pickerStart" [(ngModel)]="startDate">
+      <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+      <mat-datepicker #pickerStart></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Data Final</mat-label>
+      <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="endDate">
+      <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+      <mat-datepicker #pickerEnd></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="onDateChange()">Filtrar</button>
+    <button mat-raised-button color="accent" (click)="exportToCSV()" [disabled]="isAnnualEntriesEmpty()">Exportar para CSV</button>
+  </div>
+
+  <div class="data-table" *ngIf="!isAnnualEntriesEmpty()">
+    <mat-accordion multi>
+      <mat-expansion-panel *ngFor="let cong of congregations">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{ cong }}
+          </mat-panel-title>
+          <mat-panel-description>
+            Total: {{ formatCurrency(getCongregationTotal(cong)) }}
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-accordion multi>
+          <mat-expansion-panel *ngFor="let month of getMonths(cong)">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{ month }}
+              </mat-panel-title>
+              <mat-panel-description>
+                Total: {{ formatCurrency(getMonthTotal(cong, month)) }}
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Centro de Custo</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let costCenter of getCostCenters(cong, month)">
+                  <td>{{ costCenter }}</td>
+                  <td>{{ formatCurrency(annualEntries[cong][month][costCenter]) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+  <div *ngIf="isAnnualEntriesEmpty()" class="text-center">
+    <p>Nenhum dado disponível para o período selecionado.</p>
+  </div>
+</div>
